@@ -1,4 +1,4 @@
-package common
+package utils
 
 import "hiholive/shared/go/logger"
 

@@ -1,12 +1,12 @@
 package appContext
 
 import (
-	"hiholive/shared/go/common"
 	"hiholive/shared/go/logger"
+	"hiholive/shared/go/utils"
 )
 
 type AppContext interface {
-	common.AppContext
+	utils.AppContext
 }
 
 type appContext struct {

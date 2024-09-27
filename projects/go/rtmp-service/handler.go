@@ -2,13 +2,13 @@ package main
 
 import (
 	"bytes"
-	"io"
-	"log"
-
 	"github.com/pkg/errors"
 	flvtag "github.com/yutopp/go-flv/tag"
 	"github.com/yutopp/go-rtmp"
 	rtmpmsg "github.com/yutopp/go-rtmp/message"
+	"hiholive/shared/go/utils"
+	"io"
+	"log"
 )
 
 var _ rtmp.Handler = (*Handler)(nil)
@@ -31,10 +31,9 @@ func (h *Handler) OnServe(conn *rtmp.Conn) {
 
 func (h *Handler) OnConnect(timestamp uint32, cmd *rtmpmsg.NetConnectionConnect) error {
 	log.Printf("OnConnect: %#v", cmd)
-
-	// TODO: check app name to distinguish stream names per apps
-	// cmd.Command.App
-
+	if cmd.Command.App != utils.StreamDomain {
+		return errors.New("OnConnect: Invalid App Name")
+	}
 	return nil
 }
 
@@ -50,7 +49,6 @@ func (h *Handler) OnPublish(_ *rtmp.StreamContext, timestamp uint32, cmd *rtmpms
 		return errors.New("Cannot publish to this stream")
 	}
 
-	// (example) Reject a connection when PublishingName is empty
 	if cmd.PublishingName == "" {
 		return errors.New("PublishingName is empty")
 	}
@@ -59,6 +57,11 @@ func (h *Handler) OnPublish(_ *rtmp.StreamContext, timestamp uint32, cmd *rtmpms
 	if err != nil {
 		return errors.Wrap(err, "Failed to create pubsub")
 	}
+
+	if cmd.PublishingName != "test" {
+		return errors.New("PublishingName is empty")
+	}
+	log.Printf("KEY STREAM %s", cmd.PublishingName)
 
 	pub := pubsub.Pub()
 

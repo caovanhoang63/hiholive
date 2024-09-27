@@ -5,25 +5,24 @@ import (
 	"github.com/yutopp/go-rtmp"
 	"go.uber.org/zap"
 	"hiholive/projects/go/rtmp-service/component/appContext"
+	logger "hiholive/shared/go/logger"
 	zaplogger "hiholive/shared/go/logger/zap"
 	"io"
-	"log"
 	"net"
 )
 
 func main() {
-	logger := zaplogger.NewZapLogger(context.Background(), zap.DebugLevel)
-	appCtx := appContext.NewAppContextRTPM(logger)
-	appCtx.GetLogger()
-
+	l := zaplogger.NewZapLogger(context.Background(), zap.DebugLevel)
+	appCtx := appContext.NewAppContextRTPM(l)
+	log := appCtx.GetLogger()
 	tcpAddr, err := net.ResolveTCPAddr("tcp", ":1935")
 	if err != nil {
-		log.Panicf("Failed: %+v", err)
+		log.FatalWithFields("Failed: %+v", logger.Field{"Error": err})
 	}
 
 	listener, err := net.ListenTCP("tcp", tcpAddr)
 	if err != nil {
-		log.Panicf("Failed: %+v", err)
+		log.FatalWithFields("Failed: %+v", logger.Field{"Error": err})
 	}
 
 	relayService := NewRelayService()
@@ -43,7 +42,8 @@ func main() {
 			}
 		},
 	})
-	if err := srv.Serve(listener); err != nil {
-		log.Panicf("Failed: %+v", err)
+
+	if err = srv.Serve(listener); err != nil {
+		log.FatalWithFields("Failed: %+v", logger.Field{"Error": err})
 	}
 }
