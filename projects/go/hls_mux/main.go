@@ -12,7 +12,7 @@ import (
 )
 
 func main() {
-
+	failList := make([]int, 0)
 	err := godotenv.Load(".env")
 	if err != nil {
 		log.Fatal("Error loading .env file")
@@ -39,7 +39,7 @@ func main() {
 	// Local output directory for HLS (.m3u8 and .ts files)
 	outputDir := "./hls_output"
 	playlistFile := "pipe:1" // The playlist will be piped to stdout
-	segmentFileTemplate := outputDir + "/segment_%03d.ts"
+	segmentFileTemplate := outputDir + "/segment_%05d.ts"
 
 	// Create output directory if it doesn't exist
 	err = os.MkdirAll(outputDir, os.ModePerm)
@@ -76,24 +76,29 @@ func main() {
 			if err != nil {
 				log.Fatalf("Error reading output directory: %v", err)
 			}
+			cur := len(files) - 1
 
-			for _, file := range files {
-				filePath := filepath.Join(outputDir, file.Name())
-				fileData, err := ioutil.ReadFile(filePath)
-				if err != nil {
-					log.Printf("Error reading file %s: %v", filePath, err)
-					continue
-				}
-
-				// Upload the file to S3
-				ctx := context.Background()
-				dst := "hls/" + file.Name() // Destination path in S3 (e.g., hls/segment_001.ts)
-				_, err = s3Provider.SaveFileUploaded(ctx, fileData, dst)
-				if err != nil {
-					log.Printf("Error uploading file %s to S3: %v", file.Name(), err)
-				} else {
-					log.Printf("Uploaded %s to S3 successfully.", file.Name())
-				}
+			if cur == 0 {
+				continue
+			}
+			// just push the last file to S3
+			file := files[cur]
+			filePath := filepath.Join(outputDir, file.Name())
+			fileData, err := ioutil.ReadFile(filePath)
+			if err != nil {
+				log.Printf("Error reading file %s: %v", filePath, err)
+				continue
+			}
+			// Upload the file to S3
+			// TODO: Implement stream key and store it to redis
+			dst := "hls/" + file.Name() // Destination path in S3 (e.g., hls/segment_00001.ts)
+			ctx := context.Background()
+			_, err = s3Provider.SaveFileUploaded(ctx, fileData, dst)
+			if err != nil {
+				log.Printf("Error uploading file %s to S3: %v", file.Name(), err)
+			} else {
+				log.Printf("Uploaded %s to S3 successfully.", file.Name())
+				failList = append(failList, cur)
 			}
 		}
 	}()
@@ -109,7 +114,6 @@ func main() {
 			if n == 0 {
 				break
 			}
-
 			// Upload the playlist (.m3u8) to S3
 			ctx := context.Background()
 			s3Key := "hls/index.m3u8" // S3 path for playlist file
