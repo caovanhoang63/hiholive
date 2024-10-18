@@ -66,7 +66,7 @@ type Pub struct {
 	lastKeyFrame *flvtag.FlvTag
 }
 
-// TODO: Should check codec types and so on.
+// Publish TODO: Should check codec types and so on.
 // In this example, checks only sequence headers and assume that AAC and AVC.
 func (p *Pub) Publish(flv *flvtag.FlvTag) error {
 	switch flv.Data.(type) {

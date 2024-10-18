@@ -5,7 +5,7 @@ import (
 	"sync"
 )
 
-// TODO: Create this service per apps.
+// RelayService TODO: Create this service per apps.
 // In this example, this instance is singleton.
 type RelayService struct {
 	streams map[string]*Pubsub

@@ -4,7 +4,7 @@ import (
 	"context"
 	"github.com/yutopp/go-rtmp"
 	"go.uber.org/zap"
-	"hiholive/projects/go/rtmp-service/component/appContext"
+	"hiholive/projects/go/rtmp/component/appContext"
 	logger "hiholive/shared/go/logger"
 	zaplogger "hiholive/shared/go/logger/zap"
 	"io"
@@ -12,9 +12,13 @@ import (
 )
 
 func main() {
+	// Setup dependencies
 	l := zaplogger.NewZapLogger(context.Background(), zap.DebugLevel)
 	appCtx := appContext.NewAppContextRTPM(l)
 	log := appCtx.GetLogger()
+	// Setup dependencies
+
+	// Setup TCP connection
 	tcpAddr, err := net.ResolveTCPAddr("tcp", ":1935")
 	if err != nil {
 		log.FatalWithFields("Failed: %+v", logger.Field{"Error": err})
@@ -24,6 +28,7 @@ func main() {
 	if err != nil {
 		log.FatalWithFields("Failed: %+v", logger.Field{"Error": err})
 	}
+	// Setup TCP connection
 
 	relayService := NewRelayService()
 

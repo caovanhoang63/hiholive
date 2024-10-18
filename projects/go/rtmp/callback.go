@@ -9,6 +9,7 @@ import (
 	rtmpmsg "github.com/yutopp/go-rtmp/message"
 )
 
+// onEventCallback receive a flv tag input and convert it into a rtmp message  chunk
 func onEventCallback(conn *rtmp.Conn, streamID uint32) func(flv *flvtag.FlvTag) error {
 	return func(flv *flvtag.FlvTag) error {
 		buf := new(bytes.Buffer)
