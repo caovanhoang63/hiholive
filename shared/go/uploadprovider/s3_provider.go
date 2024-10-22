@@ -8,7 +8,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
-	"hiholive/shared/go/core"
+	"github.com/caovanhoang63/hiholive/shared/core"
 	"log"
 	"net/http"
 )

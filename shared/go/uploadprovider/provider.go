@@ -2,7 +2,7 @@ package uploadprovider
 
 import (
 	"context"
-	"hiholive/shared/go/core"
+	"github.com/caovanhoang63/hiholive/shared/core"
 )
 
 type UploadProvider interface {
