@@ -1,8 +1,8 @@
 package entity
 
 import (
-	"hiholive/shared/go/core"
-	"hiholive/shared/go/shared"
+	"github.com/caovanhoang63/hiholive/shared/core"
+	"github.com/caovanhoang63/hiholive/shared/shared"
 )
 
 type SystemRole string

@@ -2,7 +2,7 @@ package biz
 
 import (
 	"context"
-	"hiholive/projects/go/user/module/user/entity"
+	"github.com/caovanhoang63/hiholive/user/module/user/entity"
 )
 
 type UserBiz interface {

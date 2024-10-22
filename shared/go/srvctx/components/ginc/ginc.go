@@ -2,8 +2,8 @@ package ginc
 
 import (
 	"flag"
+	"github.com/caovanhoang63/hiholive/shared/srvctx"
 	"github.com/gin-gonic/gin"
-	"hiholive/shared/go/srvctx"
 )
 
 const (

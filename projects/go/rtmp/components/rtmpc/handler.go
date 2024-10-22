@@ -2,12 +2,13 @@ package rtmpc
 
 import (
 	"bytes"
+	"github.com/caovanhoang63/hiholive/shared/core"
+	"github.com/caovanhoang63/hiholive/shared/srvctx"
 	"github.com/pkg/errors"
 	flvtag "github.com/yutopp/go-flv/tag"
 	"github.com/yutopp/go-rtmp"
 	rtmpmsg "github.com/yutopp/go-rtmp/message"
-	"hiholive/shared/go/core"
-	"hiholive/shared/go/srvctx"
+
 	"io"
 )
 

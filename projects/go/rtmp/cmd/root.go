@@ -2,14 +2,15 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/caovanhoang63/hiholive/rtmp/components/rtmpc"
+	"github.com/caovanhoang63/hiholive/shared/shared"
+	"github.com/caovanhoang63/hiholive/shared/srvctx"
+	"github.com/caovanhoang63/hiholive/shared/srvctx/components/ginc"
+	"github.com/caovanhoang63/hiholive/shared/srvctx/components/gormc"
+	"github.com/caovanhoang63/hiholive/shared/srvctx/components/jwtc"
 	"github.com/spf13/cobra"
 	"github.com/yutopp/go-rtmp"
-	"hiholive/projects/go/rtmp/components/rtmpc"
-	"hiholive/shared/go/shared"
-	"hiholive/shared/go/srvctx"
-	"hiholive/shared/go/srvctx/components/ginc"
-	"hiholive/shared/go/srvctx/components/gormc"
-	"hiholive/shared/go/srvctx/components/jwtc"
+
 	"io"
 	"net"
 	"os"

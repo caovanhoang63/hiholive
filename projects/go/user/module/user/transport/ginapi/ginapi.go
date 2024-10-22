@@ -1,9 +1,9 @@
 package ginapi
 
 import (
+	"github.com/caovanhoang63/hiholive/shared/srvctx"
+	"github.com/caovanhoang63/hiholive/user/module/user/biz"
 	"github.com/gin-gonic/gin"
-	"hiholive/projects/go/user/module/user/biz"
-	"hiholive/shared/go/srvctx"
 )
 
 type ginAPI struct {

@@ -2,15 +2,14 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/gin-gonic/gin"
+	"github.com/caovanhoang63/hiholive/hls_mux/component/ffmpegc"
+	"github.com/caovanhoang63/hiholive/shared/shared"
+	"github.com/caovanhoang63/hiholive/shared/srvctx"
+	"github.com/caovanhoang63/hiholive/shared/srvctx/components/ginc"
+	"github.com/caovanhoang63/hiholive/shared/srvctx/components/gormc"
+	"github.com/caovanhoang63/hiholive/shared/srvctx/components/jwtc"
 	"github.com/spf13/cobra"
-	"hiholive/projects/go/hls_mux/component/ffmpegc"
-	"hiholive/projects/go/user/composer"
-	"hiholive/shared/go/shared"
-	"hiholive/shared/go/srvctx"
-	"hiholive/shared/go/srvctx/components/ginc"
-	"hiholive/shared/go/srvctx/components/gormc"
-	"hiholive/shared/go/srvctx/components/jwtc"
+
 	"os"
 )
 
@@ -33,15 +32,6 @@ var rootCmd = &cobra.Command{
 		ffmpeg := ffmpegc.NewFfmpeg(serviceCtx).WithConfig(nil)
 		ffmpeg.NewStream("test")
 	},
-}
-
-func SetupRoutes(router *gin.RouterGroup, serviceCtx srvctx.ServiceContext) {
-	userService := composer.ComposeUserAPIService(serviceCtx)
-
-	tasks := router.Group("/user")
-	{
-		tasks.GET("", userService.GetUserProfile())
-	}
 }
 
 func Execute() {

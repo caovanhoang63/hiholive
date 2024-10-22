@@ -1,7 +1,7 @@
 package ffmpegc
 
 import (
-	"hiholive/shared/go/srvctx"
+	"github.com/caovanhoang63/hiholive/shared/srvctx"
 	"log"
 	"os"
 	"os/exec"

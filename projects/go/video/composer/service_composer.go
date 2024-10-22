@@ -1,12 +1,12 @@
 package composer
 
 import (
-	"github.com/caovanhoang63/hiholive/shared/shared"
-	"github.com/caovanhoang63/hiholive/shared/srvctx"
-	"github.com/caovanhoang63/hiholive/user/module/user/biz"
-	"github.com/caovanhoang63/hiholive/user/module/user/repository/mysql"
-	"github.com/caovanhoang63/hiholive/user/module/user/transport/ginapi"
 	"github.com/gin-gonic/gin"
+	"hiholive/projects/go/user/module/user/biz"
+	"hiholive/projects/go/user/module/user/repository/mysql"
+	"hiholive/projects/go/user/module/user/transport/ginapi"
+	"hiholive/shared/go/shared"
+	"hiholive/shared/go/srvctx"
 )
 
 type UserService interface {

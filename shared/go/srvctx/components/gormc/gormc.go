@@ -3,11 +3,11 @@ package gormc
 import (
 	"flag"
 	"fmt"
+	"github.com/caovanhoang63/hiholive/shared/srvctx"
+	"github.com/caovanhoang63/hiholive/shared/srvctx/components/gormc/dialets"
 	"github.com/pkg/errors"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
-	"hiholive/shared/go/srvctx"
-	"hiholive/shared/go/srvctx/components/gormc/dialets"
 	"strings"
 	"time"
 )

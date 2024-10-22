@@ -2,8 +2,8 @@ package cmd
 
 import (
 	"flag"
-	"hiholive/shared/go/shared"
-	"hiholive/shared/go/srvctx"
+	"github.com/caovanhoang63/hiholive/shared/shared"
+	"github.com/caovanhoang63/hiholive/shared/srvctx"
 )
 
 type config struct {

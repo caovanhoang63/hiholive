@@ -1,9 +1,9 @@
 package main
 
 import (
+	"github.com/caovanhoang63/hiholive/hls_mux/cmd"
 	"github.com/joho/godotenv"
-	log "github.com/sirupsen/logrus"
-	"hiholive/projects/go/hls_mux/cmd"
+	"log"
 )
 
 func main() {

@@ -2,8 +2,8 @@ package mysql
 
 import (
 	"context"
+	"github.com/caovanhoang63/hiholive/user/module/user/entity"
 	"github.com/pkg/errors"
-	"hiholive/projects/go/user/module/user/entity"
 )
 
 func (repo *mysqlRepo) CreateNewUser(ctx context.Context, data *entity.UserCreate) error {
