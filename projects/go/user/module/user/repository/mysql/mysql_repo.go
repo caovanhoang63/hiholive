@@ -2,7 +2,7 @@ package mysql
 
 import (
 	"context"
-	"github.com/caovanhoang63/hiholive/user/module/user/entity"
+	"github.com/caovanhoang63/hiholive/projects/go/user/module/user/entity"
 	"gorm.io/gorm"
 )
 

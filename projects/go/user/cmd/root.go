@@ -2,13 +2,14 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/caovanhoang63/hiholive/shared/shared"
-	"github.com/caovanhoang63/hiholive/shared/srvctx"
-	"github.com/caovanhoang63/hiholive/shared/srvctx/components/ginc"
-	"github.com/caovanhoang63/hiholive/shared/srvctx/components/ginc/middlewares"
-	"github.com/caovanhoang63/hiholive/shared/srvctx/components/gormc"
-	"github.com/caovanhoang63/hiholive/shared/srvctx/components/jwtc"
-	"github.com/caovanhoang63/hiholive/user/composer"
+	"github.com/caovanhoang63/hiholive/projects/go/user/composer"
+	"github.com/caovanhoang63/hiholive/shared/go/shared"
+	"github.com/caovanhoang63/hiholive/shared/go/srvctx"
+	"github.com/caovanhoang63/hiholive/shared/go/srvctx/components/ginc"
+	"github.com/caovanhoang63/hiholive/shared/go/srvctx/components/ginc/middlewares"
+	"github.com/caovanhoang63/hiholive/shared/go/srvctx/components/gormc"
+	"github.com/caovanhoang63/hiholive/shared/go/srvctx/components/jwtc"
+
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/cobra"
 

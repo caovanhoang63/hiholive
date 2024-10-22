@@ -2,7 +2,7 @@ package ginc
 
 import (
 	"flag"
-	"github.com/caovanhoang63/hiholive/shared/srvctx"
+	"github.com/caovanhoang63/hiholive/shared/go/srvctx"
 	"github.com/gin-gonic/gin"
 )
 

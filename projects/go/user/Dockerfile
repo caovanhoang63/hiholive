@@ -1,12 +1,15 @@
 FROM golang:1.23-alpine as builder
-
-RUN mkdir /app
-ADD . /app/
 WORKDIR /app
-RUN go mod init app
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o app .
 
-FROM alpine
+COPY go.mod go.sum ./
+
+COPY . .
+
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o app ./projects/go/user
+
+FROM alpine:latest
 WORKDIR /app/
+COPY ./projects/go/user/.env.local .
 COPY --from=builder /app/app .
 ENTRYPOINT ["./app"]
+

@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/caovanhoang63/hiholive/hls_mux/cmd"
+	"github.com/caovanhoang63/hiholive/projects/go/hls_mux/cmd"
 	"github.com/joho/godotenv"
 	"log"
 )

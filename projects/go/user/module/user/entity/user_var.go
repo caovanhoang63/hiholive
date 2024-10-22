@@ -1,6 +1,6 @@
 package entity
 
-import "github.com/caovanhoang63/hiholive/shared/core"
+import "github.com/caovanhoang63/hiholive/shared/go/core"
 
 type UserCreate struct {
 	core.BaseModel `json:",inline"`

@@ -4,7 +4,7 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"github.com/caovanhoang63/hiholive/shared/srvctx"
+	"github.com/caovanhoang63/hiholive/shared/go/srvctx"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/pkg/errors"
 	"time"
