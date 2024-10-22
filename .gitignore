@@ -1,5 +1,6 @@
 # Created by https://www.toptal.com/developers/gitignore/api/go,node,jetbrains,goland+all,webstorm+all
 # Edit at https://www.toptal.com/developers/gitignore?templates=go,node,jetbrains,goland+all,webstorm+all
+bash.sh
 
 ### Go ###
 # If you prefer the allow list template instead of the deny list, see community template:
