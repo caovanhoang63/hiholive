@@ -1,53 +1,14 @@
 package main
 
 import (
-	"context"
-	"github.com/yutopp/go-rtmp"
-	"go.uber.org/zap"
-	"hiholive/projects/go/rtmp/component/appContext"
-	"hiholive/shared/go/srvctx"
-	"io"
-	"net"
+	"github.com/joho/godotenv"
+	log "github.com/sirupsen/logrus"
+	"hiholive/projects/go/rtmp/cmd"
 )
 
 func main() {
-	// Setup dependencies
-	l := srvctx.NewZapLogger(context.Background(), zap.DebugLevel)
-	appCtx := appContext.NewAppContextRTPM(l)
-	log := appCtx.GetLogger()
-	// Setup dependencies
-
-	// Setup TCP connection
-	tcpAddr, err := net.ResolveTCPAddr("tcp", ":1935")
-	if err != nil {
-		log.FatalWithFields("Failed: %+v", srvctx.Field{"Error": err})
+	if err := godotenv.Load(".env.local"); err != nil {
+		log.Fatal("Error loading .env file")
 	}
-
-	listener, err := net.ListenTCP("tcp", tcpAddr)
-	if err != nil {
-		log.FatalWithFields("Failed: %+v", srvctx.Field{"Error": err})
-	}
-	// Setup TCP connection
-
-	relayService := NewRelayService()
-
-	srv := rtmp.NewServer(&rtmp.ServerConfig{
-		OnConnect: func(conn net.Conn) (io.ReadWriteCloser, *rtmp.ConnConfig) {
-			h := &Handler{
-				relayService: relayService,
-			}
-
-			return conn, &rtmp.ConnConfig{
-				Handler: h,
-
-				ControlState: rtmp.StreamControlStateConfig{
-					DefaultBandwidthWindowSize: 6 * 1024 * 1024 / 8,
-				},
-			}
-		},
-	})
-
-	if err = srv.Serve(listener); err != nil {
-		log.FatalWithFields("Failed: %+v", srvctx.Field{"Error": err})
-	}
+	cmd.Execute()
 }

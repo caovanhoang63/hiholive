@@ -1,35 +1,49 @@
-package main
+package rtmpc
 
 import (
 	"bytes"
-	"fmt"
-	"hiholive/shared/go/core"
-	"io"
-	"log"
-	"os"
-	"path/filepath"
-
 	"github.com/pkg/errors"
-	"github.com/yutopp/go-flv"
 	flvtag "github.com/yutopp/go-flv/tag"
 	"github.com/yutopp/go-rtmp"
 	rtmpmsg "github.com/yutopp/go-rtmp/message"
+	"hiholive/shared/go/core"
+	"hiholive/shared/go/srvctx"
+	"io"
 )
+
+//
+//                                    HLS 720p
+// Client -> OBS -> RTMP -> FFMPEG -> HLS 1080p    -> Cloudfront -> videojs
+//                                    HLS 440p
+//
 
 var _ rtmp.Handler = (*Handler)(nil)
 
 // Handler An RTMP connection handler
 type Handler struct {
 	rtmp.DefaultHandler
-	flvFile *os.File
-	flvEnc  *flv.Encoder
+	relayService *RelayService
+	logger       srvctx.Logger
+	//
+	conn *rtmp.Conn
+	//
+	pub *Pub
+	sub *Sub
+}
+
+func NewHandler(relayService *RelayService) *Handler {
+	return &Handler{
+		logger:       srvctx.DefaultLogger,
+		relayService: relayService,
+	}
 }
 
 func (h *Handler) OnServe(conn *rtmp.Conn) {
+	h.conn = conn
 }
 
 func (h *Handler) OnConnect(timestamp uint32, cmd *rtmpmsg.NetConnectionConnect) error {
-	log.Printf("OnConnect: %#v", cmd)
+	h.logger.WithField(srvctx.Field{"cmd": cmd}).Info("OnConnect")
 	if cmd.Command.App != core.StreamDomain {
 		return errors.New("OnConnect: Invalid App Name")
 	}
@@ -37,38 +51,51 @@ func (h *Handler) OnConnect(timestamp uint32, cmd *rtmpmsg.NetConnectionConnect)
 }
 
 func (h *Handler) OnCreateStream(timestamp uint32, cmd *rtmpmsg.NetConnectionCreateStream) error {
-	log.Printf("OnCreateStream: %#v", cmd)
+	h.logger.WithField(srvctx.Field{"cmd": cmd}).Info("OnCreateStream")
 	return nil
 }
 
 func (h *Handler) OnPublish(_ *rtmp.StreamContext, timestamp uint32, cmd *rtmpmsg.NetStreamPublish) error {
-	log.Printf("OnPublish: %#v", cmd)
+	h.logger.WithField(srvctx.Field{"cmd": cmd}).Info("OnPublish")
+	if h.sub != nil {
+		return errors.New("Cannot publish to this stream")
+	}
 
-	// (example) Reject a connection when PublishingName is empty
 	if cmd.PublishingName == "" {
 		return errors.New("PublishingName is empty")
 	}
 
-	fmt.Println("Stream name", cmd.PublishingName)
-	fmt.Println("Stream Type", cmd.PublishingType)
-
-	// Record streams as FLV!
-	p := filepath.Join(
-		os.TempDir(),
-		filepath.Clean(filepath.Join("/", fmt.Sprintf("%s.flv", cmd.PublishingName))),
-	)
-	f, err := os.OpenFile(p, os.O_CREATE|os.O_WRONLY, 0666)
+	pubsub, err := h.relayService.NewPubsub(cmd.PublishingName)
 	if err != nil {
-		return errors.Wrap(err, "Failed to create flv file")
+		return errors.Wrap(err, "Failed to create pubsub")
 	}
-	h.flvFile = f
 
-	enc, err := flv.NewEncoder(f, flv.FlagsAudio|flv.FlagsVideo)
-	if err != nil {
-		_ = f.Close()
-		return errors.Wrap(err, "Failed to create flv encoder")
+	if cmd.PublishingName != "test" {
+		return errors.New("PublishingName is empty")
 	}
-	h.flvEnc = enc
+	h.logger.Infof("KEY STREAM %s", cmd.PublishingName)
+
+	pub := pubsub.Pub()
+
+	h.pub = pub
+
+	return nil
+}
+
+func (h *Handler) OnPlay(ctx *rtmp.StreamContext, timestamp uint32, cmd *rtmpmsg.NetStreamPlay) error {
+	if h.sub != nil {
+		return errors.New("Cannot play on this stream")
+	}
+
+	pubsub, err := h.relayService.GetPubsub(cmd.StreamName)
+	if err != nil {
+		return errors.Wrap(err, "Failed to get pubsub")
+	}
+
+	sub := pubsub.Sub()
+	sub.eventCallback = onEventCallback(h.conn, ctx.StreamID)
+
+	h.sub = sub
 
 	return nil
 }
@@ -78,19 +105,17 @@ func (h *Handler) OnSetDataFrame(timestamp uint32, data *rtmpmsg.NetStreamSetDat
 
 	var script flvtag.ScriptData
 	if err := flvtag.DecodeScriptData(r, &script); err != nil {
-		log.Printf("Failed to decode script data: Err = %+v", err)
+		h.logger.Errorf("Failed to decode script data: Err = %+v", err)
 		return nil // ignore
 	}
 
-	log.Printf("SetDataFrame: Script = %#v", script)
+	h.logger.WithField(srvctx.Field{"Script": script}).Info("SetDataFrame")
 
-	if err := h.flvEnc.Encode(&flvtag.FlvTag{
+	_ = h.pub.Publish(&flvtag.FlvTag{
 		TagType:   flvtag.TagTypeScriptData,
 		Timestamp: timestamp,
 		Data:      &script,
-	}); err != nil {
-		log.Printf("Failed to write script data: Err = %+v", err)
-	}
+	})
 
 	return nil
 }
@@ -107,23 +132,11 @@ func (h *Handler) OnAudio(timestamp uint32, payload io.Reader) error {
 	}
 	audio.Data = flvBody
 
-	log.Printf("FLV Audio Data: Timestamp = %d, SoundFormat = %+v, SoundRate = %+v, SoundSize = %+v, SoundType = %+v, AACPacketType = %+v, Data length = %+v",
-		timestamp,
-		audio.SoundFormat,
-		audio.SoundRate,
-		audio.SoundSize,
-		audio.SoundType,
-		audio.AACPacketType,
-		len(flvBody.Bytes()),
-	)
-
-	if err := h.flvEnc.Encode(&flvtag.FlvTag{
+	_ = h.pub.Publish(&flvtag.FlvTag{
 		TagType:   flvtag.TagTypeAudio,
 		Timestamp: timestamp,
 		Data:      &audio,
-	}); err != nil {
-		log.Printf("Failed to write audio: Err = %+v", err)
-	}
+	})
 
 	return nil
 }
@@ -134,36 +147,30 @@ func (h *Handler) OnVideo(timestamp uint32, payload io.Reader) error {
 		return err
 	}
 
+	// Need deep copy because payload will be recycled
 	flvBody := new(bytes.Buffer)
 	if _, err := io.Copy(flvBody, video.Data); err != nil {
 		return err
 	}
 	video.Data = flvBody
 
-	log.Printf("FLV Video Data: Timestamp = %d, FrameType = %+v, CodecID = %+v, AVCPacketType = %+v, CT = %+v, Data length = %+v",
-		timestamp,
-		video.FrameType,
-		video.CodecID,
-		video.AVCPacketType,
-		video.CompositionTime,
-		len(flvBody.Bytes()),
-	)
-
-	if err := h.flvEnc.Encode(&flvtag.FlvTag{
+	_ = h.pub.Publish(&flvtag.FlvTag{
 		TagType:   flvtag.TagTypeVideo,
 		Timestamp: timestamp,
 		Data:      &video,
-	}); err != nil {
-		log.Printf("Failed to write video: Err = %+v", err)
-	}
+	})
 
 	return nil
 }
 
 func (h *Handler) OnClose() {
-	log.Printf("OnClose")
+	h.logger.Infof("OnClose")
 
-	if h.flvFile != nil {
-		_ = h.flvFile.Close()
+	if h.pub != nil {
+		_ = h.pub.Close()
+	}
+
+	if h.sub != nil {
+		_ = h.sub.Close()
 	}
 }

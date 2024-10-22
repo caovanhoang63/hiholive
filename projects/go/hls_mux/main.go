@@ -9,7 +9,7 @@ import (
 func main() {
 
 	//Địa chỉ RTMP stream
-	rtmpURL := "rtmp://localhost:1935/stream/test"
+	rtmpURL := "rtmpc://localhost:1935/stream/test"
 
 	// Thư mục đầu ra cho các file HLS (.m3u8 và .ts)
 	outputDir := "./hls_output"
