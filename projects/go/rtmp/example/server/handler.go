@@ -3,7 +3,7 @@ package main
 import (
 	"bytes"
 	"fmt"
-	"hiholive/shared/go/utils"
+	"hiholive/shared/go/core"
 	"io"
 	"log"
 	"os"
@@ -30,7 +30,7 @@ func (h *Handler) OnServe(conn *rtmp.Conn) {
 
 func (h *Handler) OnConnect(timestamp uint32, cmd *rtmpmsg.NetConnectionConnect) error {
 	log.Printf("OnConnect: %#v", cmd)
-	if cmd.Command.App != utils.StreamDomain {
+	if cmd.Command.App != core.StreamDomain {
 		return errors.New("OnConnect: Invalid App Name")
 	}
 	return nil

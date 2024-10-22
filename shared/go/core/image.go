@@ -1,4 +1,4 @@
-package utils
+package core
 
 import (
 	"database/sql/driver"
@@ -7,24 +7,26 @@ import (
 	"fmt"
 )
 
-type File struct {
+type Image struct {
 	Id        int    `json:"id" gorm:"column:id"`
 	Url       string `json:"url" gorm:"column:url"`
+	Width     int    `json:"width" gorm:"column:width"`
+	Height    int    `json:"height" gorm:"column:height"`
 	CloudName string `json:"cloud_name,omitempty" gorm:"-"`
 	Extension string `json:"extension,omitempty" gorm:"-"`
 }
 
-func (File) TableName() string { return "images" }
+func (Image) TableName() string { return "images" }
 
 // Scan scan value into Jsonb,
 // decode jsonb in db into struct
 // implements sql.Scanner interface
-func (j *File) Scan(value interface{}) error {
+func (j *Image) Scan(value interface{}) error {
 	bytes, ok := value.([]byte)
 	if !ok {
 		return errors.New(fmt.Sprintf("Failed to unmarshal JSONB value: %v", value))
 	}
-	var image File
+	var image Image
 	if err := json.Unmarshal(bytes, &image); err != nil {
 		return err
 	}
@@ -35,21 +37,21 @@ func (j *File) Scan(value interface{}) error {
 // Value return json value;
 // encode struct to []byte aka jsonb
 // ;implement driver.Valuer interface
-func (j *File) Value() (driver.Value, error) {
+func (j *Image) Value() (driver.Value, error) {
 	if j == nil {
 		return nil, nil
 	}
 	return json.Marshal(j)
 }
 
-type Files []File
+type Images []Image
 
-func (j *Files) Scan(value interface{}) error {
+func (j *Images) Scan(value interface{}) error {
 	bytes, ok := value.([]byte)
 	if !ok {
 		return errors.New(fmt.Sprintf("Failed to unmarshal JSONB value: %v", value))
 	}
-	var images Files
+	var images Images
 	if err := json.Unmarshal(bytes, &images); err != nil {
 		return err
 	}
@@ -57,7 +59,7 @@ func (j *Files) Scan(value interface{}) error {
 	return nil
 }
 
-func (j *Files) Value() (driver.Value, error) {
+func (j *Images) Value() (driver.Value, error) {
 	if j == nil {
 		return nil, nil
 	}

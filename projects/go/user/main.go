@@ -1,7 +1,7 @@
 package main
 
-import "fmt"
+import "hiholive/projects/go/user/cmd"
 
 func main() {
-	fmt.Println("Hello World")
+	cmd.Execute()
 }

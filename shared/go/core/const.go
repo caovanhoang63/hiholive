@@ -1,3 +1,3 @@
-package utils
+package core
 
 const StreamDomain = "stream"

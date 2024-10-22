@@ -8,7 +8,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
-	"hiholive/shared/go/utils"
+	"hiholive/shared/go/core"
 	"log"
 	"net/http"
 )
@@ -22,7 +22,7 @@ type s3Provider struct {
 	session    *session.Session
 }
 
-func (provider *s3Provider) SaveFileUploaded(ctx context.Context, data []byte, dst string) (*utils.File, error) {
+func (provider *s3Provider) SaveFileUploaded(ctx context.Context, data []byte, dst string) (*core.File, error) {
 	// fileBytes is an io reader to read data
 	fileBytes := bytes.NewReader(data)
 
@@ -40,7 +40,7 @@ func (provider *s3Provider) SaveFileUploaded(ctx context.Context, data []byte, d
 		return nil, err
 	}
 
-	file := &utils.File{
+	file := &core.File{
 		Url:       fmt.Sprintf("%s/%s", provider.domain, dst),
 		CloudName: "s3",
 	}
@@ -72,7 +72,7 @@ func NewS3Provider(bucketName string, region string, apiKey string, secret strin
 }
 
 // SaveImageUploaded receives data and stores it into aws s3
-func (provider *s3Provider) SaveImageUploaded(ctx context.Context, data []byte, dst string) (*utils.Image, error) {
+func (provider *s3Provider) SaveImageUploaded(ctx context.Context, data []byte, dst string) (*core.Image, error) {
 	// fileBytes is an io reader to read data
 	fileBytes := bytes.NewReader(data)
 
@@ -98,7 +98,7 @@ func (provider *s3Provider) SaveImageUploaded(ctx context.Context, data []byte, 
 		return nil, err
 	}
 
-	img := &utils.Image{
+	img := &core.Image{
 		Url:       fmt.Sprintf("%s/%s", provider.domain, dst),
 		CloudName: "s3",
 	}
