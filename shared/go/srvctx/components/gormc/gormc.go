@@ -8,7 +8,6 @@ import (
 	"gorm.io/gorm/logger"
 	"hiholive/shared/go/srvctx"
 	"hiholive/shared/go/srvctx/components/gormc/dialets"
-	"hiholive/shared/go/srvctx/components/loggerc"
 	"strings"
 	"time"
 )
@@ -34,7 +33,7 @@ type GormOpt struct {
 type gormDB struct {
 	id     string
 	prefix string
-	logger loggerc.Logger
+	logger srvctx.Logger
 	db     *gorm.DB
 	*GormOpt
 }
@@ -111,7 +110,7 @@ func (gdb *gormDB) Activate(_ srvctx.ServiceContext) error {
 	gdb.db, err = gdb.getDBConn(dbType)
 
 	if err != nil {
-		gdb.logger.WithField(loggerc.Field{"err": err.Error()}).Error("Cannot connect to database")
+		gdb.logger.Errorf("Cannot connect to database %s", err)
 		return err
 	}
 

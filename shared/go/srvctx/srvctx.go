@@ -6,8 +6,6 @@ import (
 	"flag"
 	"fmt"
 	"github.com/joho/godotenv"
-	"hiholive/shared/go/srvctx/components/loggerc"
-	"hiholive/shared/go/srvctx/components/loggerc/zaplogger"
 	"os"
 )
 
@@ -32,7 +30,7 @@ type ServiceContext interface {
 	Load() error
 	MustGet(id string) interface{}
 	Get(id string) (interface{}, bool)
-	Logger(prefix string) loggerc.Logger
+	Logger(prefix string) Logger
 	EnvName() string
 	GetName() string
 	Stop() error
@@ -45,11 +43,11 @@ type serviceCtx struct {
 	components []Component
 	store      map[string]Component
 	cmdLine    *AppFlagSet
-	logger     loggerc.Logger
+	logger     Logger
 }
 
-func GlobalLogger() loggerc.AppLogger {
-	return zaplogger.DefaultLogger
+func GlobalLogger() AppLogger {
+	return DefaultLogger
 }
 
 func NewServiceContext(opts ...Option) ServiceContext {
@@ -57,7 +55,7 @@ func NewServiceContext(opts ...Option) ServiceContext {
 		store: make(map[string]Component),
 	}
 
-	sv.components = []Component{zaplogger.DefaultLogger}
+	sv.components = []Component{DefaultLogger}
 
 	for _, opt := range opts {
 		opt(sv)
@@ -68,7 +66,7 @@ func NewServiceContext(opts ...Option) ServiceContext {
 	sv.cmdLine = newFlagSet(sv.name, flag.CommandLine)
 	sv.parseFlags()
 
-	sv.logger = zaplogger.DefaultLogger
+	sv.logger = DefaultLogger
 
 	return sv
 }
@@ -113,8 +111,8 @@ func (s *serviceCtx) Load() error {
 	return nil
 }
 
-func (s *serviceCtx) Logger(prefix string) loggerc.Logger {
-	return zaplogger.DefaultLogger
+func (s *serviceCtx) Logger(prefix string) Logger {
+	return DefaultLogger.GetLogger(prefix)
 }
 
 func (s *serviceCtx) Stop() error {

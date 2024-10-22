@@ -2,7 +2,7 @@ package appContext
 
 import (
 	"hiholive/shared/go/core"
-	"hiholive/shared/go/srvctx/components/loggerc"
+	"hiholive/shared/go/srvctx"
 )
 
 type AppContext interface {
@@ -10,15 +10,15 @@ type AppContext interface {
 }
 
 type appContext struct {
-	logger loggerc.Logger
+	logger srvctx.Logger
 }
 
-func NewAppContext(logger loggerc.Logger) *appContext {
+func NewAppContext(logger srvctx.Logger) *appContext {
 	return &appContext{
 		logger: logger,
 	}
 }
 
-func (a *appContext) GetLogger() loggerc.Logger {
+func (a *appContext) GetLogger() srvctx.Logger {
 	return a.logger
 }

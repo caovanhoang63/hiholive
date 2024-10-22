@@ -5,15 +5,14 @@ import (
 	"github.com/yutopp/go-rtmp"
 	"go.uber.org/zap"
 	"hiholive/projects/go/rtmp/component/appContext"
-	"hiholive/shared/go/srvctx/components/loggerc"
-	"hiholive/shared/go/srvctx/components/loggerc/zaplogger"
+	"hiholive/shared/go/srvctx"
 	"io"
 	"net"
 )
 
 func main() {
 	// Setup dependencies
-	l := zaplogger.NewZapLogger(context.Background(), zap.DebugLevel)
+	l := srvctx.NewZapLogger(context.Background(), zap.DebugLevel)
 	appCtx := appContext.NewAppContextRTPM(l)
 	log := appCtx.GetLogger()
 	// Setup dependencies
@@ -21,12 +20,12 @@ func main() {
 	// Setup TCP connection
 	tcpAddr, err := net.ResolveTCPAddr("tcp", ":1935")
 	if err != nil {
-		log.FatalWithFields("Failed: %+v", loggerc.Field{"Error": err})
+		log.FatalWithFields("Failed: %+v", srvctx.Field{"Error": err})
 	}
 
 	listener, err := net.ListenTCP("tcp", tcpAddr)
 	if err != nil {
-		log.FatalWithFields("Failed: %+v", loggerc.Field{"Error": err})
+		log.FatalWithFields("Failed: %+v", srvctx.Field{"Error": err})
 	}
 	// Setup TCP connection
 
@@ -49,6 +48,6 @@ func main() {
 	})
 
 	if err = srv.Serve(listener); err != nil {
-		log.FatalWithFields("Failed: %+v", loggerc.Field{"Error": err})
+		log.FatalWithFields("Failed: %+v", srvctx.Field{"Error": err})
 	}
 }

@@ -1,9 +1,9 @@
 package core
 
 import (
-	"hiholive/shared/go/srvctx/components/loggerc"
+	"hiholive/shared/go/srvctx"
 )
 
 type AppContext interface {
-	GetLogger() loggerc.Logger
+	GetLogger() srvctx.Logger
 }

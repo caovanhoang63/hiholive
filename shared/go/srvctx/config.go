@@ -1,4 +1,4 @@
-package zaplogger
+package srvctx
 
 import (
 	"go.uber.org/zap"
@@ -16,7 +16,7 @@ func getEncoderLog() zapcore.Encoder {
 }
 
 func getWritterSync() zapcore.WriteSyncer {
-	file, _ := os.OpenFile(".log/log.txt", os.O_CREATE|os.O_RDONLY, os.ModePerm)
+	file, _ := os.OpenFile(".log/log.txt", os.O_APPEND|os.O_WRONLY, os.ModePerm)
 	syncFile := zapcore.AddSync(file)
 	syncConsole := zapcore.AddSync(os.Stderr)
 	return zapcore.NewMultiWriteSyncer(syncFile, syncConsole)

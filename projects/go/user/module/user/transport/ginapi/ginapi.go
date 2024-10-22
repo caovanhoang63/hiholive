@@ -12,8 +12,9 @@ type ginAPI struct {
 }
 
 func (g ginAPI) GetUserProfile() func(c *gin.Context) {
-	//TODO implement me
-	panic("implement me")
+	return func(c *gin.Context) {
+
+	}
 }
 
 func NewGinAPI(serviceCtx srvctx.ServiceContext, b biz.UserBiz) *ginAPI {

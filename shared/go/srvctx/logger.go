@@ -1,4 +1,4 @@
-package loggerc
+package srvctx
 
 type Logger interface {
 	Debug(...any)

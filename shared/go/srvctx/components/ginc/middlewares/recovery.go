@@ -27,7 +27,7 @@ func Recovery(serviceCtx srvctx.ServiceContext) gin.HandlerFunc {
 					})
 				}
 
-				serviceCtx.Logger("service").Error("")
+				serviceCtx.Logger("service").Error(err)
 
 				// Must go with gin recovery
 				if gin.IsDebugging() {

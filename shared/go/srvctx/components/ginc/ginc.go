@@ -4,7 +4,6 @@ import (
 	"flag"
 	"github.com/gin-gonic/gin"
 	"hiholive/shared/go/srvctx"
-	"hiholive/shared/go/srvctx/components/loggerc"
 )
 
 const (
@@ -21,7 +20,7 @@ type ginEngine struct {
 	*Config
 	name   string
 	id     string
-	logger loggerc.Logger
+	logger srvctx.Logger
 	router *gin.Engine
 }
 

@@ -13,7 +13,6 @@ import (
 	"hiholive/shared/go/srvctx/components/jwtc"
 	"net/http"
 	"os"
-	"time"
 )
 
 func newServiceCtx() srvctx.ServiceContext {
@@ -36,7 +35,6 @@ var rootCmd = &cobra.Command{
 
 		// Make some delay for DB ready (migration)
 		// remove it if you already had your own DB
-		time.Sleep(time.Second * 5)
 
 		if err := serviceCtx.Load(); err != nil {
 			logger.Fatal(err.Error())
@@ -45,7 +43,7 @@ var rootCmd = &cobra.Command{
 		ginComp := serviceCtx.MustGet(shared.KeyCompGIN).(shared.GINComponent)
 
 		router := ginComp.GetRouter()
-		router.Use(gin.Recovery(), gin.Logger(), middlewares.Recovery(serviceCtx))
+		router.Use(gin.Recovery(), middlewares.Logger(serviceCtx), middlewares.Recovery(serviceCtx))
 
 		router.Use(middlewares.Cors())
 		router.GET("/ping", func(c *gin.Context) {
@@ -65,7 +63,7 @@ var rootCmd = &cobra.Command{
 func SetupRoutes(router *gin.RouterGroup, serviceCtx srvctx.ServiceContext) {
 	userService := composer.ComposeUserAPIService(serviceCtx)
 
-	tasks := router.Group("/tasks")
+	tasks := router.Group("/user")
 	{
 		tasks.GET("", userService.GetUserProfile())
 	}
