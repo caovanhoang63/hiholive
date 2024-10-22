@@ -26,8 +26,8 @@ type biz struct {
 }
 
 func (b biz) CreateNewUser(ctx context.Context, data *entity.UserCreate) error {
-	//TODO implement me
-	panic("implement me")
+	data.Id = 1
+	return nil
 }
 
 func (b biz) DeleteUser(ctx context.Context, id int) error {

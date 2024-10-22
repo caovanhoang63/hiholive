@@ -2,7 +2,9 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/caovanhoang63/hiholive/services/user/common"
 	"github.com/caovanhoang63/hiholive/services/user/composer"
+	"github.com/caovanhoang63/hiholive/services/user/proto/pb"
 	"github.com/caovanhoang63/hiholive/shared/go/shared"
 	"github.com/caovanhoang63/hiholive/shared/go/srvctx"
 	"github.com/caovanhoang63/hiholive/shared/go/srvctx/components/ginc"
@@ -10,7 +12,11 @@ import (
 	"github.com/caovanhoang63/hiholive/shared/go/srvctx/components/gormc"
 	"github.com/caovanhoang63/hiholive/shared/go/srvctx/components/jwtc"
 	"github.com/gin-gonic/gin"
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	"google.golang.org/grpc"
+	"net"
+	"time"
 
 	"net/http"
 	"os"
@@ -36,12 +42,13 @@ var rootCmd = &cobra.Command{
 
 		// Make some delay for DB ready (migration)
 		// remove it if you already had your own DB
+		time.Sleep(time.Second * 5)
 
 		if err := serviceCtx.Load(); err != nil {
-			logger.Fatal(err.Error())
+			logger.Fatal(err)
 		}
 
-		ginComp := serviceCtx.MustGet(shared.KeyCompGIN).(shared.GINComponent)
+		ginComp := serviceCtx.MustGet(shared.KeyCompGIN).(common.GINComponent)
 
 		router := ginComp.GetRouter()
 		router.Use(gin.Recovery(), middlewares.Logger(serviceCtx), middlewares.Recovery(serviceCtx))
@@ -51,12 +58,14 @@ var rootCmd = &cobra.Command{
 			c.JSON(http.StatusOK, gin.H{"data": "pong"})
 		})
 
+		go StartGRPCServices(serviceCtx)
+
 		v1 := router.Group("/v1")
 
 		SetupRoutes(v1, serviceCtx)
 
 		if err := router.Run(fmt.Sprintf(":%d", ginComp.GetPort())); err != nil {
-			logger.Fatal(err.Error())
+			logger.Fatal(err)
 		}
 	},
 }
@@ -67,6 +76,26 @@ func SetupRoutes(router *gin.RouterGroup, serviceCtx srvctx.ServiceContext) {
 	tasks := router.Group("/user")
 	{
 		tasks.GET("", userService.GetUserProfile())
+	}
+}
+func StartGRPCServices(serviceCtx srvctx.ServiceContext) {
+	configComp := serviceCtx.MustGet(shared.KeyCompConf).(common.Config)
+	logger := serviceCtx.Logger("grpc")
+
+	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", configComp.GetGRPCPort()))
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	logger.Infof("GRPC Server is listening on %d ...\n", configComp.GetGRPCPort())
+
+	s := grpc.NewServer()
+
+	pb.RegisterUserServiceServer(s, composer.ComposeUserGRPCService(serviceCtx))
+
+	if err := s.Serve(lis); err != nil {
+		log.Fatalln(err)
 	}
 }
 

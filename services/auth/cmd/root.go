@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/caovanhoang63/hiholive/services/auth/common"
 	"github.com/caovanhoang63/hiholive/services/auth/composer"
 	"github.com/caovanhoang63/hiholive/shared/go/shared"
 	"github.com/caovanhoang63/hiholive/shared/go/srvctx"
@@ -33,17 +34,14 @@ var rootCmd = &cobra.Command{
 
 		logger := srvctx.GlobalLogger().GetLogger("service")
 
-		// Make some delay for DB ready (migration)
-		// remove it if you already had your own DB
-
 		if err := serviceCtx.Load(); err != nil {
-			logger.Fatal(err.Error())
+			logger.Fatal(err)
 		}
 
-		ginComp := serviceCtx.MustGet(shared.KeyCompGIN).(shared.GINComponent)
+		ginComp := serviceCtx.MustGet(shared.KeyCompGIN).(common.GINComponent)
 
 		router := ginComp.GetRouter()
-		router.Use(gin.Recovery(), middlewares.Logger(serviceCtx), middlewares.Recovery(serviceCtx))
+		router.Use(gin.Recovery(), gin.Logger(), middlewares.Recovery(serviceCtx))
 
 		router.Use(middlewares.Cors())
 		router.GET("/ping", func(c *gin.Context) {
@@ -55,7 +53,7 @@ var rootCmd = &cobra.Command{
 		SetupRoutes(v1, serviceCtx)
 
 		if err := router.Run(fmt.Sprintf(":%d", ginComp.GetPort())); err != nil {
-			logger.Fatal(err.Error())
+			logger.Fatal(err)
 		}
 	},
 }
