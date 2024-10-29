@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/caovanhoang63/hiholive/services/hls_mux/cmd"
+	"github.com/caovanhoang63/hiholive/services/rtmp/cmd"
 	"github.com/joho/godotenv"
 	log "github.com/sirupsen/logrus"
 )
