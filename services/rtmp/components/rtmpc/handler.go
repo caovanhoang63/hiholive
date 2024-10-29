@@ -124,11 +124,13 @@ func (h *Handler) OnSetDataFrame(timestamp uint32, data *rtmpmsg.NetStreamSetDat
 func (h *Handler) OnAudio(timestamp uint32, payload io.Reader) error {
 	var audio flvtag.AudioData
 	if err := flvtag.DecodeAudioData(payload, &audio); err != nil {
+		h.logger.Errorf("Failed to decode audio data: Err = %+v", err)
 		return err
 	}
 
 	flvBody := new(bytes.Buffer)
 	if _, err := io.Copy(flvBody, audio.Data); err != nil {
+		h.logger.Errorf("Failed to copy audio data: Err = %+v", err)
 		return err
 	}
 	audio.Data = flvBody
@@ -145,12 +147,14 @@ func (h *Handler) OnAudio(timestamp uint32, payload io.Reader) error {
 func (h *Handler) OnVideo(timestamp uint32, payload io.Reader) error {
 	var video flvtag.VideoData
 	if err := flvtag.DecodeVideoData(payload, &video); err != nil {
+		h.logger.Errorf("Failed to decode video data: Err = %+v", err)
 		return err
 	}
 
 	// Need deep copy because payload will be recycled
 	flvBody := new(bytes.Buffer)
 	if _, err := io.Copy(flvBody, video.Data); err != nil {
+		h.logger.Errorf("Failed to copy video data: Err = %+v", err)
 		return err
 	}
 	video.Data = flvBody

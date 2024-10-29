@@ -1,6 +1,7 @@
 package ffmpegc
 
 import (
+	"fmt"
 	"github.com/caovanhoang63/hiholive/shared/go/srvctx"
 	"log"
 	"os"
@@ -43,34 +44,67 @@ func (f *Ffmpeg) WithConfig(config *FfmpegConfig) *Ffmpeg {
 func (f *Ffmpeg) NewStream(key string) {
 	log.Println(key)
 
-	// Thư mục đầu ra cho các file HLS (.m3u8 và .ts)
+	// output folder for HLS file (.m3u8 and .ts)
 	outputDir := f.ffmpegConfig.mountFolder + "/" + key
-	outputFile := outputDir + "/index.m3u8"
+	outputFile := outputDir + "/index-%v.m3u8"
 	url := f.ffmpegConfig.rtmpUrl + key
-	// Tạo thư mục đầu ra nếu chưa tồn tại
+	// create folder if not existed
 	err := os.MkdirAll(outputDir, os.ModePerm)
 	if err != nil {
 		log.Fatalf("Lỗi khi tạo thư mục: %v", err)
 	}
 
-	// Câu lệnh FFmpeg để chuyển đổi RTMP stream thành HLS với chế độ ghi liên tục
-	cmd := exec.Command("ffmpeg", "-i", url,
-		"-c:v", "libx264", // Sử dụng codec H.264 cho video
-		"-c:a", "aac", // Sử dụng codec AAC cho audio
-		"-f", "hls", // Định dạng output là HLS
-		"-hls_time", "10", // Độ dài mỗi segment HLS (10 giây)
-		"-hls_list_size", "10", // Giữ tối đa 10 segment trong playlist
-		"-hls_flags", "delete_segments", // Xóa các segment cũ khi không còn trong playlist
-		"-hls_segment_filename", outputDir+"/segment_%03d.ts", // Đặt tên cho các file segment
+	//ffmpeg -f flv -i "rtmp://server/live/livestream" \
+	//-map 0:v:0 -map 0:a:0 -map 0:v:0 -map 0:a:0 -map 0:v:0 -map 0:a:0 \
+	//-c:v libx264 -crf 22 -c:a aac -ar 44100 \
+	//-filter:v:0 scale=w=480:h=360  -maxrate:v:0 600k -b:a:0 500k \
+	//-filter:v:1 scale=w=640:h=480  -maxrate:v:1 1500k -b:a:1 1000k \
+	//-filter:v:2 scale=w=1280:h=720 -maxrate:v:2 3000k -b:a:2 2000k \
+	//-var_stream_map "v:0,a:0,name:360p v:1,a:1,name:480p v:2,a:2,name:720p" \
+	//-preset fast -hls_list_size 10 -threads 0 -f hls \
+	//-hls_time 3 -hls_flags independent_segments \
+	//-master_pl_name "livestream.m3u8" \
+	//-y "livestream-%v.m3u8"
+
+	cmd := exec.Command("ffmpeg",
+		"-i", url,
+		"-map", "0:v:0",
+		"-map", "0:a:0",
+		"-map", "0:v:0",
+		"-map", "0:a:0",
+		"-map", "0:v:0",
+		"-map", "0:a:0",
+		"-c:v", "libx264",
+		"-c:a", "aac",
+		"-crf", "22",
+		"-ar", "44100",
+
+		"-filter:v:0", "scale=w=480:h=360",
+		"-b:v:0", "600k",
+		"-b:a:0", "500k",
+		"-filter:v:1", "scale=w=640:h=480",
+		"-b:v:1", "1500k",
+		"-b:a:1", "1000k",
+		"-filter:v:2", "scale=w=1280:h=720",
+		"-b:v:2", "3000k",
+		"-b:a:2", "2000k",
+		"-var_stream_map", "v:0,a:0,name:360p v:1,a:1,name:480p v:2,a:2,name:720p",
+		"-threads", "0",
+		"-hls_time", "5",
+		"-hls_list_size", "10",
+		"-hls_flags", "independent_segments",
+		"-f", "hls",
+		"-hls_segment_filename", outputDir+"/stream_%v_%03d.ts",
+		"-master_pl_name", "master.m3u8",
 		outputFile)
 
-	// Ghi log output của FFmpeg để theo dõi
+	fmt.Println(cmd.String())
+	// write log output of FFmpeg
 	cmd.Stdout = log.Writer()
 	cmd.Stderr = log.Writer()
 
-	// Chạy câu lệnh FFmpeg
 	if err := cmd.Run(); err != nil {
-		log.Fatalf("Lỗi khi chạy FFmpeg: %v", err)
+		log.Fatalf("FFmpeg err : %v", err)
 	}
 
 }

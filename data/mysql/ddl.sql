@@ -135,14 +135,15 @@ CREATE TABLE `live_streams` (
                                 `max_concurrent_viewers` INT,
                                 `total_unique_viewers` INT,
                                 `state` ENUM('scheduled', 'live', 'ended'),
-                                `stream_key` VARCHAR(255),
+                                `stream_key` BINARY(16) default (UUID_TO_BIN(UUID())),
                                 `status` INT DEFAULT 1,
                                 `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                                 `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
                                 PRIMARY KEY (`id`),
                                 KEY `status` (`status`) USING BTREE,
                                 KEY `video_id` (`video_id`) USING BTREE,
-                                KEY `state` (`state`) USING BTREE
+                                KEY `state` (`state`) USING BTREE,
+                                KEY `stream_key` (`stream_key`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 DROP TABLE IF EXISTS `live_stream_metric`;
