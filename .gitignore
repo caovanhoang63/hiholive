@@ -13,6 +13,8 @@ bash.sh
 *.so
 *.dylib
 
+services/hls_mux/hls_output
+
 # Test binary, built with `go test -c`
 *.test
 
