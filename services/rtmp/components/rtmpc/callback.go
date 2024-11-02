@@ -15,6 +15,8 @@ func onEventCallback(conn *rtmp.Conn, streamID uint32) func(flv *flvtag.FlvTag) 
 		buf := new(bytes.Buffer)
 
 		switch flv.Data.(type) {
+
+		// TODO: Convert to AAC instead of Flv audio
 		case *flvtag.AudioData:
 			d := flv.Data.(*flvtag.AudioData)
 

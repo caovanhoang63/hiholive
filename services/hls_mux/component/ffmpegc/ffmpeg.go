@@ -73,6 +73,9 @@ func (f *Ffmpeg) NewStream(key string) {
 		"-map", "0:v:0",
 		"-map", "0:a:0",
 
+		"-map", "0:v:0",
+		"-map", "0:a:0",
+
 		"-async", "1",
 		// audio compression
 		"-crf", "22",
@@ -86,40 +89,44 @@ func (f *Ffmpeg) NewStream(key string) {
 		// Improve RAM efficiency by increasing compression ratio
 		"-preset", "veryfast",
 
-		"-filter:v:0", "scale=w=480:h=360,fps=60",
-		"-x264-params:v:0", "keyint=120:scenecut=0",
-
+		// 360p30
+		"-filter:v:0", "scale=w=480:h=360,fps=30",
+		"-x264-params:v:0", "keyint=60:scenecut=0",
 		"-b:v:0", "600k",
 		"-b:a:0", "64k",
 		"-c:v:0", "libx264",
 		"-c:a:0", "aac",
 
-		"-filter:v:1", "scale=w=640:h=480,fps=60",
-		"-x264-params:v:1", "keyint=120:scenecut=0",
-
+		// 480p30
+		"-filter:v:1", "scale=w=640:h=480,fps=30",
+		"-x264-params:v:1", "keyint=60:scenecut=0",
 		"-b:v:1", "1500k",
 		"-b:a:1", "128k",
 		"-c:v:1", "libx264",
 		"-c:a:1", "aac",
 
+		// 720p30
 		"-filter:v:2", "scale=w=1280:h=720,fps=30",
 		"-x264-params:v:2", "keyint=60:scenecut=0",
-
 		"-b:v:2", "2500k",
 		"-b:a:2", "128k",
 		"-c:v:2", "libx264",
 		"-c:a:2", "aac",
 
+		// 720p60
 		"-filter:v:3", "scale=w=1280:h=720,fps=60",
 		"-x264-params:v:3", "keyint=120:scenecut=0",
-
 		"-b:v:3", "3000k",
 		"-b:a:3", "192k",
 		"-c:v:3", "libx264",
 		"-c:a:3", "aac",
 
+		// origin resolution
+		"-c:v:4", "copy",
+		"-c:a:4", "aac",
+
 		"-var_stream_map",
-		"v:0,a:0,name:360p60 v:1,a:1,name:480p60 v:2,a:2,name:720p30 v:3,a:3,name:720p60",
+		"v:0,a:0,name:360p60 v:1,a:1,name:480p60 v:2,a:2,name:720p30 v:3,a:3,name:720p60 v:4,a:4,name:1080p60",
 
 		"-threads", "2",
 		"-hls_time", "2",
@@ -145,6 +152,7 @@ func (f *Ffmpeg) NewStream(key string) {
 	if err := cmd.Run(); err != nil {
 		log.Fatalf("FFmpeg err : %v", err)
 	}
+
 }
 
 func (f *Ffmpeg) Start() {}
