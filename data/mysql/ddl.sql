@@ -22,24 +22,8 @@ CREATE TABLE `auths` (
 
 
 DROP TABLE IF EXISTS `users`;
-CREATE TABLE `users` (
-                         `id` int NOT NULL AUTO_INCREMENT,
-                         `phone_number` VARCHAR(255),
-                         `address` VARCHAR(255),
-                         `first_name` VARCHAR(255),
-                         `last_name` VARCHAR(255),
-                         `display_name` VARCHAR(255),
-                         `date_of_birth` date,
-                         `gender` enum('male','female','other') NOT NULL,
-                         `system_role` ENUM('admin','viewer','streamer','moderator'),
-                         `avatar` JSON,
-                         `bio` TEXT,
-                         `status` INT DEFAULT 1,
-                         `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                         `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-                         PRIMARY KEY (`id`),
-                         KEY `status` (`status`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
 
 DROP TABLE IF EXISTS `user_channel`;
 CREATE TABLE `user_channel` (

@@ -2,39 +2,33 @@ package pubsub
 
 import (
 	"encoding/json"
-	"fmt"
+	"github.com/google/uuid"
 	"time"
 )
 
 type Message struct {
 	Id        string    `json:"id"`
 	Channel   string    `json:"channel"`
-	Data      []byte    `json:"data"`
+	Data      any       `json:"data"`
 	CreatedAt time.Time `json:"created_at"`
 }
 
 func NewMessage(data interface{}) *Message {
 	now := time.Now().UTC()
-	jsonData, _ := json.Marshal(data)
-
+	id, _ := uuid.NewUUID()
 	return &Message{
-		Id:        fmt.Sprintf("%d", now.UnixNano()),
-		Data:      jsonData,
+		Id:        id.String(),
+		Data:      data,
 		CreatedAt: now,
 	}
 }
 
-func (Message) String() string {
-
-	return "Message"
-}
-
-func (m *Message) SetChannel(topic string) {
+func (m *Message) SetTopic(topic string) {
 	m.Channel = topic
 }
 
-func (evt *Message) Marshal() ([]byte, error) {
-	b, err := json.Marshal(evt)
+func (m *Message) Marshal() ([]byte, error) {
+	b, err := json.Marshal(m)
 	if err != nil {
 		return nil, err
 	}

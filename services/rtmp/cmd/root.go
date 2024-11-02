@@ -6,11 +6,10 @@ import (
 	"github.com/caovanhoang63/hiholive/shared/go/shared"
 	"github.com/caovanhoang63/hiholive/shared/go/srvctx"
 	"github.com/caovanhoang63/hiholive/shared/go/srvctx/components/ginc"
-	"github.com/caovanhoang63/hiholive/shared/go/srvctx/components/gormc"
 	"github.com/caovanhoang63/hiholive/shared/go/srvctx/components/jwtc"
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/yutopp/go-rtmp"
-
 	"io"
 	"net"
 	"os"
@@ -20,9 +19,10 @@ func newServiceCtx() srvctx.ServiceContext {
 	return srvctx.NewServiceContext(
 		srvctx.WithName("Demo Microservices"),
 		srvctx.WithComponent(ginc.NewGin(shared.KeyCompGIN)),
-		srvctx.WithComponent(gormc.NewGormDB(shared.KeyCompMySQL, "")),
+		//srvctx.WithComponent(gormc.NewGormDB(shared.KeyCompMySQL, "")),
 		srvctx.WithComponent(jwtc.NewJWT(shared.KeyCompJWT)),
 		srvctx.WithComponent(NewConfig()),
+		//srvctx.WithComponent(rabbitpubsub.NewRabbitPubSub(shared.KeyCompRabbitMQ)),
 	)
 }
 
@@ -30,7 +30,14 @@ var rootCmd = &cobra.Command{
 	Use:   "app",
 	Short: "Start service",
 	Run: func(cmd *cobra.Command, args []string) {
+		serviceCtx := newServiceCtx()
+
 		logger := srvctx.GlobalLogger().GetLogger("Rtmp Service")
+		if err := serviceCtx.Load(); err != nil {
+			logger.Fatal(err)
+		}
+
+		//_ = serviceCtx.MustGet(shared.KeyCompRabbitMQ).(pubsub.Pubsub)
 		// Setup TCP connection
 		tcpAddr, err := net.ResolveTCPAddr("tcp", ":1935")
 		if err != nil {
@@ -50,6 +57,7 @@ var rootCmd = &cobra.Command{
 					ControlState: rtmp.StreamControlStateConfig{
 						DefaultBandwidthWindowSize: 6 * 1024 * 1024 / 8,
 					},
+					Logger: log.StandardLogger(),
 				}
 			},
 		})
