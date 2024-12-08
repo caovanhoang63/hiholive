@@ -58,6 +58,7 @@ jobs:
               docker run -d --name ${APP_NAME} \
               --network hiholive \
               -p 8080:8080 \
-              -v ${PWD}/rtmp/.env:/app/.env
+              -v ${PWD}/.env:/app/.env \
+              -v ${PWD}/.log/:/app/.log/
               caovanhoang204/${APP_NAME}:latest
           '
