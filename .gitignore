@@ -390,7 +390,8 @@ dist
 ### WebStorm+all Patch ###
 # Ignore everything but code style settings and run configurations
 # that are supposed to be shared within teams.
-
+infras.sh
+iplist
 
 
 # End of https://www.toptal.com/developers/gitignore/api/go,node,jetbrains,goland+all,webstorm+all
