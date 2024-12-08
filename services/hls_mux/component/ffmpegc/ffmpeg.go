@@ -151,7 +151,7 @@ func (f *Ffmpeg) NewStream(key string) {
 
 		"-threads", "2",
 		"-hls_time", "2",
-		"-hls_list_size", "3",
+		"-hls_list_size", "10",
 		"-hls_flags", "independent_segments",
 		"-f", "hls",
 

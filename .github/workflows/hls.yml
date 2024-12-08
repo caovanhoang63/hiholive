@@ -38,7 +38,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          file: ./services/hls/Dockerfile
+          file: ./services/hls_mux/Dockerfile
           push: true
           tags: caovanhoang204/hiholive-hls:latest
 
