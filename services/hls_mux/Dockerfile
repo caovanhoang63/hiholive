@@ -1,5 +1,6 @@
-    FROM alpine
-    FROM jrottenberg/ffmpeg:6-alpine
+FROM alpine
+
+RUN apk add --no-cache ffmpeg
 
 WORKDIR /app
 
