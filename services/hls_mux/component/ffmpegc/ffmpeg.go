@@ -10,7 +10,7 @@ import (
 )
 
 var (
-	DefaultConfig = NewFfmpegConfig("rtmp://localhost:1935/stream/", "./hls_output")
+	DefaultConfig = NewFfmpegConfig("rtmp://34.126.85.171:1935/stream/", "./hls_output")
 )
 
 type FfmpegConfig struct {
@@ -151,7 +151,7 @@ func (f *Ffmpeg) NewStream(key string) {
 
 		"-threads", "2",
 		"-hls_time", "2",
-		"-hls_list_size", "10",
+		"-hls_list_size", "3",
 		"-hls_flags", "independent_segments",
 		"-f", "hls",
 

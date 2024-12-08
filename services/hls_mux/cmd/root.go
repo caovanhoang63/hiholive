@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/caovanhoang63/hiholive/services/auth/common"
 	"github.com/caovanhoang63/hiholive/services/hls_mux/component/ffmpegc"
 	"github.com/caovanhoang63/hiholive/shared/go/shared"
 	"github.com/caovanhoang63/hiholive/shared/go/srvctx"
@@ -35,10 +36,20 @@ var rootCmd = &cobra.Command{
 		}
 
 		//_ = serviceCtx.MustGet(shared.KeyCompRabbitMQ).(pubsub.Pubsub)
+		ginComp := serviceCtx.MustGet(shared.KeyCompGIN).(common.GINComponent)
+		router := ginComp.GetRouter()
+
+		router.Static("/static", "hls_output")
 
 		ffmpeg := ffmpegc.NewFfmpeg(serviceCtx).WithConfig(nil)
 
-		ffmpeg.NewStream("test")
+		go func() {
+			ffmpeg.NewStream("test")
+		}()
+
+		if err := router.Run(fmt.Sprintf(":%d", ginComp.GetPort())); err != nil {
+			logger.Fatal(err)
+		}
 	},
 }
 
