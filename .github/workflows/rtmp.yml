@@ -1,0 +1,63 @@
+name: RTMP Deploy
+on:
+  push:
+    branches:
+      - deploy/rtmp
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      # Checkout source code
+      - uses: actions/checkout@v4
+
+      # Setup Go environment
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.23.x'
+
+      # Install dependencies
+      - name: Install dependencies
+        run: go get .
+
+      # Build Go binary
+      - name: Build
+        run: CGO_ENABLED=0 GOOS=linux go build -v -a -o app ./services/rtmp
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      # Build Docker image
+      - name: Build and Push Docker Image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./service/rtmp/Dockerfile
+          push: true
+          tags: caovanhoang204/hiholive-rtmp:latest
+
+      # Deploy
+      - name:  Deploy
+        env:
+          PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          HOSTNAME: ${{ secrets.RTMP_HOST }}
+          USER_NAME: ${{ secrets.SSH_USER_NAME }}
+        run: |
+          echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
+          ssh -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOSTNAME} '
+              APP_NAME=hiholive-rtmp &&
+              docker rm -f ${APP_NAME} &&
+              echo pull &&
+              docker pull caovanhoang204/${APP_NAME}:latest &&
+              docker run -d --name ${APP_NAME} \
+              --network hiholive \
+              -p 8080:8080 \
+              -v ${PWD}/rtmp/.env:/app/.env
+              caovanhoang204/${APP_NAME}:latest
+          '
