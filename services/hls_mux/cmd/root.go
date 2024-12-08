@@ -7,6 +7,7 @@ import (
 	"github.com/caovanhoang63/hiholive/shared/go/shared"
 	"github.com/caovanhoang63/hiholive/shared/go/srvctx"
 	"github.com/caovanhoang63/hiholive/shared/go/srvctx/components/ginc"
+	"github.com/caovanhoang63/hiholive/shared/go/srvctx/components/ginc/middlewares"
 	"github.com/caovanhoang63/hiholive/shared/go/srvctx/components/jwtc"
 	"github.com/spf13/cobra"
 
@@ -40,7 +41,7 @@ var rootCmd = &cobra.Command{
 		router := ginComp.GetRouter()
 
 		router.Static("/static", "hls_output")
-
+		router.Use(middlewares.Cors())
 		ffmpeg := ffmpegc.NewFfmpeg(serviceCtx).WithConfig(nil)
 
 		go func() {
