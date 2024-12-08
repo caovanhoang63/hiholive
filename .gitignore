@@ -395,4 +395,5 @@ iplist
 deploy-script
 .secret
 infras-ffmpeg.sh
+POSTGRES_PASSWORD
 # End of https://www.toptal.com/developers/gitignore/api/go,node,jetbrains,goland+all,webstorm+all
