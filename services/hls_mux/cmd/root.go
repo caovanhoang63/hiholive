@@ -39,9 +39,10 @@ var rootCmd = &cobra.Command{
 		//_ = serviceCtx.MustGet(shared.KeyCompRabbitMQ).(pubsub.Pubsub)
 		ginComp := serviceCtx.MustGet(shared.KeyCompGIN).(common.GINComponent)
 		router := ginComp.GetRouter()
+		router.Use(middlewares.Cors())
 
 		router.Static("/static", "hls_output")
-		router.Use(middlewares.Cors())
+
 		ffmpeg := ffmpegc.NewFfmpeg(serviceCtx).WithConfig(nil)
 
 		go func() {
