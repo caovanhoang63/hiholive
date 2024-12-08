@@ -38,7 +38,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          file: ./service/rtmp/Dockerfile
+          file: ./services/rtmp/Dockerfile
           push: true
           tags: caovanhoang204/hiholive-rtmp:latest
 

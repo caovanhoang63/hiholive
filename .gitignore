@@ -393,5 +393,5 @@ dist
 infras.sh
 iplist
 deploy-script
-
+.secret
 # End of https://www.toptal.com/developers/gitignore/api/go,node,jetbrains,goland+all,webstorm+all
