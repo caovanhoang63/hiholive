@@ -1,4 +1,4 @@
-package entity
+package usermodel
 
 import "github.com/caovanhoang63/hiholive/shared/go/core"
 

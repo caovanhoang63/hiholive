@@ -1,4 +1,4 @@
-package entity
+package usermodel
 
 import (
 	"github.com/caovanhoang63/hiholive/shared/go/core"
@@ -32,6 +32,7 @@ type User struct {
 	Role           SystemRole  `json:"role" gorm:"column:role"`
 	Avatar         *core.Image `json:"avatar" gorm:"column:avatar"`
 	Bio            string      `json:"bio" gorm:"column:bio"`
+	Status         int         `json:"status" gorm:"column:status"`
 }
 
 func (User) TableName() string {

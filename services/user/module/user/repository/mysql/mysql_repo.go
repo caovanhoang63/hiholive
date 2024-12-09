@@ -2,7 +2,7 @@ package mysql
 
 import (
 	"context"
-	"github.com/caovanhoang63/hiholive/services/user/module/user/entity"
+	"github.com/caovanhoang63/hiholive/services/user/module/user/usermodel"
 	"gorm.io/gorm"
 )
 
@@ -15,17 +15,12 @@ func (repo *mysqlRepo) DeleteUser(ctx context.Context, id int) error {
 	panic("implement me")
 }
 
-func (repo *mysqlRepo) FindUserById(ctx context.Context, id int) (*entity.User, error) {
+func (repo *mysqlRepo) FindUserByIds(ctx context.Context, ids []int) ([]*usermodel.User, error) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (repo *mysqlRepo) FindUserByIds(ctx context.Context, ids []int) ([]*entity.User, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (repo *mysqlRepo) UpdateUser(ctx context.Context, id int, data *entity.UserUpdate) error {
+func (repo *mysqlRepo) UpdateUser(ctx context.Context, id int, data *usermodel.UserUpdate) error {
 	//TODO implement me
 	panic("implement me")
 }

@@ -73,9 +73,10 @@ var rootCmd = &cobra.Command{
 func SetupRoutes(router *gin.RouterGroup, serviceCtx srvctx.ServiceContext) {
 	userService := composer.ComposeUserAPIService(serviceCtx)
 
-	tasks := router.Group("/user")
+	tasks := router.Group("user")
 	{
-		tasks.GET("", userService.GetUserProfile())
+		tasks.GET(":id", userService.GetUserProfile())
+		tasks.GET("", userService.ListUser())
 	}
 }
 func StartGRPCServices(serviceCtx srvctx.ServiceContext) {
