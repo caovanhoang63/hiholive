@@ -29,7 +29,7 @@ type User struct {
 	DisplayName    string      `json:"display_name" gorm:"column:display_name"`
 	DateOfBirth    string      `json:"date_of_birth" gorm:"column:date_of_birth"`
 	Gender         Gender      `json:"gender" gorm:"column:gender"`
-	Role           SystemRole  `json:"role" gorm:"column:role"`
+	SystemRole     SystemRole  `json:"SystemRole" gorm:"column:system_role"`
 	Avatar         *core.Image `json:"avatar" gorm:"column:avatar"`
 	Bio            string      `json:"bio" gorm:"column:bio"`
 	Status         int         `json:"status" gorm:"column:status"`

@@ -38,7 +38,7 @@ func (b *userBiz) GetUserRole(ctx context.Context, userId int) (string, error) {
 			return "", core.ErrInternalServerError.WithWrap(err)
 		}
 	}
-	return string(user.Role), nil
+	return string(user.SystemRole), nil
 }
 
 func (b *userBiz) FindUsersWithCondition(ctx context.Context, filter *usermodel.UserFilter, paging *core.Paging) ([]usermodel.User, error) {

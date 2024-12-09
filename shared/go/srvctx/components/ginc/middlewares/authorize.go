@@ -12,9 +12,10 @@ type UserClient interface {
 
 func Authorize(uc UserClient, roles ...string) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		requester := core.GetRequester(c.Request.Context())
+		requester := c.MustGet(core.KeyRequester).(core.Requester)
 		role, err := uc.GetUserRole(c.Request.Context(), requester.GetUserId())
 		if err != nil {
+
 			core.WriteErrorResponse(c, err)
 			c.Abort()
 			return
@@ -22,6 +23,8 @@ func Authorize(uc UserClient, roles ...string) gin.HandlerFunc {
 
 		for _, r := range roles {
 			if role == r {
+				requester.SetRole(role)
+				c.Set(core.KeyRequester, requester)
 				c.Next()
 				return
 			}

@@ -8,11 +8,14 @@ type Requester interface {
 	GetSubject() string
 	GetTokenId() string
 	GetUserId() int
+	GetRole() string
+	SetRole(string)
 }
 
 type requesterData struct {
-	Sub string `json:"user_id"`
-	Tid string `json:"tid"`
+	Sub  string `json:"user_id"`
+	Tid  string `json:"tid"`
+	Role string `json:"-"`
 }
 
 func NewRequester(sub, tid string) *requesterData {
@@ -29,11 +32,18 @@ func (r *requesterData) GetSubject() string {
 func (r *requesterData) GetTokenId() string {
 	return r.Tid
 }
+
 func (r *requesterData) GetUserId() int {
 	uid, _ := FromBase58(r.GetSubject())
 	return int(uid.GetLocalID())
 }
 
+func (r *requesterData) SetRole(role string) {
+	r.Role = role
+}
+func (r *requesterData) GetRole() string {
+	return r.Role
+}
 func GetRequester(ctx context.Context) Requester {
 	if requester, ok := ctx.Value(KeyRequester).(Requester); ok {
 		return requester

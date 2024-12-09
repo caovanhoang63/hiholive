@@ -2,19 +2,15 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/caovanhoang63/hiholive/services/user/composer"
+	"github.com/caovanhoang63/hiholive/services/video/composer"
 	"github.com/caovanhoang63/hiholive/shared/go/core"
-	"github.com/caovanhoang63/hiholive/shared/go/proto/pb"
 	"github.com/caovanhoang63/hiholive/shared/go/srvctx"
 	"github.com/caovanhoang63/hiholive/shared/go/srvctx/components/ginc"
 	"github.com/caovanhoang63/hiholive/shared/go/srvctx/components/ginc/middlewares"
 	"github.com/caovanhoang63/hiholive/shared/go/srvctx/components/gormc"
 	"github.com/caovanhoang63/hiholive/shared/go/srvctx/components/jwtc"
 	"github.com/gin-gonic/gin"
-	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"google.golang.org/grpc"
-	"net"
 	"net/http"
 	"os"
 )
@@ -51,8 +47,6 @@ var rootCmd = &cobra.Command{
 			c.JSON(http.StatusOK, gin.H{"data": "pong"})
 		})
 
-		go StartGRPCServices(serviceCtx)
-
 		v1 := router.Group("/v1")
 
 		SetupRoutes(v1, serviceCtx)
@@ -64,35 +58,12 @@ var rootCmd = &cobra.Command{
 }
 
 func SetupRoutes(router *gin.RouterGroup, serviceCtx srvctx.ServiceContext) {
-	userService := composer.ComposeUserAPIService(serviceCtx)
+	channelService := composer.ComposeChannelAPIService(serviceCtx)
+	ac := composer.ComposeAuthRPCClient(serviceCtx)
+	uc := composer.ComposeUserRPCClient(serviceCtx)
+	channel := router.Group("/channel")
 
-	tasks := router.Group("user")
-	{
-		tasks.Use(middlewares.RequireAuth(composer.ComposeAuthRPCClient(serviceCtx)))
-		tasks.GET(":id", userService.GetUserProfile())
-		tasks.GET("", userService.ListUser())
-	}
-}
-
-func StartGRPCServices(serviceCtx srvctx.ServiceContext) {
-	configComp := serviceCtx.MustGet(core.KeyCompConf).(core.Config)
-	logger := serviceCtx.Logger("grpc")
-
-	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", configComp.GetGRPCPort()))
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	logger.Infof("GRPC Server is listening on %d ...\n", configComp.GetGRPCPort())
-
-	s := grpc.NewServer()
-
-	pb.RegisterUserServiceServer(s, composer.ComposeUserGRPCService(serviceCtx))
-
-	if err := s.Serve(lis); err != nil {
-		log.Fatalln(err)
-	}
+	channel.POST("", middlewares.RequireAuth(ac), middlewares.Authorize(uc, "viewer"), channelService.CreateChannel())
 }
 
 func Execute() {

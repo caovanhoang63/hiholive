@@ -28,7 +28,6 @@ func RequireAuth(ac AuthClient) func(*gin.Context) {
 			c.Abort()
 			return
 		}
-
 		c.Set(core.KeyRequester, core.NewRequester(sub, tid))
 		c.Next()
 	}
