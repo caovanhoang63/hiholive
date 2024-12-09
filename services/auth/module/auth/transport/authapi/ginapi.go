@@ -38,3 +38,23 @@ func (g *ginAPI) Register() func(c *gin.Context) {
 
 	}
 }
+func (g *ginAPI) Login() func(c *gin.Context) {
+	return func(c *gin.Context) {
+		var data authmodel.AuthEmailPassword
+
+		if err := c.ShouldBind(&data); err != nil {
+			core.WriteErrorResponse(c, core.ErrBadRequest.WithError(err.Error()))
+			return
+		}
+
+		token, err := g.biz.Login(c.Request.Context(), &data)
+
+		if err != nil {
+			core.WriteErrorResponse(c, err)
+			return
+		}
+
+		c.JSON(http.StatusOK, core.ResponseData(token))
+
+	}
+}

@@ -12,7 +12,6 @@ import (
 
 func ComposeUserRPCClient(serviceCtx srvctx.ServiceContext) pb.UserServiceClient {
 	configComp := serviceCtx.MustGet(shared.KeyCompConf).(common.Config)
-
 	opts := grpc.WithTransportCredentials(insecure.NewCredentials())
 	clientConn, err := grpc.Dial(configComp.GetGRPCUserAddress(), opts)
 

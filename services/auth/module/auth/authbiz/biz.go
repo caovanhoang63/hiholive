@@ -1,11 +1,13 @@
 package authbiz
 
 import (
-	"github.com/caovanhoang63/hiholive/services/auth/common"
+	"errors"
 	"github.com/caovanhoang63/hiholive/services/auth/module/auth/authmodel"
 	"github.com/caovanhoang63/hiholive/shared/go/core"
+	"github.com/caovanhoang63/hiholive/shared/go/shared"
 	"github.com/caovanhoang63/hiholive/shared/go/srvctx"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
 	"golang.org/x/net/context"
 )
 
@@ -23,15 +25,26 @@ type UserRepository interface {
 	CreateUser(ctx context.Context, firstName, lastName, email string) (newId int, err error)
 }
 
+type Hasher interface {
+	Hash(string) string
+}
+
 type biz struct {
 	serviceContext srvctx.ServiceContext
 	repo           AuthRepository
 	userRepo       UserRepository
-	jwtProvider    common.JWTProvider
+	jwtProvider    shared.JWTProvider
+	hasher         Hasher
 }
 
-func NewAuthBiz(serviceContext srvctx.ServiceContext, repo AuthRepository, userRepo UserRepository) *biz {
-	return &biz{serviceContext: serviceContext, repo: repo, userRepo: userRepo}
+func NewAuthBiz(serviceContext srvctx.ServiceContext, repo AuthRepository, userRepo UserRepository, jwtProvider shared.JWTProvider, hasher Hasher) *biz {
+	return &biz{
+		serviceContext: serviceContext,
+		repo:           repo,
+		userRepo:       userRepo,
+		jwtProvider:    jwtProvider,
+		hasher:         hasher,
+	}
 }
 
 func (b *biz) Register(x context.Context, register *authmodel.AuthRegister) error {
@@ -56,7 +69,33 @@ func (b *biz) Register(x context.Context, register *authmodel.AuthRegister) erro
 }
 
 func (b *biz) Login(c context.Context, user *authmodel.AuthEmailPassword) (*authmodel.TokenResponse, error) {
-	return nil, nil
+	old, err := b.repo.FindByEmail(c, user.Email)
+	if err != nil {
+		if errors.Is(err, core.ErrRecordNotFound) {
+			return nil, core.ErrBadRequest.WithError("Invalid username or password")
+		}
+		return nil, core.ErrInternalServerError.WithDebug(err.Error())
+	}
+
+	if user.Password != old.Password {
+		return nil, core.ErrBadRequest.WithError("Invalid username or password")
+	}
+
+	uid := core.NewUID(uint32(old.UserId), 1, 1)
+	sub := uid.String()
+	tid := uuid.New().String()
+
+	tokenStr, expSecs, err := b.jwtProvider.IssueToken(c, tid, sub)
+	if err != nil {
+		return nil, core.ErrInternalServerError.WithError("Invalid username or password").WithDebug(err.Error())
+	}
+
+	return &authmodel.TokenResponse{
+		AccessToken: authmodel.Token{
+			Token:     tokenStr,
+			ExpiredIn: expSecs,
+		},
+	}, nil
 }
 
 func (b *biz) IntrospectToken(ctx context.Context, accessToken string) (*jwt.RegisteredClaims, error) {

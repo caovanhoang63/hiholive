@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/caovanhoang63/hiholive/services/auth/common"
 	"github.com/caovanhoang63/hiholive/services/auth/composer"
 	"github.com/caovanhoang63/hiholive/shared/go/shared"
 	"github.com/caovanhoang63/hiholive/shared/go/srvctx"
@@ -38,7 +37,7 @@ var rootCmd = &cobra.Command{
 			logger.Fatal(err)
 		}
 
-		ginComp := serviceCtx.MustGet(shared.KeyCompGIN).(common.GINComponent)
+		ginComp := serviceCtx.MustGet(shared.KeyCompGIN).(shared.GINComponent)
 
 		router := ginComp.GetRouter()
 		router.Use(gin.Recovery(), middlewares.Logger(serviceCtx), middlewares.Recovery(serviceCtx))
@@ -61,9 +60,10 @@ var rootCmd = &cobra.Command{
 func SetupRoutes(router *gin.RouterGroup, serviceCtx srvctx.ServiceContext) {
 	authService := composer.ComposeAuthAPIService(serviceCtx)
 
-	tasks := router.Group("/register")
+	tasks := router.Group("auth")
 	{
-		tasks.POST("/", authService.Register())
+		tasks.POST("register", authService.Register())
+		tasks.POST("login", authService.Login())
 	}
 }
 
