@@ -44,6 +44,10 @@ func (r *redisEngine) InitFlags() {
 
 }
 
+func (r *redisEngine) GetClient() *redis.Client {
+	return r.client
+}
+
 func (r *redisEngine) Activate(ctx srvctx.ServiceContext) error {
 	r.logger = srvctx.GlobalLogger().GetLogger(r.id)
 

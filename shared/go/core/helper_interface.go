@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
 )
 
@@ -14,6 +15,10 @@ type GINComponent interface {
 
 type GormComponent interface {
 	GetDB() *gorm.DB
+}
+
+type RedisComponent interface {
+	GetClient() *redis.Client
 }
 
 type JWTProvider interface {

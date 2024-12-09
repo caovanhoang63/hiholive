@@ -31,8 +31,9 @@ type StreamService interface {
 
 func ComposeStreamAPIService(serviceCtx srvctx.ServiceContext) StreamService {
 	db := serviceCtx.MustGet(core.KeyCompMySQL).(core.GormComponent)
+	rd := serviceCtx.MustGet(core.KeyRedis).(core.RedisComponent)
 	channelRepo := channelmysql.NewChannelMysqlRepo(db.GetDB())
-	streamRepo := streammysql.NewStreamMysqlRepo(db.GetDB())
+	streamRepo := streammysql.NewStreamMysqlRepo(db.GetDB(), rd.GetClient())
 	biz := streambiz.NewStreamBiz(streamRepo, channelRepo)
 	streamService := streamgin.NewStreamApi(biz, serviceCtx)
 	return streamService

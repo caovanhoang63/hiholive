@@ -7,6 +7,8 @@ import (
 	"github.com/caovanhoang63/hiholive/shared/go/srvctx"
 	"github.com/caovanhoang63/hiholive/shared/go/srvctx/components/ginc"
 	"github.com/caovanhoang63/hiholive/shared/go/srvctx/components/jwtc"
+	"github.com/caovanhoang63/hiholive/shared/go/srvctx/components/redisc"
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/yutopp/go-rtmp"
 	"io"
@@ -20,6 +22,7 @@ func newServiceCtx() srvctx.ServiceContext {
 		srvctx.WithComponent(ginc.NewGin(core.KeyCompGIN)),
 		srvctx.WithComponent(jwtc.NewJWT(core.KeyCompJWT)),
 		srvctx.WithComponent(core.NewConfig()),
+		srvctx.WithComponent(redisc.NewRedis(core.KeyRedis)),
 	)
 }
 
@@ -28,6 +31,7 @@ var rootCmd = &cobra.Command{
 	Short: "Start service",
 	Run: func(cmd *cobra.Command, args []string) {
 		serviceCtx := newServiceCtx()
+		rd := serviceCtx.MustGet(core.KeyRedis).(core.RedisComponent)
 
 		logger := srvctx.GlobalLogger().GetLogger("Rtmp Service")
 		if err := serviceCtx.Load(); err != nil {
@@ -49,11 +53,11 @@ var rootCmd = &cobra.Command{
 		srv := rtmp.NewServer(&rtmp.ServerConfig{
 			OnConnect: func(conn net.Conn) (io.ReadWriteCloser, *rtmp.ConnConfig) {
 				return conn, &rtmp.ConnConfig{
-					Handler: rtmpc.NewHandler(relayService),
+					Handler: rtmpc.NewHandler(relayService, rd.GetClient()),
 					ControlState: rtmp.StreamControlStateConfig{
 						DefaultBandwidthWindowSize: 6 * 1024 * 1024 / 8,
 					},
-					//Logger: log.StandardLogger(),
+					Logger: log.StandardLogger(),
 				}
 			},
 		})
