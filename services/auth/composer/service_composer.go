@@ -6,7 +6,6 @@ import (
 	"github.com/caovanhoang63/hiholive/services/auth/module/auth/repository/authmysql"
 	"github.com/caovanhoang63/hiholive/services/auth/module/auth/transport/authapi"
 	"github.com/caovanhoang63/hiholive/shared/go/core"
-	"github.com/caovanhoang63/hiholive/shared/go/shared"
 	"github.com/caovanhoang63/hiholive/shared/go/srvctx"
 	"github.com/gin-gonic/gin"
 )
@@ -17,8 +16,8 @@ type AuthService interface {
 }
 
 func ComposeAuthAPIService(serviceCtx srvctx.ServiceContext) AuthService {
-	db := serviceCtx.MustGet(shared.KeyCompMySQL).(shared.GormComponent)
-	jwtComp := serviceCtx.MustGet(shared.KeyCompJWT).(shared.JWTProvider)
+	db := serviceCtx.MustGet(core.KeyCompMySQL).(core.GormComponent)
+	jwtComp := serviceCtx.MustGet(core.KeyCompJWT).(core.JWTProvider)
 	userClient := authgrpcrepo.NewClient(ComposeUserRPCClient(serviceCtx))
 	authRepo := authmysql.NewMySQLRepository(db.GetDB())
 	authBiz := authbiz.NewAuthBiz(serviceCtx, authRepo, userClient, jwtComp, core.NewSha256Hash())

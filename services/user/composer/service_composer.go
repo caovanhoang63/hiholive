@@ -6,7 +6,7 @@ import (
 	"github.com/caovanhoang63/hiholive/services/user/module/user/transport/ginapi"
 	"github.com/caovanhoang63/hiholive/services/user/module/user/transport/grpc"
 	"github.com/caovanhoang63/hiholive/services/user/proto/pb"
-	"github.com/caovanhoang63/hiholive/shared/go/shared"
+	"github.com/caovanhoang63/hiholive/shared/go/core"
 	"github.com/caovanhoang63/hiholive/shared/go/srvctx"
 	"github.com/gin-gonic/gin"
 )
@@ -16,7 +16,7 @@ type UserService interface {
 }
 
 func ComposeUserAPIService(serviceCtx srvctx.ServiceContext) UserService {
-	db := serviceCtx.MustGet(shared.KeyCompMySQL).(shared.GormComponent)
+	db := serviceCtx.MustGet(core.KeyCompMySQL).(core.GormComponent)
 
 	userRepo := mysql.NewMySQLRepository(db.GetDB())
 	userBiz := biz.NewBiz(userRepo)
@@ -26,7 +26,7 @@ func ComposeUserAPIService(serviceCtx srvctx.ServiceContext) UserService {
 }
 
 func ComposeUserGRPCService(serviceCtx srvctx.ServiceContext) pb.UserServiceServer {
-	db := serviceCtx.MustGet(shared.KeyCompMySQL).(shared.GormComponent)
+	db := serviceCtx.MustGet(core.KeyCompMySQL).(core.GormComponent)
 
 	userRepo := mysql.NewMySQLRepository(db.GetDB())
 	userBiz := biz.NewBiz(userRepo)

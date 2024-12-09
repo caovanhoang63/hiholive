@@ -3,7 +3,7 @@ package composer
 import (
 	"context"
 	"github.com/caovanhoang63/hiholive/services/user/proto/pb"
-	"github.com/caovanhoang63/hiholive/shared/go/shared"
+	"github.com/caovanhoang63/hiholive/shared/go/core"
 	"github.com/caovanhoang63/hiholive/shared/go/srvctx"
 
 	"google.golang.org/grpc"
@@ -27,7 +27,7 @@ func (ac *authClient) IntrospectToken(ctx context.Context, accessToken string) (
 
 // ComposeAuthRPCClient use only for middleware: get token info
 func ComposeAuthRPCClient(serviceCtx srvctx.ServiceContext) *authClient {
-	configComp := serviceCtx.MustGet(shared.KeyCompConf).(shared.Config)
+	configComp := serviceCtx.MustGet(core.KeyCompConf).(core.Config)
 
 	opts := grpc.WithTransportCredentials(insecure.NewCredentials())
 	clientConn, err := grpc.Dial(configComp.GetGRPCAuthServerAddress(), opts)

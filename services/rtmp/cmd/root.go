@@ -3,7 +3,7 @@ package cmd
 import (
 	"fmt"
 	"github.com/caovanhoang63/hiholive/services/rtmp/components/rtmpc"
-	"github.com/caovanhoang63/hiholive/shared/go/shared"
+	"github.com/caovanhoang63/hiholive/shared/go/core"
 	"github.com/caovanhoang63/hiholive/shared/go/srvctx"
 	"github.com/caovanhoang63/hiholive/shared/go/srvctx/components/ginc"
 	"github.com/caovanhoang63/hiholive/shared/go/srvctx/components/jwtc"
@@ -17,9 +17,9 @@ import (
 func newServiceCtx() srvctx.ServiceContext {
 	return srvctx.NewServiceContext(
 		srvctx.WithName("Demo Microservices"),
-		srvctx.WithComponent(ginc.NewGin(shared.KeyCompGIN)),
+		srvctx.WithComponent(ginc.NewGin(core.KeyCompGIN)),
 		//srvctx.WithComponent(gormc.NewGormDB(shared.KeyCompMySQL, "")),
-		srvctx.WithComponent(jwtc.NewJWT(shared.KeyCompJWT)),
+		srvctx.WithComponent(jwtc.NewJWT(core.KeyCompJWT)),
 		srvctx.WithComponent(NewConfig()),
 		//srvctx.WithComponent(rabbitpubsub.NewRabbitPubSub(shared.KeyCompRabbitMQ)),
 	)

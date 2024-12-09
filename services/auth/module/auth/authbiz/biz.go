@@ -4,7 +4,6 @@ import (
 	"errors"
 	"github.com/caovanhoang63/hiholive/services/auth/module/auth/authmodel"
 	"github.com/caovanhoang63/hiholive/shared/go/core"
-	"github.com/caovanhoang63/hiholive/shared/go/shared"
 	"github.com/caovanhoang63/hiholive/shared/go/srvctx"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
@@ -33,11 +32,11 @@ type biz struct {
 	serviceContext srvctx.ServiceContext
 	repo           AuthRepository
 	userRepo       UserRepository
-	jwtProvider    shared.JWTProvider
+	jwtProvider    core.JWTProvider
 	hasher         Hasher
 }
 
-func NewAuthBiz(serviceContext srvctx.ServiceContext, repo AuthRepository, userRepo UserRepository, jwtProvider shared.JWTProvider, hasher Hasher) *biz {
+func NewAuthBiz(serviceContext srvctx.ServiceContext, repo AuthRepository, userRepo UserRepository, jwtProvider core.JWTProvider, hasher Hasher) *biz {
 	return &biz{
 		serviceContext: serviceContext,
 		repo:           repo,

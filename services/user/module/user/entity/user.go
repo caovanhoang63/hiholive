@@ -2,7 +2,6 @@ package entity
 
 import (
 	"github.com/caovanhoang63/hiholive/shared/go/core"
-	"github.com/caovanhoang63/hiholive/shared/go/shared"
 )
 
 type SystemRole string
@@ -40,5 +39,5 @@ func (User) TableName() string {
 }
 
 func (u *User) Mask() {
-	u.BaseModel.Mask(shared.DbTypeUser)
+	u.BaseModel.Mask(core.DbTypeUser)
 }

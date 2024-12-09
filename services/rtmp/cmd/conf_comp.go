@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"flag"
-	"github.com/caovanhoang63/hiholive/shared/go/shared"
+	"github.com/caovanhoang63/hiholive/shared/go/core"
 	"github.com/caovanhoang63/hiholive/shared/go/srvctx"
 )
 
@@ -17,7 +17,7 @@ func NewConfig() *config {
 }
 
 func (c *config) ID() string {
-	return shared.KeyCompConf
+	return core.KeyCompConf
 }
 
 func (c *config) InitFlags() {
