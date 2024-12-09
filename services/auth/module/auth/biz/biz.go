@@ -1,9 +1,11 @@
 package biz
 
 import (
+	"github.com/caovanhoang63/hiholive/services/auth/common"
 	"github.com/caovanhoang63/hiholive/services/auth/module/auth/entity"
 	"github.com/caovanhoang63/hiholive/shared/go/core"
 	"github.com/caovanhoang63/hiholive/shared/go/srvctx"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/pkg/errors"
 	"golang.org/x/net/context"
 )
@@ -26,6 +28,7 @@ type biz struct {
 	serviceContext srvctx.ServiceContext
 	repo           AuthRepository
 	userRepo       UserRepository
+	jwtProvider    common.JWTProvider
 }
 
 func NewAuthBiz(serviceContext srvctx.ServiceContext, repo AuthRepository, userRepo UserRepository) *biz {
@@ -55,4 +58,14 @@ func (b *biz) Register(x context.Context, register *entity.AuthRegister) error {
 
 func (b *biz) Login(c context.Context, user *entity.AuthEmailPassword) (*entity.TokenResponse, error) {
 	return nil, nil
+}
+
+func (b *biz) IntrospectToken(ctx context.Context, accessToken string) (*jwt.RegisteredClaims, error) {
+	claims, err := b.jwtProvider.ParseToken(ctx, accessToken)
+
+	if err != nil {
+		return nil, core.ErrUnauthorized.WithDebug(err.Error())
+	}
+
+	return claims, nil
 }
