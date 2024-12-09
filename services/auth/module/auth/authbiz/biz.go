@@ -1,23 +1,22 @@
-package biz
+package authbiz
 
 import (
 	"github.com/caovanhoang63/hiholive/services/auth/common"
-	"github.com/caovanhoang63/hiholive/services/auth/module/auth/entity"
+	"github.com/caovanhoang63/hiholive/services/auth/module/auth/authmodel"
 	"github.com/caovanhoang63/hiholive/shared/go/core"
 	"github.com/caovanhoang63/hiholive/shared/go/srvctx"
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/pkg/errors"
 	"golang.org/x/net/context"
 )
 
 type AuthBiz interface {
-	Register(c context.Context, register *entity.AuthRegister) error
-	Login(c context.Context, user *entity.AuthEmailPassword) (*entity.TokenResponse, error)
+	Register(c context.Context, register *authmodel.AuthRegister) error
+	Login(c context.Context, user *authmodel.AuthEmailPassword) (*authmodel.TokenResponse, error)
 }
 
 type AuthRepository interface {
-	Create(ctx context.Context, register *entity.Auth) error
-	FindByEmail(ctx context.Context, email string) (*entity.Auth, error)
+	Create(ctx context.Context, register *authmodel.Auth) error
+	FindByEmail(ctx context.Context, email string) (*authmodel.Auth, error)
 }
 
 type UserRepository interface {
@@ -35,28 +34,28 @@ func NewAuthBiz(serviceContext srvctx.ServiceContext, repo AuthRepository, userR
 	return &biz{serviceContext: serviceContext, repo: repo, userRepo: userRepo}
 }
 
-func (b *biz) Register(x context.Context, register *entity.AuthRegister) error {
+func (b *biz) Register(x context.Context, register *authmodel.AuthRegister) error {
 	field, err := core.Validator.ValidateField(register)
 	if err != nil {
-		return errors.Errorf("INVALID_%s", field)
+		return core.ErrInvalidInput(field)
 	}
 
 	old, err := b.repo.FindByEmail(x, register.Email)
 	if old != nil {
-		return errors.Errorf("Email existed!")
+		return core.ErrBadRequest.WithError("Email already exists")
 	}
 
 	id, err := b.userRepo.CreateUser(x, register.FirstName, register.LastName, register.Email)
 	if err != nil {
-		return errors.New("ERROR")
+		return core.ErrInternalServerError.WithWrap(err)
 	}
 
 	salt := core.GenSalt(50)
-	auth := entity.NewAuthWithEmailPassword(id, register.Email, salt, register.Password)
+	auth := authmodel.NewAuthWithEmailPassword(id, register.Email, salt, register.Password)
 	return b.repo.Create(x, &auth)
 }
 
-func (b *biz) Login(c context.Context, user *entity.AuthEmailPassword) (*entity.TokenResponse, error) {
+func (b *biz) Login(c context.Context, user *authmodel.AuthEmailPassword) (*authmodel.TokenResponse, error) {
 	return nil, nil
 }
 

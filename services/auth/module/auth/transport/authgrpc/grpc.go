@@ -1,4 +1,4 @@
-package grpc
+package authgrpc
 
 import (
 	"github.com/caovanhoang63/hiholive/services/auth/proto/pb"

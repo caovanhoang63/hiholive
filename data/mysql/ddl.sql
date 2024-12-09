@@ -1,7 +1,6 @@
 create database hiholive;
 use hiholive;
 
-
 -- Create tables
 DROP TABLE IF EXISTS `auths`;
 CREATE TABLE `auths` (
@@ -9,7 +8,7 @@ CREATE TABLE `auths` (
                          `user_id` int NOT NULL,
                          `auth_type` enum('email_password','gmail','facebook') DEFAULT 'email_password',
                          `email` varchar(255) CHARACTER SET utf8mb4 NOT NULL,
-                         `salt` varchar(40) CHARACTER SET utf8mb4 DEFAULT NULL,
+                         `salt` varchar(50) CHARACTER SET utf8mb4 DEFAULT NULL,
                          `password` varchar(100) CHARACTER SET utf8mb4 DEFAULT NULL,
                          `facebook_id` varchar(35) CHARACTER SET utf8mb4 DEFAULT NULL,
                          `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
@@ -22,6 +21,25 @@ CREATE TABLE `auths` (
 
 
 DROP TABLE IF EXISTS `users`;
+CREATE TABLE `users` (
+                         `id` int NOT NULL AUTO_INCREMENT,
+                         `phone_number` VARCHAR(255),
+                         `address` VARCHAR(255),
+                         `first_name` VARCHAR(255),
+                         `last_name` VARCHAR(255),
+                         `display_name` VARCHAR(255),
+                         `date_of_birth` date,
+                         `email` varchar(255) CHARACTER SET utf8mb4 NOT NULL,
+                         `gender` enum('male','female','other') NOT NULL DEFAULT 'other',
+                         `system_role` ENUM('admin','viewer','streamer','moderator'),
+                         `avatar` JSON,
+                         `bio` TEXT,
+                         `status` INT DEFAULT 1,
+                         `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                         `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                         PRIMARY KEY (`id`),
+                         KEY `status` (`status`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 
 

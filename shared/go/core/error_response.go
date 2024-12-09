@@ -329,6 +329,14 @@ var ErrBadRequest = DefaultError{
 	CodeField:   http.StatusBadRequest,
 }
 
+var ErrInvalidInput = func(field string) DefaultError {
+	return DefaultError{
+		StatusField: http.StatusText(http.StatusBadRequest),
+		ErrorField:  fmt.Sprintf("Invalid %s", field),
+		CodeField:   http.StatusBadRequest,
+	}
+}
+
 var ErrUnsupportedMediaType = DefaultError{
 	StatusField: http.StatusText(http.StatusUnsupportedMediaType),
 	ErrorField:  "The request is using an unknown content type",

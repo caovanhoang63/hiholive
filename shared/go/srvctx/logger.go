@@ -26,8 +26,7 @@ type Logger interface {
 	Panicf(string, ...any)
 
 	WithField(Field) Logger
-	// add source field to log
-	WithSrc() Logger
+	WithSrc(skip int) Logger
 	GetLevel() string
 }
 

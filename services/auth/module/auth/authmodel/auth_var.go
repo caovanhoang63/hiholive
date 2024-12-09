@@ -1,4 +1,4 @@
-package entity
+package authmodel
 
 type AuthEmailPassword struct {
 	Email    string `json:"email" form:"email" validate:"required,email"`

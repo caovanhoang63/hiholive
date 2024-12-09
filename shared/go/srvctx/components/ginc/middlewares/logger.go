@@ -20,11 +20,12 @@ func Logger(serviceCtx srvctx.ServiceContext) gin.HandlerFunc {
 			"ip":         c.ClientIP(),
 			"duration":   end.String(),
 		}
-
 		if len(c.Errors) > 0 {
 			for _, e := range c.Errors.Errors() {
-				logger.WithSrc().WithField(fields).Error(e)
+				logger.WithField(fields).Error(e)
 			}
+		} else if end.Milliseconds() > 1000 {
+			logger.WithField(fields).Warn()
 		} else {
 			logger.WithField(fields).Info()
 		}

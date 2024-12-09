@@ -1,8 +1,8 @@
-package ginapi
+package authapi
 
 import (
-	"github.com/caovanhoang63/hiholive/services/auth/module/auth/biz"
-	"github.com/caovanhoang63/hiholive/services/auth/module/auth/entity"
+	"github.com/caovanhoang63/hiholive/services/auth/module/auth/authbiz"
+	"github.com/caovanhoang63/hiholive/services/auth/module/auth/authmodel"
 	"github.com/caovanhoang63/hiholive/shared/go/core"
 	"github.com/caovanhoang63/hiholive/shared/go/srvctx"
 	"github.com/gin-gonic/gin"
@@ -10,17 +10,17 @@ import (
 )
 
 type ginAPI struct {
-	biz        biz.AuthBiz
+	biz        authbiz.AuthBiz
 	serviceCtx srvctx.ServiceContext
 }
 
-func NewGinAPI(serviceCtx srvctx.ServiceContext, b biz.AuthBiz) *ginAPI {
+func NewGinAPI(serviceCtx srvctx.ServiceContext, b authbiz.AuthBiz) *ginAPI {
 	return &ginAPI{b, serviceCtx}
 }
 
 func (g *ginAPI) Register() func(c *gin.Context) {
 	return func(c *gin.Context) {
-		var data entity.AuthRegister
+		var data authmodel.AuthRegister
 
 		if err := c.ShouldBind(&data); err != nil {
 			core.WriteErrorResponse(c, core.ErrBadRequest.WithError(err.Error()))

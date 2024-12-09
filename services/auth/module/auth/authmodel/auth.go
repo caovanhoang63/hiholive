@@ -1,4 +1,4 @@
-package entity
+package authmodel
 
 import "github.com/caovanhoang63/hiholive/shared/go/core"
 

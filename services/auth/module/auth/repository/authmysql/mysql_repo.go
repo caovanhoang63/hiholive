@@ -1,4 +1,4 @@
-package mysql
+package authmysql
 
 import "gorm.io/gorm"
 
