@@ -5,6 +5,8 @@ import (
 	"github.com/caovanhoang63/hiholive/services/auth/module/auth/repository/authgrpcrepo"
 	"github.com/caovanhoang63/hiholive/services/auth/module/auth/repository/authmysql"
 	"github.com/caovanhoang63/hiholive/services/auth/module/auth/transport/authapi"
+	"github.com/caovanhoang63/hiholive/services/auth/module/auth/transport/authgrpc"
+	"github.com/caovanhoang63/hiholive/services/auth/proto/pb"
 	"github.com/caovanhoang63/hiholive/shared/go/core"
 	"github.com/caovanhoang63/hiholive/shared/go/srvctx"
 	"github.com/gin-gonic/gin"
@@ -23,4 +25,14 @@ func ComposeAuthAPIService(serviceCtx srvctx.ServiceContext) AuthService {
 	authBiz := authbiz.NewAuthBiz(serviceCtx, authRepo, userClient, jwtComp, core.NewSha256Hash())
 	userService := authapi.NewGinAPI(serviceCtx, authBiz)
 	return userService
+}
+
+func ComposeAuthGRPCService(serviceCtx srvctx.ServiceContext) pb.AuthServiceServer {
+	db := serviceCtx.MustGet(core.KeyCompMySQL).(core.GormComponent)
+	jwtComp := serviceCtx.MustGet(core.KeyCompJWT).(core.JWTProvider)
+	userClient := authgrpcrepo.NewClient(ComposeUserRPCClient(serviceCtx))
+	authRepo := authmysql.NewMySQLRepository(db.GetDB())
+	authBiz := authbiz.NewAuthBiz(serviceCtx, authRepo, userClient, jwtComp, core.NewSha256Hash())
+	service := authgrpc.NewAuthGRPCService(authBiz)
+	return service
 }

@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"github.com/caovanhoang63/hiholive/services/auth/composer"
+	"github.com/caovanhoang63/hiholive/services/auth/proto/pb"
 	"github.com/caovanhoang63/hiholive/shared/go/core"
 	"github.com/caovanhoang63/hiholive/shared/go/srvctx"
 	"github.com/caovanhoang63/hiholive/shared/go/srvctx/components/ginc"
@@ -10,7 +11,10 @@ import (
 	"github.com/caovanhoang63/hiholive/shared/go/srvctx/components/gormc"
 	"github.com/caovanhoang63/hiholive/shared/go/srvctx/components/jwtc"
 	"github.com/gin-gonic/gin"
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	"google.golang.org/grpc"
+	"net"
 	"net/http"
 	"os"
 )
@@ -21,7 +25,7 @@ func newServiceCtx() srvctx.ServiceContext {
 		srvctx.WithComponent(ginc.NewGin(core.KeyCompGIN)),
 		srvctx.WithComponent(gormc.NewGormDB(core.KeyCompMySQL, "")),
 		srvctx.WithComponent(jwtc.NewJWT(core.KeyCompJWT)),
-		srvctx.WithComponent(NewConfig()),
+		srvctx.WithComponent(core.NewConfig()),
 	)
 }
 
@@ -49,12 +53,34 @@ var rootCmd = &cobra.Command{
 
 		v1 := router.Group("/v1")
 
+		go StartGRPCServices(serviceCtx)
+
 		SetupRoutes(v1, serviceCtx)
 
 		if err := router.Run(fmt.Sprintf(":%d", ginComp.GetPort())); err != nil {
 			logger.Fatal(err)
 		}
 	},
+}
+
+func StartGRPCServices(serviceCtx srvctx.ServiceContext) {
+	configComp := serviceCtx.MustGet(core.KeyCompConf).(core.Config)
+	logger := serviceCtx.Logger("grpc")
+
+	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", configComp.GetGRPCPort()))
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	logger.Infof("GRPC Server is listening on %d ...\n", configComp.GetGRPCPort())
+
+	s := grpc.NewServer()
+	pb.RegisterAuthServiceServer(s, composer.ComposeAuthGRPCService(serviceCtx))
+
+	if err := s.Serve(lis); err != nil {
+		log.Fatalln(err)
+	}
 }
 
 func SetupRoutes(router *gin.RouterGroup, serviceCtx srvctx.ServiceContext) {

@@ -15,7 +15,7 @@ type grpcService struct {
 	business Business
 }
 
-func NewService(business Business) *grpcService {
+func NewAuthGRPCService(business Business) *grpcService {
 	return &grpcService{business: business}
 }
 

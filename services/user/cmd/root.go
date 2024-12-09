@@ -74,10 +74,12 @@ func SetupRoutes(router *gin.RouterGroup, serviceCtx srvctx.ServiceContext) {
 
 	tasks := router.Group("user")
 	{
+		tasks.Use(middlewares.RequireAuth(composer.ComposeAuthRPCClient(serviceCtx)))
 		tasks.GET(":id", userService.GetUserProfile())
 		tasks.GET("", userService.ListUser())
 	}
 }
+
 func StartGRPCServices(serviceCtx srvctx.ServiceContext) {
 	configComp := serviceCtx.MustGet(core.KeyCompConf).(core.Config)
 	logger := serviceCtx.Logger("grpc")
