@@ -9,6 +9,7 @@ import (
 
 type Business interface {
 	CreateNewUser(ctx context.Context, data *usermodel.UserCreate) error
+	GetUserRole(ctx context.Context, userId int) (string, error)
 }
 
 type grpcService struct {
@@ -27,4 +28,12 @@ func (s *grpcService) CreateUser(ctx context.Context, req *pb.CreateUserReq) (*p
 	}
 
 	return &pb.NewUserIdResp{Id: int32(newUserData.Id)}, nil
+}
+
+func (s *grpcService) GetUserRole(ctx context.Context, req *pb.GetUserRoleReq) (*pb.GetUserRoleReps, error) {
+	role, err := s.business.GetUserRole(ctx, int(req.Id))
+	if err != nil {
+		return nil, err
+	}
+	return &pb.GetUserRoleReps{Role: role}, nil
 }

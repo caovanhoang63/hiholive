@@ -30,7 +30,6 @@ func RequireAuth(ac AuthClient) func(*gin.Context) {
 		}
 
 		c.Set(core.KeyRequester, core.NewRequester(sub, tid))
-
 		c.Next()
 	}
 }

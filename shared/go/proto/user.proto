@@ -36,6 +36,15 @@ message PublicUsersInfoResp {
   repeated PublicUserInfo users = 1;
 }
 
+message GetUserRoleReq {
+  int32 id = 1;
+}
+
+message GetUserRoleReps {
+  string role = 1;
+}
+
 service UserService {
   rpc CreateUser(CreateUserReq) returns (NewUserIdResp);
+  rpc GetUserRole(GetUserRoleReq) returns (GetUserRoleReps);
 }

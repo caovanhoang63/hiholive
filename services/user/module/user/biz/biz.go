@@ -29,6 +29,18 @@ type userBiz struct {
 	repo UserRepo
 }
 
+func (b *userBiz) GetUserRole(ctx context.Context, userId int) (string, error) {
+	user, err := b.repo.FindUserById(ctx, userId)
+	if err != nil {
+		if errors.Is(err, core.ErrRecordNotFound) {
+			return "", core.ErrNotFound
+		} else {
+			return "", core.ErrInternalServerError.WithWrap(err)
+		}
+	}
+	return string(user.Role), nil
+}
+
 func (b *userBiz) FindUsersWithCondition(ctx context.Context, filter *usermodel.UserFilter, paging *core.Paging) ([]usermodel.User, error) {
 
 	if field, err := core.Validator.ValidateField(filter); err != nil {

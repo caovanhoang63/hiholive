@@ -7,6 +7,7 @@ const KeyRequester = "requester"
 type Requester interface {
 	GetSubject() string
 	GetTokenId() string
+	GetUserId() int
 }
 
 type requesterData struct {
@@ -27,6 +28,10 @@ func (r *requesterData) GetSubject() string {
 
 func (r *requesterData) GetTokenId() string {
 	return r.Tid
+}
+func (r *requesterData) GetUserId() int {
+	uid, _ := FromBase58(r.GetSubject())
+	return int(uid.GetLocalID())
 }
 
 func GetRequester(ctx context.Context) Requester {
