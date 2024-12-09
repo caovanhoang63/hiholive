@@ -63,7 +63,7 @@ func (b *biz) Register(x context.Context, register *authmodel.AuthRegister) erro
 	}
 
 	salt := core.GenSalt(50)
-	auth := authmodel.NewAuthWithEmailPassword(id, register.Email, salt, register.Password)
+	auth := authmodel.NewAuthWithEmailPassword(id, register.Email, salt, b.hasher.Hash(register.Password+salt))
 	return b.repo.Create(x, &auth)
 }
 
@@ -76,7 +76,7 @@ func (b *biz) Login(c context.Context, user *authmodel.AuthEmailPassword) (*auth
 		return nil, core.ErrInternalServerError.WithDebug(err.Error())
 	}
 
-	if user.Password != old.Password {
+	if b.hasher.Hash(user.Password+old.Salt) != old.Password {
 		return nil, core.ErrBadRequest.WithError("Invalid username or password")
 	}
 
