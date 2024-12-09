@@ -30,7 +30,7 @@ func ComposeAuthRPCClient(serviceCtx srvctx.ServiceContext) *authClient {
 	configComp := serviceCtx.MustGet(core.KeyCompConf).(core.Config)
 
 	opts := grpc.WithTransportCredentials(insecure.NewCredentials())
-	clientConn, err := grpc.Dial(configComp.GetGRPCAuthServerAddress(), opts)
+	clientConn, err := grpc.Dial(configComp.GetGRPCAuthAddress(), opts)
 
 	if err != nil {
 		log.Fatal(err)

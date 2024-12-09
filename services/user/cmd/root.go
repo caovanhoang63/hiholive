@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/caovanhoang63/hiholive/services/user/common"
 	"github.com/caovanhoang63/hiholive/services/user/composer"
 	"github.com/caovanhoang63/hiholive/services/user/proto/pb"
 	"github.com/caovanhoang63/hiholive/shared/go/core"
@@ -28,7 +27,7 @@ func newServiceCtx() srvctx.ServiceContext {
 		srvctx.WithComponent(ginc.NewGin(core.KeyCompGIN)),
 		srvctx.WithComponent(gormc.NewGormDB(core.KeyCompMySQL, "")),
 		srvctx.WithComponent(jwtc.NewJWT(core.KeyCompJWT)),
-		srvctx.WithComponent(NewConfig()),
+		srvctx.WithComponent(core.NewConfig()),
 	)
 }
 
@@ -80,7 +79,7 @@ func SetupRoutes(router *gin.RouterGroup, serviceCtx srvctx.ServiceContext) {
 	}
 }
 func StartGRPCServices(serviceCtx srvctx.ServiceContext) {
-	configComp := serviceCtx.MustGet(core.KeyCompConf).(common.Config)
+	configComp := serviceCtx.MustGet(core.KeyCompConf).(core.Config)
 	logger := serviceCtx.Logger("grpc")
 
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", configComp.GetGRPCPort()))
