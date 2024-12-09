@@ -28,7 +28,7 @@ type Hasher interface {
 	Hash(string) string
 }
 
-type biz struct {
+type authBiz struct {
 	serviceContext srvctx.ServiceContext
 	repo           AuthRepository
 	userRepo       UserRepository
@@ -36,8 +36,8 @@ type biz struct {
 	hasher         Hasher
 }
 
-func NewAuthBiz(serviceContext srvctx.ServiceContext, repo AuthRepository, userRepo UserRepository, jwtProvider core.JWTProvider, hasher Hasher) *biz {
-	return &biz{
+func NewAuthBiz(serviceContext srvctx.ServiceContext, repo AuthRepository, userRepo UserRepository, jwtProvider core.JWTProvider, hasher Hasher) *authBiz {
+	return &authBiz{
 		serviceContext: serviceContext,
 		repo:           repo,
 		userRepo:       userRepo,
@@ -46,7 +46,7 @@ func NewAuthBiz(serviceContext srvctx.ServiceContext, repo AuthRepository, userR
 	}
 }
 
-func (b *biz) Register(x context.Context, register *authmodel.AuthRegister) error {
+func (b *authBiz) Register(x context.Context, register *authmodel.AuthRegister) error {
 	field, err := core.Validator.ValidateField(register)
 	if err != nil {
 		return core.ErrInvalidInput(field)
@@ -67,7 +67,7 @@ func (b *biz) Register(x context.Context, register *authmodel.AuthRegister) erro
 	return b.repo.Create(x, &auth)
 }
 
-func (b *biz) Login(c context.Context, user *authmodel.AuthEmailPassword) (*authmodel.TokenResponse, error) {
+func (b *authBiz) Login(c context.Context, user *authmodel.AuthEmailPassword) (*authmodel.TokenResponse, error) {
 	old, err := b.repo.FindByEmail(c, user.Email)
 	if err != nil {
 		if errors.Is(err, core.ErrRecordNotFound) {
@@ -97,7 +97,7 @@ func (b *biz) Login(c context.Context, user *authmodel.AuthEmailPassword) (*auth
 	}, nil
 }
 
-func (b *biz) IntrospectToken(ctx context.Context, accessToken string) (*jwt.RegisteredClaims, error) {
+func (b *authBiz) IntrospectToken(ctx context.Context, accessToken string) (*jwt.RegisteredClaims, error) {
 	claims, err := b.jwtProvider.ParseToken(ctx, accessToken)
 
 	if err != nil {
