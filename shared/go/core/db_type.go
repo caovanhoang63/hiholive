@@ -5,4 +5,5 @@ const (
 	DbTypeAuth
 	DbTypeStream
 	DbTypeCategory
+	DbTypeChannel
 )

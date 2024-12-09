@@ -33,7 +33,6 @@ CREATE TABLE `users` (
                          `gender` enum('male','female','other') NOT NULL DEFAULT 'other',
                          `system_role` ENUM('admin','viewer','streamer','moderator'),
                          `avatar` JSON,
-                         `bio` TEXT,
                          `status` INT DEFAULT 1,
                          `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                          `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -41,26 +40,10 @@ CREATE TABLE `users` (
                          KEY `status` (`status`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-
-
-DROP TABLE IF EXISTS `user_channel`;
-CREATE TABLE `user_channel` (
-                                `id` int NOT NULL AUTO_INCREMENT,
-                                `user_id` int NOT NULL,
-                                `channel_id` int NOT NULL,
-                                `status` INT DEFAULT 1,
-                                `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                                `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-                                PRIMARY KEY (`id`),
-                                KEY `status` (`status`) USING BTREE,
-                                KEY `user_id` (`user_id`) USING BTREE,
-                                KEY `channel_id` (`channel_id`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
 DROP TABLE IF EXISTS `channels`;
 CREATE TABLE `channels` (
                             `id` int NOT NULL AUTO_INCREMENT,
-                            `display_name` VARCHAR(255),
+                            `user_id` INT NOT NULL,
                             `panel` JSON,
                             `description` TEXT,
                             `url` VARCHAR(2083),
@@ -111,61 +94,12 @@ CREATE TABLE `categories` (
                               KEY `status` (`status`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-
-DROP TABLE IF EXISTS `videos_categories`;
-CREATE TABLE `videos_categories` (
-                                     `id` int NOT NULL AUTO_INCREMENT,
-                                     `video_id` int NOT NULL,
-                                     `category_id` int NOT NULL,
-                                     `status` INT DEFAULT 1,
-                                     `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                                     `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-                                     PRIMARY KEY (`id`),
-                                     KEY `status` (`status`) USING BTREE,
-                                     KEY `category_id` (`category_id`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-DROP TABLE IF EXISTS `live_streams`;
-CREATE TABLE `live_streams` (
-                                `id` int NOT NULL AUTO_INCREMENT,
-                                `video_id` int NOT NULL,
-                                `title` VARCHAR(255),
-                                `description` TEXT,
-                                `scheduled_start_time` TIMESTAMP,
-                                `actual_start_time` TIMESTAMP,
-                                `actual_end_time` TIMESTAMP,
-                                `max_concurrent_viewers` INT,
-                                `total_unique_viewers` INT,
-                                `state` ENUM('scheduled', 'live', 'ended'),
-                                `stream_key` BINARY(16) default (UUID_TO_BIN(UUID())),
-                                `status` INT DEFAULT 1,
-                                `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                                `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-                                PRIMARY KEY (`id`),
-                                KEY `status` (`status`) USING BTREE,
-                                KEY `video_id` (`video_id`) USING BTREE,
-                                KEY `state` (`state`) USING BTREE,
-                                KEY `stream_key` (`stream_key`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-DROP TABLE IF EXISTS `live_stream_metric`;
-CREATE TABLE `live_stream_metric` (
-                                      `id` int NOT NULL AUTO_INCREMENT,
-                                      `live_stream_id` int NOT NULL,
-                                      `current_view` INT,
-                                      `status` INT DEFAULT 1,
-                                      `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                                      `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-                                      PRIMARY KEY (`id`),
-                                      KEY `status` (`status`) USING BTREE,
-                                      KEY `live_stream_id` (`live_stream_id`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
 DROP TABLE IF EXISTS `videos`;
 CREATE TABLE `videos` (
                           `id` int NOT NULL AUTO_INCREMENT,
                           `channel_id` int NOT NULL,
                           `title` VARCHAR(255),
+                          `categoryId` INT NOT NULL,
                           `url` VARCHAR(2083),
                           `duration` FLOAT,
                           `total_view` INT,
@@ -181,6 +115,46 @@ CREATE TABLE `videos` (
                           PRIMARY KEY (`id`),
                           KEY `status` (`status`) USING BTREE,
                           KEY `channel_id` (`channel_id`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `live_streams`;
+CREATE TABLE `live_streams` (
+                                `id` int NOT NULL AUTO_INCREMENT,
+
+                                `channel_id` int NOT NULL,
+                                `title` VARCHAR(255),
+                                `description` TEXT,
+                                `notification` TEXT,
+                                `categoryId` INT,
+                                `is_rerun` boolean default false,
+                                `scheduled_start_time` TIMESTAMP,
+
+                                `actual_start_time` TIMESTAMP,
+                                `actual_end_time` TIMESTAMP,
+                                `peak_concurrent_view` INT,
+                                `total_unique_viewers` INT,
+                                `state` ENUM('scheduled','pending', 'running', 'ended'),
+                                `stream_key` BINARY(16) default (UUID_TO_BIN(UUID())),
+                                `status` INT DEFAULT 1,
+                                `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                                `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                                PRIMARY KEY (`id`),
+                                KEY `status` (`status`) USING BTREE,
+                                KEY `state` (`state`) USING BTREE,
+                                KEY `stream_key` (`stream_key`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `live_stream_metric`;
+CREATE TABLE `live_stream_metric` (
+                                      `id` int NOT NULL AUTO_INCREMENT,
+                                      `live_stream_id` int NOT NULL,
+                                      `current_view` INT,
+                                      `status` INT DEFAULT 1,
+                                      `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                                      `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                                      PRIMARY KEY (`id`),
+                                      KEY `status` (`status`) USING BTREE,
+                                      KEY `live_stream_id` (`live_stream_id`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 DROP TABLE IF EXISTS `playlists`;
