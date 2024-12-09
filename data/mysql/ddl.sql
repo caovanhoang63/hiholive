@@ -125,7 +125,7 @@ CREATE TABLE `live_streams` (
                                 `title` VARCHAR(255),
                                 `description` TEXT,
                                 `notification` TEXT,
-                                `categoryId` INT,
+                                `category_id` INT,
                                 `is_rerun` boolean default false,
                                 `scheduled_start_time` TIMESTAMP,
 
@@ -133,8 +133,9 @@ CREATE TABLE `live_streams` (
                                 `actual_end_time` TIMESTAMP,
                                 `peak_concurrent_view` INT,
                                 `total_unique_viewers` INT,
-                                `state` ENUM('scheduled','pending', 'running', 'ended'),
-                                `stream_key` BINARY(16) default (UUID_TO_BIN(UUID())),
+                                `state` ENUM('scheduled','pending', 'running', 'ended') default 'pending',
+                                stream_key VARCHAR(36),
+
                                 `status` INT DEFAULT 1,
                                 `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                                 `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,

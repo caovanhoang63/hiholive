@@ -59,11 +59,14 @@ var rootCmd = &cobra.Command{
 
 func SetupRoutes(router *gin.RouterGroup, serviceCtx srvctx.ServiceContext) {
 	channelService := composer.ComposeChannelAPIService(serviceCtx)
+	streamService := composer.ComposeStreamAPIService(serviceCtx)
 	ac := composer.ComposeAuthRPCClient(serviceCtx)
 	uc := composer.ComposeUserRPCClient(serviceCtx)
 	channel := router.Group("/channel")
-
 	channel.POST("", middlewares.RequireAuth(ac), middlewares.Authorize(uc, "viewer"), channelService.CreateChannel())
+
+	stream := router.Group("/stream")
+	stream.POST("", middlewares.RequireAuth(ac), middlewares.Authorize(uc, "streamer"), streamService.CreateStream())
 }
 
 func Execute() {

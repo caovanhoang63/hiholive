@@ -22,7 +22,7 @@ type Stream struct {
 	ActualEndTime      *time.Time `json:"actualEndTime" gorm:"column:actual_end_time"`
 	PeakConcurrentView int        `json:"peakConcurrentView" gorm:"column:peak_concurrent_view"`
 	TotalUniqueViewers int        `json:"totalUniqueViewers" gorm:"column:total_unique_viewers"`
-	ScheduledStart     *time.Time `json:"scheduledStart" gorm:"column:scheduled_start"`
+	ScheduledStartTime *time.Time `json:"scheduledStartTime" gorm:"column:scheduled_start_time"`
 	Status             int        `json:"status" gorm:"column:status"`
 }
 
