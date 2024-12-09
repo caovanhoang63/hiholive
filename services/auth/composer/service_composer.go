@@ -6,8 +6,8 @@ import (
 	"github.com/caovanhoang63/hiholive/services/auth/module/auth/repository/authmysql"
 	"github.com/caovanhoang63/hiholive/services/auth/module/auth/transport/authapi"
 	"github.com/caovanhoang63/hiholive/services/auth/module/auth/transport/authgrpc"
-	"github.com/caovanhoang63/hiholive/services/auth/proto/pb"
 	"github.com/caovanhoang63/hiholive/shared/go/core"
+	"github.com/caovanhoang63/hiholive/shared/go/proto/pb"
 	"github.com/caovanhoang63/hiholive/shared/go/srvctx"
 	"github.com/gin-gonic/gin"
 )

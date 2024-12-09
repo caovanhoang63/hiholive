@@ -2,8 +2,8 @@ package composer
 
 import (
 	"github.com/caovanhoang63/hiholive/services/auth/common"
-	"github.com/caovanhoang63/hiholive/services/auth/proto/pb"
 	"github.com/caovanhoang63/hiholive/shared/go/core"
+	"github.com/caovanhoang63/hiholive/shared/go/proto/pb"
 	"github.com/caovanhoang63/hiholive/shared/go/srvctx"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"

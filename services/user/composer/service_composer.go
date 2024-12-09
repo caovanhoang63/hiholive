@@ -5,8 +5,8 @@ import (
 	"github.com/caovanhoang63/hiholive/services/user/module/user/repository/mysql"
 	"github.com/caovanhoang63/hiholive/services/user/module/user/transport/ginapi"
 	"github.com/caovanhoang63/hiholive/services/user/module/user/transport/grpc"
-	"github.com/caovanhoang63/hiholive/services/user/proto/pb"
 	"github.com/caovanhoang63/hiholive/shared/go/core"
+	"github.com/caovanhoang63/hiholive/shared/go/proto/pb"
 	"github.com/caovanhoang63/hiholive/shared/go/srvctx"
 	"github.com/gin-gonic/gin"
 )

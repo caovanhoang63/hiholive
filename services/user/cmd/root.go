@@ -3,8 +3,8 @@ package cmd
 import (
 	"fmt"
 	"github.com/caovanhoang63/hiholive/services/user/composer"
-	"github.com/caovanhoang63/hiholive/services/user/proto/pb"
 	"github.com/caovanhoang63/hiholive/shared/go/core"
+	"github.com/caovanhoang63/hiholive/shared/go/proto/pb"
 	"github.com/caovanhoang63/hiholive/shared/go/srvctx"
 	"github.com/caovanhoang63/hiholive/shared/go/srvctx/components/ginc"
 	"github.com/caovanhoang63/hiholive/shared/go/srvctx/components/ginc/middlewares"

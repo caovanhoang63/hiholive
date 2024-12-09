@@ -2,8 +2,8 @@ package grpc
 
 import (
 	"github.com/caovanhoang63/hiholive/services/user/module/user/usermodel"
-	"github.com/caovanhoang63/hiholive/services/user/proto/pb"
 	"github.com/caovanhoang63/hiholive/shared/go/core"
+	"github.com/caovanhoang63/hiholive/shared/go/proto/pb"
 	"golang.org/x/net/context"
 )
 
