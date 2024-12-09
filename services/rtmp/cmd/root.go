@@ -18,10 +18,8 @@ func newServiceCtx() srvctx.ServiceContext {
 	return srvctx.NewServiceContext(
 		srvctx.WithName("Demo Microservices"),
 		srvctx.WithComponent(ginc.NewGin(core.KeyCompGIN)),
-		//srvctx.WithComponent(gormc.NewGormDB(shared.KeyCompMySQL, "")),
 		srvctx.WithComponent(jwtc.NewJWT(core.KeyCompJWT)),
-		srvctx.WithComponent(NewConfig()),
-		//srvctx.WithComponent(rabbitpubsub.NewRabbitPubSub(shared.KeyCompRabbitMQ)),
+		srvctx.WithComponent(core.NewConfig()),
 	)
 }
 
@@ -36,8 +34,6 @@ var rootCmd = &cobra.Command{
 			logger.Fatal(err)
 		}
 
-		//_ = serviceCtx.MustGet(shared.KeyCompRabbitMQ).(pubsub.Pubsub)
-		// Setup TCP connection
 		tcpAddr, err := net.ResolveTCPAddr("tcp", ":1935")
 		if err != nil {
 			logger.Panicf("Failed: %+v", err)
@@ -47,6 +43,7 @@ var rootCmd = &cobra.Command{
 		if err != nil {
 			logger.Panicf("Failed: %+v", err)
 		}
+
 		// Setup TCP connection
 		relayService := rtmpc.NewRelayService()
 		srv := rtmp.NewServer(&rtmp.ServerConfig{

@@ -6,4 +6,5 @@ const (
 	KeyCompJWT      = "jwt"
 	KeyCompConf     = "config"
 	KeyCompRabbitMQ = "rabbitmq"
+	KeyRedis        = "redis"
 )

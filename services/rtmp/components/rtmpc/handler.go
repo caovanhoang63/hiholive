@@ -74,6 +74,7 @@ func (h *Handler) OnPublish(_ *rtmp.StreamContext, timestamp uint32, cmd *rtmpms
 	if cmd.PublishingName != "test" {
 		return errors.New("PublishingName is empty")
 	}
+
 	h.logger.Infof("KEY STREAM %s", cmd.PublishingName)
 
 	pub := pubsub.Pub()
