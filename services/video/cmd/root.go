@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/caovanhoang63/hiholive/services/video/composer"
 	"github.com/caovanhoang63/hiholive/shared/go/core"
 	"github.com/caovanhoang63/hiholive/shared/go/srvctx"
 	"github.com/caovanhoang63/hiholive/shared/go/srvctx/components/ginc"
@@ -47,26 +46,12 @@ var rootCmd = &cobra.Command{
 			c.JSON(http.StatusOK, gin.H{"data": "pong"})
 		})
 
-		v1 := router.Group("/v1")
-
-		SetupRoutes(v1, serviceCtx)
+		SetupRoutes(router.Group(""), serviceCtx)
 
 		if err := router.Run(fmt.Sprintf(":%d", ginComp.GetPort())); err != nil {
 			logger.Fatal(err)
 		}
 	},
-}
-
-func SetupRoutes(router *gin.RouterGroup, serviceCtx srvctx.ServiceContext) {
-	channelService := composer.ComposeChannelAPIService(serviceCtx)
-	streamService := composer.ComposeStreamAPIService(serviceCtx)
-	ac := composer.ComposeAuthRPCClient(serviceCtx)
-	uc := composer.ComposeUserRPCClient(serviceCtx)
-	channel := router.Group("/channel")
-	channel.POST("", middlewares.RequireAuth(ac), middlewares.Authorize(uc, "viewer"), channelService.CreateChannel())
-
-	stream := router.Group("/stream")
-	stream.POST("", middlewares.RequireAuth(ac), middlewares.Authorize(uc, "streamer"), streamService.CreateStream())
 }
 
 func Execute() {
