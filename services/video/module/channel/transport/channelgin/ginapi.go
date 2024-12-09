@@ -30,7 +30,7 @@ func (g *ginAPI) CreateChannel() func(c *gin.Context) {
 			return
 		}
 
-		requester := core.GetRequester(c.Request.Context())
+		requester := c.MustGet(core.KeyRequester).(core.Requester)
 
 		if err := g.biz.Create(c.Request.Context(), requester, &data); err != nil {
 			core.WriteErrorResponse(c, err)

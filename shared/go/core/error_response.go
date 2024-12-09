@@ -118,6 +118,9 @@ func (e DefaultError) Is(err error) bool {
 		return false
 	}
 }
+func (e DefaultError) String() string {
+	return fmt.Sprintf("%v", e.StackTrace())
+}
 
 func (e DefaultError) Status() string {
 	return e.StatusField
