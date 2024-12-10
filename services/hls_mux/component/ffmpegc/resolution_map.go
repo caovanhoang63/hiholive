@@ -12,13 +12,6 @@ type streamInfo struct {
 }
 
 func (s *streamInfo) ToCmd(index int, originResolution int, originFps int) []string {
-	if s.fps == 50 {
-		s.mapFps = 60
-	}
-	if s.fps == 25 {
-		s.mapFps = 30
-	}
-
 	if s.height == originResolution {
 		return []string{
 			"-map", "0:v:0",
@@ -27,6 +20,7 @@ func (s *streamInfo) ToCmd(index int, originResolution int, originFps int) []str
 			fmt.Sprintf("-c:a:%d", index), "aac",
 		}
 	}
+
 	return []string{
 		"-map", "0:v:0",
 		"-map", "0:a:0",
@@ -44,7 +38,7 @@ func (s *streamInfo) ToCmd(index int, originResolution int, originFps int) []str
 }
 
 func ResolutionCmd(resolution, fps int) ([]string, error) {
-	if fps%25 != 0 && fps%30 != 0 {
+	if fps%30 != 0 {
 		return nil, fmt.Errorf("fps=%d is not a multiple of 25 or 30", fps)
 	}
 
@@ -74,18 +68,6 @@ func ResolutionCmd(resolution, fps int) ([]string, error) {
 
 			fpsMap := f
 			streamMap += fmt.Sprintf("v:%d,a:%d,name:%dp%d ", index, index, height, f)
-
-			if fps < f && fps%25 != 0 {
-				continue
-			}
-
-			if f == 30 && fps%25 == 0 {
-				fpsMap = 25
-			}
-
-			if f == 60 && fps%25 == 0 {
-				fpsMap = 50
-			}
 
 			info := &streamInfo{
 				width:  widthMap[height],
