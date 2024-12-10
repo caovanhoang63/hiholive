@@ -9,6 +9,7 @@ import (
 	"github.com/caovanhoang63/hiholive/shared/go/srvctx/components/ginc/middlewares"
 	"github.com/caovanhoang63/hiholive/shared/go/srvctx/components/gormc"
 	"github.com/caovanhoang63/hiholive/shared/go/srvctx/components/jwtc"
+	"github.com/gin-gonic/gin"
 	"github.com/spf13/cobra"
 
 	"os"
@@ -41,6 +42,11 @@ var rootCmd = &cobra.Command{
 
 		router.Static("/static", "hls_output")
 		router.Use(middlewares.Cors())
+
+		router.GET("ping", func(c *gin.Context) {
+			c.JSON(200, "pong")
+		})
+
 		ffmpeg := ffmpegc.NewFfmpeg(serviceCtx).WithConfig(nil)
 
 		go StartGRPCServices(ffmpeg, serviceCtx)
