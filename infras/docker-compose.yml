@@ -43,7 +43,7 @@ services:
   gateway:
     image: docker.tyk.io/tyk-gateway/tyk-gateway
     ports:
-      - "8080:8080"
+      - "80:80"
     volumes:
       - ./gateway/tyk.standalone.conf:/opt/tyk-gateway/tyk.conf
       - ./gateway/apps:/opt/tyk-gateway/apps

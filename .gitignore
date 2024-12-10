@@ -52,7 +52,7 @@ go.work
 .idea/**/dynamic.xml
 .idea/**/uiDesigner.xml
 .idea/**/dbnavigator.xml
-
+infras/gateway/tyk.standalone.conf
 # Gradle
 .idea/**/gradle.xml
 .idea/**/libraries
@@ -397,4 +397,5 @@ deploy-script
 infras-ffmpeg.sh
 POSTGRES_PASSWORD
 tunel.sh
+
 # End of https://www.toptal.com/developers/gitignore/api/go,node,jetbrains,goland+all,webstorm+all
