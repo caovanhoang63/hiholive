@@ -18,7 +18,6 @@ func (s *streamInfo) ToCmd(index int) []string {
 	if s.fps == 25 {
 		s.mapFps = 30
 	}
-
 	return []string{
 		"-map", "0:v:0",
 		"-map", "0:a:0",
@@ -27,16 +26,16 @@ func (s *streamInfo) ToCmd(index int) []string {
 		fmt.Sprintf("-x264-params:v:%d", index),
 		fmt.Sprintf("keyint=%d:scenecut=0", s.fps*2),
 		fmt.Sprintf("-b:v:%d", index),
-		fmt.Sprintf("%dk", vBitRateMap[s.width+s.mapFps]),
+		fmt.Sprintf("%dk", vBitRateMap[s.height+s.fps]),
 		fmt.Sprintf("-b:a:%d", index),
-		fmt.Sprintf("%dk", aBitRateMap[s.width]),
+		fmt.Sprintf("%dk", aBitRateMap[s.height]),
 		fmt.Sprintf("-c:v:%d", index), "libx264",
 		fmt.Sprintf("-c:a:%d", index), "aac",
 	}
 }
 
 func ResolutionCmd(resolution, fps int) ([]string, error) {
-	if fps%25 != 0 || fps%30 != 0 {
+	if fps%25 != 0 && fps%30 != 0 {
 		return nil, fmt.Errorf("fps=%d is not a multiple of 25 or 30", fps)
 	}
 
@@ -58,11 +57,14 @@ func ResolutionCmd(resolution, fps int) ([]string, error) {
 	streamMap := ""
 	cmd := make([]string, 0)
 	index := 0
+
 	for i := 0; i <= resolutionIndex; i++ {
-		width := resolutionSupport[i]
-		for f := range resolutionFpsSupport[width] {
+		height := resolutionSupport[i]
+
+		for _, f := range resolutionFpsSupport[height] {
+
 			fpsMap := f
-			streamMap += fmt.Sprintf("v:%d,a:%d,%dp%d ", index, index, width, f)
+			streamMap += fmt.Sprintf("v:%d,a:%d,name:%dp%d ", index, index, height, f)
 
 			if fps < f && fps%25 != 0 {
 				continue
@@ -77,8 +79,8 @@ func ResolutionCmd(resolution, fps int) ([]string, error) {
 			}
 
 			info := &streamInfo{
-				width:  width,
-				height: heightMap[width],
+				width:  widthMap[height],
+				height: height,
 				fps:    f,
 				mapFps: fpsMap,
 			}

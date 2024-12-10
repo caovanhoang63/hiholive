@@ -98,7 +98,7 @@ func (h *Handler) OnPublish(_ *rtmp.StreamContext, timestamp uint32, cmd *rtmpms
 
 	go func() {
 		time.Sleep(2 * time.Second)
-		h.hlsClient.NewHlsStream(context.Background(), "rtmp://hiholive-rtmp:1935/stream", cmd.PublishingName)
+		h.hlsClient.NewHlsStream(context.Background(), "rtmp://localhost:1935/stream", cmd.PublishingName)
 	}()
 
 	return nil
