@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package pb;
+
+option go_package = "pb/";
+
+message NewHlsStreamReq {
+  string stream_key = 1;
+  string server_url = 2;
+}
+
+message NewHlsStreamResp {
+}
+
+service HlsService {
+  rpc NewHlsStream(NewHlsStreamReq) returns (NewHlsStreamResp);
+}

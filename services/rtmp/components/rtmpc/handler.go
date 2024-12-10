@@ -12,6 +12,7 @@ import (
 	rtmpmsg "github.com/yutopp/go-rtmp/message"
 	"golang.org/x/net/context"
 	"io"
+	"time"
 )
 
 //
@@ -19,6 +20,10 @@ import (
 // Client -> OBS -> RTMP -> FFMPEG -> HLS 1080p    -> Cloudfront -> videojs
 //                                    HLS 440p
 //
+
+type HlsClient interface {
+	NewHlsStream(ctx context.Context, serverUrl, streamKey string) (err error)
+}
 
 var _ rtmp.Handler = (*Handler)(nil)
 
@@ -28,18 +33,20 @@ type Handler struct {
 	relayService *RelayService
 	logger       srvctx.Logger
 	//
-	conn     *rtmp.Conn
-	rdClient *redis.Client
+	conn      *rtmp.Conn
+	rdClient  *redis.Client
+	hlsClient HlsClient
 	//
 	pub *Pub
 	sub *Sub
 }
 
-func NewHandler(relayService *RelayService, rd *redis.Client) *Handler {
+func NewHandler(relayService *RelayService, rd *redis.Client, hlsClient HlsClient) *Handler {
 	return &Handler{
 		logger:       srvctx.DefaultLogger,
 		relayService: relayService,
 		rdClient:     rd,
+		hlsClient:    hlsClient,
 	}
 }
 
@@ -81,7 +88,6 @@ func (h *Handler) OnPublish(_ *rtmp.StreamContext, timestamp uint32, cmd *rtmpms
 
 		return errors.New("PublishingName does not exist")
 	}
-
 	//if cmd.PublishingName != "test" {
 	//	return errors.New("PublishingName is empty")
 	//}
@@ -89,6 +95,12 @@ func (h *Handler) OnPublish(_ *rtmp.StreamContext, timestamp uint32, cmd *rtmpms
 	pub := pubsub.Pub()
 
 	h.pub = pub
+
+	go func() {
+		time.Sleep(2 * time.Second)
+		h.hlsClient.NewHlsStream(context.Background(), "rtmp://localhost:1935/stream", cmd.PublishingName)
+
+	}()
 
 	return nil
 }

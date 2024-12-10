@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"github.com/caovanhoang63/hiholive/services/rtmp/components/rtmpc"
+	"github.com/caovanhoang63/hiholive/services/rtmp/composer"
 	"github.com/caovanhoang63/hiholive/shared/go/core"
 	"github.com/caovanhoang63/hiholive/shared/go/srvctx"
 	"github.com/caovanhoang63/hiholive/shared/go/srvctx/components/ginc"
@@ -53,7 +54,7 @@ var rootCmd = &cobra.Command{
 		srv := rtmp.NewServer(&rtmp.ServerConfig{
 			OnConnect: func(conn net.Conn) (io.ReadWriteCloser, *rtmp.ConnConfig) {
 				return conn, &rtmp.ConnConfig{
-					Handler: rtmpc.NewHandler(relayService, rd.GetClient()),
+					Handler: rtmpc.NewHandler(relayService, rd.GetClient(), composer.ComposeHlsRPCClient(serviceCtx)),
 					ControlState: rtmp.StreamControlStateConfig{
 						DefaultBandwidthWindowSize: 6 * 1024 * 1024 / 8,
 					},

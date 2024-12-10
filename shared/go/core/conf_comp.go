@@ -57,7 +57,7 @@ func (c *config) InitFlags() {
 
 	flag.StringVar(
 		&c.grpcHlsAddress,
-		"grpc-hls-address",
+		"grpc-hlsmux-address",
 		"localhost:3201",
 		"gRPC user address. Default: localhost:3201",
 	)

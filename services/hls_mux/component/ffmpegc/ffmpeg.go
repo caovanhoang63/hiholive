@@ -10,17 +10,15 @@ import (
 )
 
 var (
-	DefaultConfig = NewFfmpegConfig("rtmp://34.126.85.171:1935/stream/", "./hls_output")
+	DefaultConfig = NewFfmpegConfig("./hls_output")
 )
 
 type FfmpegConfig struct {
-	rtmpUrl     string
 	mountFolder string
 }
 
-func NewFfmpegConfig(rtmpUrl, mountFolder string) *FfmpegConfig {
+func NewFfmpegConfig(mountFolder string) *FfmpegConfig {
 	return &FfmpegConfig{
-		rtmpUrl:     rtmpUrl,
 		mountFolder: mountFolder,
 	}
 }
@@ -42,13 +40,13 @@ func (f *Ffmpeg) WithConfig(config *FfmpegConfig) *Ffmpeg {
 	return f
 }
 
-func (f *Ffmpeg) NewStream(key string) {
-	log.Println(key)
+func (f *Ffmpeg) NewStream(serverUrl string, key string) {
+	log.Println(serverUrl)
 
 	// output folder for HLS file (.m3u8 and .ts)
 	outputDir := f.ffmpegConfig.mountFolder + "/" + key
 	outputFile := outputDir + "/index-%v.m3u8"
-	url := f.ffmpegConfig.rtmpUrl + key
+	url := serverUrl + "/" + key
 	// create folder if not existed
 	err := os.MkdirAll(outputDir, os.ModePerm)
 	if err != nil {
