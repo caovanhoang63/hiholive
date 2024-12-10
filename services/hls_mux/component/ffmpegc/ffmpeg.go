@@ -63,19 +63,19 @@ func (f *Ffmpeg) NewStream(serverUrl string, key string) {
 	args := []string{
 		"-i", url,
 		"-async", "1",
-		"-crf", "22",
+		"-crf", "28",
 		"-ar", "44100",
 		"-sws_flags", "bilinear",
-		"-preset", "veryfast",
+		"-preset", "superfast",
 	}
 	args = append(args, param...)
 	args = append(args,
-		"-threads", "1",
+		"-threads", "2",
 		"-hls_time", "2",
-		"-hls_list_size", "3",
+		"-hls_list_size", "0",
 		"-hls_flags", "independent_segments",
 		"-f", "hls",
-		"-hls_segment_filename", outputDir+"/%v_%03d.ts",
+		"-hls_segment_filename", outputDir+"/%v_%05d.ts",
 		"-master_pl_name", "master.m3u8",
 		outputFile,
 	)
