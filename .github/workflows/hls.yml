@@ -59,6 +59,7 @@ jobs:
               docker run -d --name ${APP_NAME} \
               --network hiholive \
               -v ${PWD}/.env:/app/.env \
+              -p 3000:3000
               -v ${PWD}/.log/:/app/.log/ \
               -v ./hls_output/:/app/hls_output/ \
               caovanhoang204/${APP_NAME}:latest
