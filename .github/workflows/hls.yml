@@ -58,9 +58,6 @@ jobs:
               docker pull caovanhoang204/${APP_NAME}:latest &&
               docker run -d --name ${APP_NAME} \
               --network hiholive \
-              -p 3000:3000 \
-              -p 3001:3001 \
-              -p 1935:1935 \
               -v ${PWD}/.env:/app/.env \
               -v ${PWD}/.log/:/app/.log/ \
               -v ./hls_output/:/app/hls_output/ \
