@@ -75,7 +75,8 @@ func (f *Ffmpeg) NewStream(serverUrl string, key string) {
 		"-hls_list_size", "0",
 		"-hls_flags", "independent_segments",
 		"-f", "hls",
-		"-hls_segment_filename", outputDir+"/%v_%05d.ts",
+		"-hls_segment_type", "fmp4", // use fmp4 instead of ts
+		"-hls_segment_filename", outputDir+"/%v_%05d.m4s",
 		"-master_pl_name", "master.m3u8",
 		outputFile,
 	)
