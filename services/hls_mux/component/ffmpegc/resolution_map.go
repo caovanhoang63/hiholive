@@ -11,12 +11,21 @@ type streamInfo struct {
 	mapFps       int
 }
 
-func (s *streamInfo) ToCmd(index int) []string {
+func (s *streamInfo) ToCmd(index int, originResolution int, originFps int) []string {
 	if s.fps == 50 {
 		s.mapFps = 60
 	}
 	if s.fps == 25 {
 		s.mapFps = 30
+	}
+
+	if s.height == originResolution {
+		return []string{
+			"-map", "0:v:0",
+			"-map", "0:a:0",
+			fmt.Sprintf("-c:v:%d", index), "copy",
+			fmt.Sprintf("-c:a:%d", index), "aac",
+		}
 	}
 	return []string{
 		"-map", "0:v:0",
@@ -84,7 +93,7 @@ func ResolutionCmd(resolution, fps int) ([]string, error) {
 				fps:    f,
 				mapFps: fpsMap,
 			}
-			cmd = append(cmd, info.ToCmd(index)...)
+			cmd = append(cmd, info.ToCmd(index, resolution, fps)...)
 			index++
 		}
 	}

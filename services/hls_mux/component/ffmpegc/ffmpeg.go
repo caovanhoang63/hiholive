@@ -70,9 +70,9 @@ func (f *Ffmpeg) NewStream(serverUrl string, key string) {
 	}
 	args = append(args, param...)
 	args = append(args,
-		"-threads", "2",
+		"-threads", "1",
 		"-hls_time", "2",
-		"-hls_list_size", "10",
+		"-hls_list_size", "3",
 		"-hls_flags", "independent_segments",
 		"-f", "hls",
 		"-hls_segment_filename", outputDir+"/%v_%03d.ts",
