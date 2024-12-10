@@ -66,17 +66,21 @@ func (f *Ffmpeg) NewStream(serverUrl string, key string) {
 		"-crf", "28",
 		"-ar", "44100",
 		"-sws_flags", "bilinear",
-		"-preset", "superfast",
+		"-preset", "ultrafast",
+		"-tune", "zerolatency",
 	}
 	args = append(args, param...)
 	args = append(args,
 		"-threads", "2",
-		"-hls_time", "2",
+		"-hls_time", "1",
 		"-hls_list_size", "0",
+		"-max_muxing_queue_size", "2048",
 		"-hls_flags", "independent_segments",
+		"-http_persistent", " 0",
 		"-f", "hls",
+		"-hls_playlist_type", "event",
 		"-hls_segment_type", "fmp4", // use fmp4 instead of ts
-		"-hls_segment_filename", outputDir+"/%v_%05d.m4s",
+		"-hls_segment_filename", outputDir+"/%v_%09d.m4s",
 		"-master_pl_name", "master.m3u8",
 		outputFile,
 	)

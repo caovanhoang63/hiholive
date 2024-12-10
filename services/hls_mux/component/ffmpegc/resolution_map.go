@@ -27,7 +27,7 @@ func (s *streamInfo) ToCmd(index int, originResolution int, originFps int) []str
 		fmt.Sprintf("-filter:v:%d", index),
 		fmt.Sprintf("scale=w=%d:h=%d,fps=%d", s.width, s.height, s.fps),
 		fmt.Sprintf("-x264-params:v:%d", index),
-		fmt.Sprintf("keyint=%d:scenecut=0", s.fps*2),
+		fmt.Sprintf("keyint=%d:scenecut=0", 15),
 		fmt.Sprintf("-b:v:%d", index),
 		fmt.Sprintf("%dk", vBitRateMap[s.height+s.fps]),
 		fmt.Sprintf("-b:a:%d", index),
