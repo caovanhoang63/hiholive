@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - deploy/video
+      - deploy
 jobs:
   build:
     runs-on: ubuntu-latest

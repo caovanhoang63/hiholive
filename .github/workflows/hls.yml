@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - deploy/hls
+      - deploy
 jobs:
   build:
     runs-on: ubuntu-latest
