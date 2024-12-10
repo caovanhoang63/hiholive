@@ -118,6 +118,9 @@ func (e DefaultError) Is(err error) bool {
 		return false
 	}
 }
+func (e DefaultError) String() string {
+	return fmt.Sprintf("%v", e.StackTrace())
+}
 
 func (e DefaultError) Status() string {
 	return e.StatusField
@@ -327,6 +330,14 @@ var ErrBadRequest = DefaultError{
 	StatusField: http.StatusText(http.StatusBadRequest),
 	ErrorField:  "The request was malformed or contained invalid parameters",
 	CodeField:   http.StatusBadRequest,
+}
+
+var ErrInvalidInput = func(field string) DefaultError {
+	return DefaultError{
+		StatusField: http.StatusText(http.StatusBadRequest),
+		ErrorField:  fmt.Sprintf("Invalid %s", field),
+		CodeField:   http.StatusBadRequest,
+	}
 }
 
 var ErrUnsupportedMediaType = DefaultError{

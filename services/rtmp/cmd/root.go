@@ -3,10 +3,13 @@ package cmd
 import (
 	"fmt"
 	"github.com/caovanhoang63/hiholive/services/rtmp/components/rtmpc"
-	"github.com/caovanhoang63/hiholive/shared/go/shared"
+	"github.com/caovanhoang63/hiholive/services/rtmp/composer"
+	"github.com/caovanhoang63/hiholive/shared/go/core"
 	"github.com/caovanhoang63/hiholive/shared/go/srvctx"
 	"github.com/caovanhoang63/hiholive/shared/go/srvctx/components/ginc"
 	"github.com/caovanhoang63/hiholive/shared/go/srvctx/components/jwtc"
+	"github.com/caovanhoang63/hiholive/shared/go/srvctx/components/redisc"
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/yutopp/go-rtmp"
 	"io"
@@ -17,11 +20,10 @@ import (
 func newServiceCtx() srvctx.ServiceContext {
 	return srvctx.NewServiceContext(
 		srvctx.WithName("Demo Microservices"),
-		srvctx.WithComponent(ginc.NewGin(shared.KeyCompGIN)),
-		//srvctx.WithComponent(gormc.NewGormDB(shared.KeyCompMySQL, "")),
-		srvctx.WithComponent(jwtc.NewJWT(shared.KeyCompJWT)),
-		srvctx.WithComponent(NewConfig()),
-		//srvctx.WithComponent(rabbitpubsub.NewRabbitPubSub(shared.KeyCompRabbitMQ)),
+		srvctx.WithComponent(ginc.NewGin(core.KeyCompGIN)),
+		srvctx.WithComponent(jwtc.NewJWT(core.KeyCompJWT)),
+		srvctx.WithComponent(core.NewConfig()),
+		srvctx.WithComponent(redisc.NewRedis(core.KeyRedis)),
 	)
 }
 
@@ -30,14 +32,13 @@ var rootCmd = &cobra.Command{
 	Short: "Start service",
 	Run: func(cmd *cobra.Command, args []string) {
 		serviceCtx := newServiceCtx()
+		rd := serviceCtx.MustGet(core.KeyRedis).(core.RedisComponent)
 
 		logger := srvctx.GlobalLogger().GetLogger("Rtmp Service")
 		if err := serviceCtx.Load(); err != nil {
 			logger.Fatal(err)
 		}
 
-		//_ = serviceCtx.MustGet(shared.KeyCompRabbitMQ).(pubsub.Pubsub)
-		// Setup TCP connection
 		tcpAddr, err := net.ResolveTCPAddr("tcp", ":1935")
 		if err != nil {
 			logger.Panicf("Failed: %+v", err)
@@ -47,16 +48,17 @@ var rootCmd = &cobra.Command{
 		if err != nil {
 			logger.Panicf("Failed: %+v", err)
 		}
+
 		// Setup TCP connection
 		relayService := rtmpc.NewRelayService()
 		srv := rtmp.NewServer(&rtmp.ServerConfig{
 			OnConnect: func(conn net.Conn) (io.ReadWriteCloser, *rtmp.ConnConfig) {
 				return conn, &rtmp.ConnConfig{
-					Handler: rtmpc.NewHandler(relayService),
+					Handler: rtmpc.NewHandler(relayService, rd.GetClient(), composer.ComposeHlsRPCClient(serviceCtx)),
 					ControlState: rtmp.StreamControlStateConfig{
 						DefaultBandwidthWindowSize: 6 * 1024 * 1024 / 8,
 					},
-					//Logger: log.StandardLogger(),
+					Logger: log.StandardLogger(),
 				}
 			},
 		})

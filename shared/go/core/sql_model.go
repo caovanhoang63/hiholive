@@ -19,7 +19,7 @@ func NewBaseModel() BaseModel {
 	}
 }
 
-func (sqlModel *BaseModel) Mask(objectId int) {
-	uid := NewUID(uint32(sqlModel.Id), objectId, 1)
-	sqlModel.Uid = &uid
+func (model *BaseModel) Mask(objectId int) {
+	uid := NewUID(uint32(model.Id), objectId, 1)
+	model.Uid = &uid
 }

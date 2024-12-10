@@ -2,14 +2,17 @@ package rtmpc
 
 import (
 	"bytes"
+	"fmt"
 	"github.com/caovanhoang63/hiholive/shared/go/core"
 	"github.com/caovanhoang63/hiholive/shared/go/srvctx"
 	"github.com/pkg/errors"
+	"github.com/redis/go-redis/v9"
 	flvtag "github.com/yutopp/go-flv/tag"
 	"github.com/yutopp/go-rtmp"
 	rtmpmsg "github.com/yutopp/go-rtmp/message"
-
+	"golang.org/x/net/context"
 	"io"
+	"time"
 )
 
 //
@@ -17,6 +20,10 @@ import (
 // Client -> OBS -> RTMP -> FFMPEG -> HLS 1080p    -> Cloudfront -> videojs
 //                                    HLS 440p
 //
+
+type HlsClient interface {
+	NewHlsStream(ctx context.Context, serverUrl, streamKey string) (err error)
+}
 
 var _ rtmp.Handler = (*Handler)(nil)
 
@@ -26,16 +33,20 @@ type Handler struct {
 	relayService *RelayService
 	logger       srvctx.Logger
 	//
-	conn *rtmp.Conn
+	conn      *rtmp.Conn
+	rdClient  *redis.Client
+	hlsClient HlsClient
 	//
 	pub *Pub
 	sub *Sub
 }
 
-func NewHandler(relayService *RelayService) *Handler {
+func NewHandler(relayService *RelayService, rd *redis.Client, hlsClient HlsClient) *Handler {
 	return &Handler{
 		logger:       srvctx.DefaultLogger,
 		relayService: relayService,
+		rdClient:     rd,
+		hlsClient:    hlsClient,
 	}
 }
 
@@ -70,15 +81,25 @@ func (h *Handler) OnPublish(_ *rtmp.StreamContext, timestamp uint32, cmd *rtmpms
 	if err != nil {
 		return errors.Wrap(err, "Failed to create pubsub")
 	}
+	_, err = h.rdClient.Get(context.Background(), fmt.Sprintf("stream:%s", cmd.PublishingName)).Result()
+	fmt.Println(err)
+	if errors.Is(err, redis.Nil) || err != nil {
+		fmt.Println(123)
 
-	if cmd.PublishingName != "test" {
-		return errors.New("PublishingName is empty")
+		return errors.New("PublishingName does not exist")
 	}
-	h.logger.Infof("KEY STREAM %s", cmd.PublishingName)
+	//if cmd.PublishingName != "test" {
+	//	return errors.New("PublishingName is empty")
+	//}
 
 	pub := pubsub.Pub()
 
 	h.pub = pub
+
+	go func() {
+		time.Sleep(2 * time.Second)
+		h.hlsClient.NewHlsStream(context.Background(), "rtmp://hiholive-rtmp:1935/stream", cmd.PublishingName)
+	}()
 
 	return nil
 }

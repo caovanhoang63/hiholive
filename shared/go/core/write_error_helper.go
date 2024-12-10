@@ -6,10 +6,10 @@ import (
 )
 
 func WriteErrorResponse(c *gin.Context, err error) {
+	c.Error(err)
 	if errSt, ok := err.(StatusCodeCarrier); ok {
 		c.JSON(errSt.StatusCode(), errSt)
-		return
+	} else {
+		c.JSON(http.StatusInternalServerError, ErrInternalServerError.WithError(err.Error()))
 	}
-
-	c.JSON(http.StatusInternalServerError, ErrInternalServerError.WithError(err.Error()))
 }

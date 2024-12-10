@@ -1,0 +1,64 @@
+services:
+  mysql:
+    image: bitnami/mysql:${MYSQL_VERSION}
+    container_name: hiholive-mysql
+    privileged: true
+    ports:
+      - "3306:3306"
+    networks:
+      - hiholive
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+    volumes:
+      - mysql_data:/bitnami/mysql/data
+  rabbitmq:
+    image: rabbitmq:${RABBITMQ_VERSION}
+    container_name: hiholive-rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - hiholive
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_DEFAULT_USER}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_DEFAULT_PASS}
+  redis:
+    image: redis
+    container_name: hiholive-redis
+    command: redis-server /usr/local/etc/redis/redis.conf
+    volumes:
+      - ./redis/redis.conf:/usr/local/etc/redis/redis.conf
+      - redis-data:/data
+    networks:
+      - hiholive
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      timeout: 5s
+      retries: 5
+  gateway:
+    image: docker.tyk.io/tyk-gateway/tyk-gateway
+    ports:
+      - "80:80"
+    volumes:
+      - ./gateway/tyk.standalone.conf:/opt/tyk-gateway/tyk.conf
+      - ./gateway/apps:/opt/tyk-gateway/apps
+    networks:
+      - hiholive
+    depends_on:
+      redis:
+        condition: service_healthy
+
+networks:
+  hiholive:
+    external: true
+
+volumes:
+  rabbitmq_log:
+  rabbitmq_data:
+  mysql_data:
+  redis-data:

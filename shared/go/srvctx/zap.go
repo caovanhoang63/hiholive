@@ -99,9 +99,9 @@ func (l *ZapLogger) WithField(field Field) Logger {
 	return newLogger
 }
 
-func (l *ZapLogger) WithSrc() Logger {
+func (l *ZapLogger) WithSrc(skip int) Logger {
 	newLogger := &ZapLogger{
-		logger:   l.logger.WithOptions(zap.AddCaller(), zap.AddCallerSkip(1)),
+		logger:   l.logger.WithOptions(zap.AddCaller(), zap.AddCallerSkip(skip)),
 		ctx:      l.ctx,
 		logLevel: l.logLevel,
 	}
