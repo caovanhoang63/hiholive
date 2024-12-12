@@ -33,4 +33,4 @@ EXPOSE 3300
 EXPOSE 1935
 
 # Run the binary
-CMD ["./app","/usr/bin/s3fs hiholive-stream-storage  hls_output -o passwd_file=${HOME}/.passwd-s3fs"]
+CMD ["/entrypoint.sh"]
