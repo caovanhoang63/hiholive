@@ -62,26 +62,49 @@ func (f *Ffmpeg) NewStream(serverUrl string, key string) {
 	}
 	args := []string{
 		"-i", url,
+
+		// Flag to enable audio-video sync. Value "1" allows synchronization
 		"-async", "1",
+
+		// CRF (Constant Rate Factor) flag to control video quality. Lower values mean higher quality (0-51). 28 is a mid-to-low quality setting, used to reduce file size.
 		"-crf", "28",
+
+		// Audio sample rate (in Hz). This is set to 32000 Hz, typically used for speech or broadcast-quality audio with lower fidelity.
 		"-ar", "32000",
+
+		// Flag specifying the interpolation method for resizing images. "bilinear" is a basic interpolation method, providing fast processing but not very sharp results.
+		// other option
+
+		//            Speed            Quality
+		// bilinear	  Fastest	       Lowest (smooth but not sharp)	        Real-time applications where speed matters more than quality
+		// bicubic	  Moderate	       Sharper than bilinear, better quality	General-purpose use when balance between speed and quality is needed
+		// lanczos	  Slowest	       Highest (preserves fine details)	    High-quality video encoding where quality is the priority
+		// neighbor	  Very Fast	       Most pixelated/blocky	                When speed is a priority and quality can be sacrificed
+		// gauss	  Moderate	       Good (slightly soft)	                Balance between speed and quality
+		// spline	  Moderate	       High (better than bicubic)	            High-quality applications, where speed is not the main concern
+		// doc: https://www.ffmpeg.org/ffmpeg-scaler.html#scaler_005foptions
 		"-sws_flags", "bilinear",
+
+		// Specifies the encoding preset. "ultrafast" is the fastest preset, but may result in lower video quality and larger file size.
 		"-preset", "ultrafast",
+
+		// Flag to tune encoding for zero-latency, optimizing for real-time streaming and minimal delay.
 		"-tune", "zerolatency",
 	}
+
 	args = append(args, param...)
 	args = append(args,
-		"-threads", "2",
-		"-hls_time", "2",
-		"-hls_list_size", "6",
-		"-hls_flags", "independent_segments",
-		"-http_persistent", "0",
-		"-f", "hls",
-		"-hls_playlist_type", "event",
-		"-hls_segment_type", "fmp4", // use fmp4 instead of ts
-		"-hls_segment_filename", outputDir+"/%v_%03d.m4s",
-		"-master_pl_name", "master.m3u8",
-		outputFile,
+		"-threads", "2", // Set the number of threads for encoding/decoding (2 threads in this case)
+		"-hls_time", "2", // Set the duration (in seconds) of each HLS segment (2 seconds per segment)
+		"-hls_list_size", "0", // Set the number of playlist entries (0 means unlimited, keeps all segments in the playlist)
+		"-hls_flags", "independent_segments", // Use independent segments, allowing segments to be played individually without depending on previous ones
+		"-http_persistent", "0", // Disable HTTP persistent connections (each segment is requested in a new connection)
+		"-f", "hls", // Set the output format to HLS (HTTP Live Streaming)
+		"-hls_playlist_type", "event", // Set the playlist type to "event", meaning the playlist is not dynamic and has no end (used for live events)
+		"-hls_segment_type", "fmp4", // Use fragmented MP4 (fMP4) instead of MPEG-TS for HLS segments
+		"-hls_segment_filename", outputDir+"/%v_%03d.m4s", // Define the output filename pattern for HLS segments (e.g., segment1_001.m4s)
+		"-master_pl_name", "master.m3u8", // Set the name for the master playlist file
+		outputFile, // Output file name (the playlist and segments will be written to this location)
 	)
 
 	cmd := exec.Command("ffmpeg", args...)

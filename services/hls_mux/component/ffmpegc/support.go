@@ -1,6 +1,6 @@
 package ffmpegc
 
-var resolutionSupport = []int{240, 480, 720}
+var resolutionSupport = []int{480, 720}
 
 var resolutionFpsSupport = map[int][]int{
 	1080: {60},
