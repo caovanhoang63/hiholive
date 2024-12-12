@@ -16,7 +16,7 @@ RUN git clone https://github.com/s3fs-fuse/s3fs-fuse.git; \
   make install; \
   rm -rf /var/cache/apk/*;
 
-RUN mkdir app/hls_output &&  /usr/bin/s3fs ${S3_BUCKET} app/hls_output -o passwd_file=${HOME}/.passwd-s3fs
+RUN mkdir app/hls_output &&  /usr/bin/s3fs hiholive-stream-storage  app/hls_output -o passwd_file=${HOME}/.passwd-s3fs
 
 WORKDIR /app
 
