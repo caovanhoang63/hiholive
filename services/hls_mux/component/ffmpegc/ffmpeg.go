@@ -64,7 +64,7 @@ func (f *Ffmpeg) NewStream(serverUrl string, key string) {
 		"-i", url,
 		"-async", "1",
 		"-crf", "28",
-		"-ar", "44100",
+		"-ar", "32000",
 		"-sws_flags", "bilinear",
 		"-preset", "ultrafast",
 		"-tune", "zerolatency",
