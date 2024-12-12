@@ -18,6 +18,7 @@ RUN git clone https://github.com/s3fs-fuse/s3fs-fuse.git; \
 
 
 WORKDIR /app
+COPY entrypoint.sh /entrypoint.sh
 
 RUN mkdir hls_output
 
