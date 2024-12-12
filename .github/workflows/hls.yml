@@ -60,6 +60,7 @@ jobs:
               --network hiholive \
               -v ${PWD}/.env:/app/.env \
               --cap-add SYS_ADMIN --device /dev/fuse \
+              --security-opt apparmor:unconfined \
               -v ${PWD}/.passwd-s3fs:/app/.passwd-s3fs \
               -p 3000:3000 \
               -v ${PWD}/.log/:/app/.log/ \
