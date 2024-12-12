@@ -20,6 +20,9 @@ RUN git clone https://github.com/s3fs-fuse/s3fs-fuse.git; \
 WORKDIR /app
 COPY services/hls_mux/entrypoint.sh /entrypoint.sh
 
+RUN chmod +x /entrypoint.sh
+
+
 RUN mkdir hls_output
 
 COPY app .
