@@ -144,9 +144,17 @@ func (h *Handler) OnSetDataFrame(timestamp uint32, data *rtmpmsg.NetStreamSetDat
 	fps := object["framerate"].(float64)
 	height := object["height"].(float64)
 
+	address, err := core.GetServerAddress()
+	if err != nil {
+		h.logger.Error(err)
+		return err
+	}
+
+	// Format URL động
+	serverUrl := fmt.Sprintf("rtmp://%s:1935/stream", address)
 	go func() {
 		job := asyncjob.NewJob(func(ctx context.Context) error {
-			return h.hlsClient.NewHlsStream(ctx, h.Stream.Uid, "rtmp://hiholive-rtmp:1935/stream", h.Stream.StreamKey, int(fps), int(height))
+			return h.hlsClient.NewHlsStream(ctx, h.Stream.Uid, serverUrl, h.Stream.StreamKey, int(fps), int(height))
 		})
 
 		// Retry 3 time to call to hls server
