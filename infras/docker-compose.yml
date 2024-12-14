@@ -41,6 +41,7 @@ services:
       timeout: 5s
       retries: 5
   gateway:
+    container_name: gateway
     image: docker.tyk.io/tyk-gateway/tyk-gateway
     ports:
       - "80:80"
@@ -52,7 +53,6 @@ services:
     depends_on:
       redis:
         condition: service_healthy
-
 networks:
   hiholive:
     external: true
