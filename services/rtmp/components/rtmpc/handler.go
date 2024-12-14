@@ -17,15 +17,17 @@ import (
 	"time"
 )
 
+//	HLS 720p
 //
-//                                    HLS 720p
 // Client -> OBS -> RTMP -> FFMPEG -> HLS 1080p    -> Cloudfront -> videojs
-//                                    HLS 440p
 //
+//	HLS 440p
 
 type HlsClient interface {
 	NewHlsStream(ctx context.Context, streamId, serverUrl, streamKey string, fps, resolution int) (err error)
 }
+
+var curStream = map[string]core.StreamState{}
 
 var _ rtmp.Handler = (*Handler)(nil)
 
@@ -34,15 +36,19 @@ type Handler struct {
 	rtmp.DefaultHandler
 	relayService *RelayService
 	logger       srvctx.Logger
-	//
+	// conn represents the RTMP connection associated with this handler.
 	conn      *rtmp.Conn
 	rdClient  *redis.Client
 	hlsClient HlsClient
-	//
+	Stream    *core.StreamState
+	// pub represents the publishing entity, handling media streams such as audio, video, and metadata for RTMP connections.
 	pub *Pub
+
+	// sub represents a subscriber for handling events or media streams during RTMP playback sessions.
 	sub *Sub
 }
 
+// NewHandler creates and returns a new Handler instance for managing RTMP connections with provided dependencies.
 func NewHandler(relayService *RelayService, rd *redis.Client, hlsClient HlsClient) *Handler {
 	return &Handler{
 		logger:       srvctx.DefaultLogger,
@@ -50,12 +56,15 @@ func NewHandler(relayService *RelayService, rd *redis.Client, hlsClient HlsClien
 		rdClient:     rd,
 		hlsClient:    hlsClient,
 	}
+
 }
 
+// OnServe initializes the RTMP connection for the handler and assigns it to the handler's 'conn' field.
 func (h *Handler) OnServe(conn *rtmp.Conn) {
 	h.conn = conn
 }
 
+// OnConnect validates the application name during an RTMP connection request and initializes the connection process.
 func (h *Handler) OnConnect(timestamp uint32, cmd *rtmpmsg.NetConnectionConnect) error {
 	h.logger.WithField(srvctx.Field{"cmd": cmd}).Info("OnConnect")
 	if cmd.Command.App != core.StreamDomain {
@@ -69,7 +78,8 @@ func (h *Handler) OnCreateStream(timestamp uint32, cmd *rtmpmsg.NetConnectionCre
 	return nil
 }
 
-func (h *Handler) OnPublish(_ *rtmp.StreamContext, timestamp uint32, cmd *rtmpmsg.NetStreamPublish) error {
+// OnPublish handles publishing requests for incoming RTMP streams, validates publishing parameters, and initializes resources.
+func (h *Handler) OnPublish(ctx *rtmp.StreamContext, timestamp uint32, cmd *rtmpmsg.NetStreamPublish) error {
 	h.logger.WithField(srvctx.Field{"cmd": cmd}).Info("OnPublish")
 	if h.sub != nil {
 		return errors.New("Cannot publish to this stream")
@@ -78,7 +88,6 @@ func (h *Handler) OnPublish(_ *rtmp.StreamContext, timestamp uint32, cmd *rtmpms
 	if cmd.PublishingName == "" {
 		return errors.New("PublishingName is empty")
 	}
-
 	pubsub, err := h.relayService.NewPubsub(cmd.PublishingName)
 	if err != nil {
 		return errors.Wrap(err, "Failed to create pubsub")
@@ -88,34 +97,21 @@ func (h *Handler) OnPublish(_ *rtmp.StreamContext, timestamp uint32, cmd *rtmpms
 	var streamInfo core.StreamState
 	_ = json.Unmarshal([]byte(byteData), &streamInfo)
 
+	streamInfo.StreamKey = cmd.PublishingName
 	if errors.Is(err, redis.Nil) || err != nil {
-		fmt.Println(123)
 		return errors.New("PublishingName does not exist")
 	}
+
+	h.Stream = &streamInfo
 
 	pub := pubsub.Pub()
 
 	h.pub = pub
-	go func() {
-		job := asyncjob.NewJob(func(ctx context.Context) error {
-			return h.hlsClient.NewHlsStream(ctx, streamInfo.Uid, "rtmp://hiholive-rtmp:1935/stream", cmd.PublishingName, 60, 720)
-		})
-
-		// Retry 3 time to call to hls server
-		job.SetRetryDurations([]time.Duration{
-			time.Second * 1,
-			time.Second * 2,
-			time.Second * 4,
-		})
-
-		if err = job.RunWithRetry(context.Background()); err != nil {
-			h.logger.Error(err)
-		}
-	}()
 
 	return nil
 }
 
+// OnPlay sets up a subscriber for RTMP playback on a specified stream and validates the stream's availability.
 func (h *Handler) OnPlay(ctx *rtmp.StreamContext, timestamp uint32, cmd *rtmpmsg.NetStreamPlay) error {
 	if h.sub != nil {
 		return errors.New("Cannot play on this stream")
@@ -134,16 +130,36 @@ func (h *Handler) OnPlay(ctx *rtmp.StreamContext, timestamp uint32, cmd *rtmpmsg
 	return nil
 }
 
+// OnSetDataFrame processes the "onMetaData" script data from a NetStreamSetDataFrame message and publishes it to subscribers.
 func (h *Handler) OnSetDataFrame(timestamp uint32, data *rtmpmsg.NetStreamSetDataFrame) error {
 	r := bytes.NewReader(data.Payload)
-
 	var script flvtag.ScriptData
 	if err := flvtag.DecodeScriptData(r, &script); err != nil {
 		h.logger.Errorf("Failed to decode script data: Err = %+v", err)
 		return nil // ignore
 	}
-
 	h.logger.WithField(srvctx.Field{"Script": script}).Info("SetDataFrame")
+
+	object := script.Objects["onMetaData"]
+	fps := object["framerate"].(float64)
+	height := object["height"].(float64)
+
+	go func() {
+		job := asyncjob.NewJob(func(ctx context.Context) error {
+			return h.hlsClient.NewHlsStream(ctx, h.Stream.Uid, "rtmp://hiholive-rtmp:1935/stream", h.Stream.StreamKey, int(fps), int(height))
+		})
+
+		// Retry 3 time to call to hls server
+		job.SetRetryDurations([]time.Duration{
+			time.Second * 1,
+			time.Second * 2,
+			time.Second * 4,
+		})
+
+		if err := job.RunWithRetry(context.Background()); err != nil {
+			h.logger.Error(err)
+		}
+	}()
 
 	_ = h.pub.Publish(&flvtag.FlvTag{
 		TagType:   flvtag.TagTypeScriptData,
@@ -154,6 +170,7 @@ func (h *Handler) OnSetDataFrame(timestamp uint32, data *rtmpmsg.NetStreamSetDat
 	return nil
 }
 
+// OnAudio processes incoming audio data, decodes it, and publishes it as an FLV tag for subscribers.
 func (h *Handler) OnAudio(timestamp uint32, payload io.Reader) error {
 	var audio flvtag.AudioData
 	if err := flvtag.DecodeAudioData(payload, &audio); err != nil {
@@ -177,6 +194,7 @@ func (h *Handler) OnAudio(timestamp uint32, payload io.Reader) error {
 	return nil
 }
 
+// OnVideo processes incoming video data, decodes it, and publishes it as an FLV tag for subscribers.
 func (h *Handler) OnVideo(timestamp uint32, payload io.Reader) error {
 	var video flvtag.VideoData
 	if err := flvtag.DecodeVideoData(payload, &video); err != nil {
@@ -201,6 +219,7 @@ func (h *Handler) OnVideo(timestamp uint32, payload io.Reader) error {
 	return nil
 }
 
+// OnClose cleans up resources associated with the handler by closing the publisher and subscriber, if they are initialized.
 func (h *Handler) OnClose() {
 	h.logger.Infof("OnClose")
 
