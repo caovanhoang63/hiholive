@@ -50,7 +50,7 @@ var rootCmd = &cobra.Command{
 			c.JSON(200, "pong")
 		})
 
-		ffmpeg := ffmpegc.NewFfmpeg(serviceCtx).WithConfig(ffmpegc.NewFfmpegConfig("/hls_output", rd.GetClient()))
+		ffmpeg := ffmpegc.NewFfmpeg(serviceCtx).WithConfig(ffmpegc.NewFfmpegConfig("./hls_output", rd.GetClient()))
 
 		go StartGRPCServices(ffmpeg, serviceCtx)
 
