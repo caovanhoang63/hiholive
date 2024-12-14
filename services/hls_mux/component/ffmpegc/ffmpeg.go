@@ -89,10 +89,10 @@ func (f *Ffmpeg) NewStream(streamId, serverUrl, streamKey string, fps, resolutio
 	outputFile := outputDir + "/index-%v.m3u8"
 	url := serverUrl + "/" + streamKey
 	// create folder if not existed
-	//err = os.MkdirAll(outputDir, os.ModePerm)
-	//if err != nil {
-	//	log.Fatalf("Lỗi khi tạo thư mục: %v", err)
-	//}
+	err = os.MkdirAll(outputDir, os.ModePerm)
+	if err != nil {
+		log.Fatalf("Lỗi khi tạo thư mục: %v", err)
+	}
 
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
