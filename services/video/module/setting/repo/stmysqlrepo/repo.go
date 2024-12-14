@@ -42,11 +42,13 @@ func (r *repo) Create(ctx context.Context, create *stmodel.SettingCreate) error 
 
 func (r *repo) Update(ctx context.Context, name string, update *stmodel.SettingUpdate) error {
 	tx := r.db.Begin()
-	if err := tx.Table(stmodel.Setting{}.TableName()).Where("id = ?", name).Updates(&update).Error; err != nil {
+	if err := tx.Table(stmodel.Setting{}.TableName()).Where("name = ?", name).Updates(&update).Error; err != nil {
 		tx.Rollback()
 		return err
 	}
-	if err := r.rdClient.SetNX(ctx, fmt.Sprintf("system_setting:%s", name), update.Value, 0).Err(); err != nil {
+	b, _ := json.Marshal(update.Value)
+
+	if err := r.rdClient.SetNX(ctx, fmt.Sprintf("system_setting:%s", name), b, 0).Err(); err != nil {
 		tx.Rollback()
 		return err
 	}

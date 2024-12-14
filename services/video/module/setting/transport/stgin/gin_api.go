@@ -67,6 +67,8 @@ func (api *ginApi) FindSystemSettingByName() gin.HandlerFunc {
 			return
 		}
 
+		data.Mask(core.DbTypeSystemSetting)
+
 		c.JSON(200, core.ResponseData(data))
 
 	}
@@ -85,11 +87,15 @@ func (api *ginApi) FindSystemSetting() gin.HandlerFunc {
 			core.WriteErrorResponse(c, core.ErrBadRequest.WithWrap(err))
 			return
 		}
+		paging.Process()
 
 		data, err := api.biz.FindByCondition(c.Request.Context(), &filter, &paging)
 		if err != nil {
 			core.WriteErrorResponse(c, err)
 			return
+		}
+		for i := range data {
+			data[i].Mask(core.DbTypeSystemSetting)
 		}
 		c.JSON(200, core.SuccessResponse(data, paging, filter))
 	}

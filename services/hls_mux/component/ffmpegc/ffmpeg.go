@@ -57,10 +57,17 @@ type FpsBitRate struct {
 	VBitRate int `json:"vBitRate"`
 }
 
-func (f *Ffmpeg) NewStream(streamId, serverUrl, streamKey string, fps, resolution int) {
-	result1, err := f.ffmpegConfig.rd.Get(context.Background(), "system_setting:STREAM_RESOLUTION_SUPPORT").Result()
-	result2, err := f.ffmpegConfig.rd.Get(context.Background(), "system_setting:STREAM_RESOLUTION_INFO").Result()
+// NewStream initializes and runs a Ffmpeg process to create an HLS stream with the specified parameters.
+func (f *Ffmpeg) NewStream(streamId, serverUrl, streamKey string, fps, resolution int) (closeFunc func() error) {
+	results, err := f.ffmpegConfig.rd.MGet(context.Background(),
+		"system_setting:STREAM_RESOLUTION_SUPPORT",
+		"system_setting:STREAM_RESOLUTION_INFO").Result()
 	if err != nil {
+		return
+	}
+	result1, ok1 := results[0].(string) // Casting the first result
+	result2, ok2 := results[1].(string) // Casting the second result
+	if !ok1 || !ok2 {
 		return
 	}
 
@@ -77,19 +84,18 @@ func (f *Ffmpeg) NewStream(streamId, serverUrl, streamKey string, fps, resolutio
 
 	supported := supportedMap["supported"]
 
-	// output folder for HLS file (.m3u8 and .ts)
+	// output folder for HLS file (.m3u8 and .m4s)
 	outputDir := f.ffmpegConfig.mountFolder + "/" + streamId
 	outputFile := outputDir + "/index-%v.m3u8"
 	url := serverUrl + "/" + streamKey
 	// create folder if not existed
-	err = os.MkdirAll(outputDir, os.ModePerm)
-	if err != nil {
-		log.Fatalf("Lỗi khi tạo thư mục: %v", err)
-	}
+	//err = os.MkdirAll(outputDir, os.ModePerm)
+	//if err != nil {
+	//	log.Fatalf("Lỗi khi tạo thư mục: %v", err)
+	//}
 
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
-
 	param, err := ResolutionCmd(resolution, fps, supported, resolutionInfo)
 	if err != nil {
 		return
@@ -150,15 +156,19 @@ func (f *Ffmpeg) NewStream(streamId, serverUrl, streamKey string, fps, resolutio
 
 	go func() {
 		<-sigChan
-		if err := cmd.Process.Kill(); err != nil {
+		if err = cmd.Process.Kill(); err != nil {
 			log.Fatalf("Failed to kill process: %v", err)
 		}
 	}()
 
-	if err := cmd.Run(); err != nil {
+	if err = cmd.Run(); err != nil {
 		log.Fatalf("FFmpeg err : %v", err)
 	}
 
+	return func() error {
+		sigChan <- syscall.SIGINT
+		return nil
+	}
 }
 
 func (f *Ffmpeg) Start() {}
