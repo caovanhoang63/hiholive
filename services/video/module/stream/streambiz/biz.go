@@ -54,6 +54,7 @@ func (s *streamBiz) Create(ctx context.Context, requester core.Requester, create
 	}
 
 	return &streammodel.StreamCreateResponse{
+		StreamId:  create.Uid,
 		StreamKey: create.StreamKey,
 		RtmpLink:  "rtmp://rtmp.hiholive.fun:1935",
 	}, nil

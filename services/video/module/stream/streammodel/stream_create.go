@@ -26,6 +26,7 @@ func (s *StreamCreate) UnMask() {
 }
 
 type StreamCreateResponse struct {
+	StreamId  *core.UID  `json:"id" gorm:"-"`
 	StreamKey *uuid.UUID `json:"streamKey" gorm:"column:stream_key"`
 	RtmpLink  string     `json:"rtmpLink" gorm:"-"`
 }
