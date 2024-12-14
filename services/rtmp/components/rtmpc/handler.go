@@ -98,7 +98,7 @@ func (h *Handler) OnPublish(_ *rtmp.StreamContext, timestamp uint32, cmd *rtmpms
 	h.pub = pub
 	go func() {
 		job := asyncjob.NewJob(func(ctx context.Context) error {
-			return h.hlsClient.NewHlsStream(ctx, streamInfo.Uid, "rtmp://localhost:1935/stream", cmd.PublishingName, 60, 720)
+			return h.hlsClient.NewHlsStream(ctx, streamInfo.Uid, "rtmp://hiholive-rtmp:1935/stream", cmd.PublishingName, 60, 720)
 		})
 
 		// Retry 3 time to call to hls server
