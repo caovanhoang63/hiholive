@@ -7,6 +7,7 @@ import (
 )
 
 type StreamCreate struct {
+	core.BaseModel     `json:",inline"`
 	Title              string     `json:"title" gorm:"column:title" validate:"required"`
 	Description        string     `json:"description" gorm:"column:description" validate:"required"`
 	ChannelId          int        `json:"-" gorm:"column:channel_id"`

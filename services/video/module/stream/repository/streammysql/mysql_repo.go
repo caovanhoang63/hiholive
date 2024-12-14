@@ -3,6 +3,7 @@ package streammysql
 import (
 	"fmt"
 	"github.com/caovanhoang63/hiholive/services/video/module/stream/streammodel"
+	"github.com/caovanhoang63/hiholive/shared/go/core"
 	"github.com/redis/go-redis/v9"
 	"golang.org/x/net/context"
 	"gorm.io/gorm"
@@ -29,7 +30,9 @@ func (s *streamRepo) Create(ctx context.Context, create *streammodel.StreamCreat
 		return err
 	}
 
-	if err := s.rdClient.SetEx(ctx, fmt.Sprintf("stream:%s", create.StreamKey), 1, 3600*time.Second).Err(); err != nil {
+	create.Mask(core.DbTypeStream)
+
+	if err := s.rdClient.SetEx(ctx, fmt.Sprintf("stream:%s", create.StreamKey), create.Uid, 3600*time.Second).Err(); err != nil {
 		tx.Rollback()
 		return err
 	}
