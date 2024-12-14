@@ -4,11 +4,15 @@ import (
 	"github.com/caovanhoang63/hiholive/services/video/module/channel/channelbiz"
 	"github.com/caovanhoang63/hiholive/services/video/module/channel/repository/channelmysql"
 	"github.com/caovanhoang63/hiholive/services/video/module/channel/transport/channelgin"
+	"github.com/caovanhoang63/hiholive/services/video/module/setting/repo/stmysqlrepo"
+	"github.com/caovanhoang63/hiholive/services/video/module/setting/stbiz"
+	"github.com/caovanhoang63/hiholive/services/video/module/setting/transport/stgin"
 	"github.com/caovanhoang63/hiholive/services/video/module/stream/repository/streammysql"
 	"github.com/caovanhoang63/hiholive/services/video/module/stream/streambiz"
 	"github.com/caovanhoang63/hiholive/services/video/module/stream/transport/streamgin"
 	"github.com/caovanhoang63/hiholive/shared/go/core"
 	"github.com/caovanhoang63/hiholive/shared/go/srvctx"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -37,4 +41,20 @@ func ComposeStreamAPIService(serviceCtx srvctx.ServiceContext) StreamService {
 	biz := streambiz.NewStreamBiz(streamRepo, channelRepo)
 	streamService := streamgin.NewStreamApi(biz, serviceCtx)
 	return streamService
+}
+
+type SystemSettingService interface {
+	CreateSystemSetting() gin.HandlerFunc
+	UpdateSystemSetting() gin.HandlerFunc
+	FindSystemSetting() gin.HandlerFunc
+	FindSystemSettingByName() gin.HandlerFunc
+}
+
+func ComposeSystemSettingApiService(serviceCtx srvctx.ServiceContext) SystemSettingService {
+	db := serviceCtx.MustGet(core.KeyCompMySQL).(core.GormComponent)
+	rd := serviceCtx.MustGet(core.KeyRedis).(core.RedisComponent)
+	repo := stmysqlrepo.New(db.GetDB(), rd.GetClient())
+	biz := stbiz.NewSystemSettingBiz(repo)
+	service := stgin.NewGinApi(biz)
+	return service
 }

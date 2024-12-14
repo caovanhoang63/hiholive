@@ -6,4 +6,5 @@ const (
 	DbTypeStream
 	DbTypeCategory
 	DbTypeChannel
+	DbTypeSystemSetting
 )
