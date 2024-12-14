@@ -58,7 +58,7 @@ type FpsBitRate struct {
 }
 
 // NewStream initializes and runs a Ffmpeg process to create an HLS stream with the specified parameters.
-func (f *Ffmpeg) NewStream(streamId, serverUrl, streamKey string, fps, resolution int) {
+func (f *Ffmpeg) NewStream(streamId, serverUrl, streamKey string, fps, resolution int) (closeFunc func() error) {
 	results, err := f.ffmpegConfig.rd.MGet(context.Background(),
 		"system_setting:STREAM_RESOLUTION_SUPPORT",
 		"system_setting:STREAM_RESOLUTION_INFO").Result()
@@ -96,7 +96,6 @@ func (f *Ffmpeg) NewStream(streamId, serverUrl, streamKey string, fps, resolutio
 
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
-
 	param, err := ResolutionCmd(resolution, fps, supported, resolutionInfo)
 	if err != nil {
 		return
@@ -166,6 +165,10 @@ func (f *Ffmpeg) NewStream(streamId, serverUrl, streamKey string, fps, resolutio
 		log.Fatalf("FFmpeg err : %v", err)
 	}
 
+	return func() error {
+		sigChan <- syscall.SIGINT
+		return nil
+	}
 }
 
 func (f *Ffmpeg) Start() {}

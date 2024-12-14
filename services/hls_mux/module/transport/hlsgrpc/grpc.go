@@ -4,6 +4,7 @@ import (
 	"github.com/caovanhoang63/hiholive/services/hls_mux/component/ffmpegc"
 	"github.com/caovanhoang63/hiholive/shared/go/proto/pb"
 	"golang.org/x/net/context"
+	"time"
 )
 
 type hlsGRPC struct {
@@ -21,7 +22,14 @@ func (h *hlsGRPC) NewHlsStream(ctx context.Context, req *pb.NewHlsStreamReq) (*p
 	resolution := req.Resolution
 	streamId := req.StreamId
 
-	go h.Ffmpeg.NewStream(streamId, link, key, int(fps), int(resolution))
+	go func() {
+		fn := h.Ffmpeg.NewStream(streamId, link, key, int(fps), int(resolution))
+
+		go func() {
+			time.Sleep(10000)
+			fn()
+		}()
+	}()
 
 	return &pb.NewHlsStreamResp{}, nil
 }
