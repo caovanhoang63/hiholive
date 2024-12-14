@@ -132,7 +132,7 @@
   "proxy": {
     "preserve_host_header": false,
     "listen_path": "/v1/setting/",
-    "target_url": "http://hiholive-setting:3000/",
+    "target_url": "http://hiholive-video:3000/",
     "disable_strip_slash": false,
     "strip_listen_path": false,
     "enable_load_balancing": false,
