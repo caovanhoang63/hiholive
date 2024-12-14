@@ -2,7 +2,9 @@ package rtmpc
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
+	"github.com/caovanhoang63/hiholive/shared/go/asyncjob"
 	"github.com/caovanhoang63/hiholive/shared/go/core"
 	"github.com/caovanhoang63/hiholive/shared/go/srvctx"
 	"github.com/pkg/errors"
@@ -22,7 +24,7 @@ import (
 //
 
 type HlsClient interface {
-	NewHlsStream(ctx context.Context, serverUrl, streamKey string) (err error)
+	NewHlsStream(ctx context.Context, streamId, serverUrl, streamKey string, fps, resolution int) (err error)
 }
 
 var _ rtmp.Handler = (*Handler)(nil)
@@ -81,24 +83,34 @@ func (h *Handler) OnPublish(_ *rtmp.StreamContext, timestamp uint32, cmd *rtmpms
 	if err != nil {
 		return errors.Wrap(err, "Failed to create pubsub")
 	}
-	_, err = h.rdClient.Get(context.Background(), fmt.Sprintf("stream:%s", cmd.PublishingName)).Result()
-	fmt.Println(err)
+	byteData, err := h.rdClient.Get(context.Background(), fmt.Sprintf("stream:%s", cmd.PublishingName)).Result()
+
+	var streamInfo core.StreamState
+	_ = json.Unmarshal([]byte(byteData), &streamInfo)
+
 	if errors.Is(err, redis.Nil) || err != nil {
 		fmt.Println(123)
-
 		return errors.New("PublishingName does not exist")
 	}
-	//if cmd.PublishingName != "test" {
-	//	return errors.New("PublishingName is empty")
-	//}
 
 	pub := pubsub.Pub()
 
 	h.pub = pub
-
 	go func() {
-		time.Sleep(2 * time.Second)
-		h.hlsClient.NewHlsStream(context.Background(), "rtmp://localhost:1935/stream", cmd.PublishingName)
+		job := asyncjob.NewJob(func(ctx context.Context) error {
+			return h.hlsClient.NewHlsStream(ctx, streamInfo.Uid, "rtmp://localhost:1935/stream", cmd.PublishingName, 60, 720)
+		})
+
+		// Retry 3 time to call to hls server
+		job.SetRetryDurations([]time.Duration{
+			time.Second * 1,
+			time.Second * 2,
+			time.Second * 4,
+		})
+
+		if err = job.RunWithRetry(context.Background()); err != nil {
+			h.logger.Error(err)
+		}
 	}()
 
 	return nil

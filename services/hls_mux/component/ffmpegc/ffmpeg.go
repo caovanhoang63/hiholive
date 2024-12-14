@@ -57,25 +57,30 @@ type FpsBitRate struct {
 	VBitRate int `json:"vBitRate"`
 }
 
-func (f *Ffmpeg) NewStream(serverUrl string, key string) {
+func (f *Ffmpeg) NewStream(streamId, serverUrl, streamKey string, fps, resolution int) {
 	result1, err := f.ffmpegConfig.rd.Get(context.Background(), "system_setting:STREAM_RESOLUTION_SUPPORT").Result()
 	result2, err := f.ffmpegConfig.rd.Get(context.Background(), "system_setting:STREAM_RESOLUTION_INFO").Result()
 	if err != nil {
 		return
 	}
 
+	fmt.Println(streamId, serverUrl, streamKey, fps, resolution)
+
 	supportedMap := map[string][]int{}
 	resolutionInfo := map[string]ResolutionInfo{}
 
-	json.Unmarshal([]byte(result1), &supportedMap)
-	json.Unmarshal([]byte(result2), &resolutionInfo)
+	err = json.Unmarshal([]byte(result1), &supportedMap)
+	err = json.Unmarshal([]byte(result2), &resolutionInfo)
+	if err != nil {
+		return
+	}
 
 	supported := supportedMap["supported"]
 
 	// output folder for HLS file (.m3u8 and .ts)
-	outputDir := f.ffmpegConfig.mountFolder + "/" + key
+	outputDir := f.ffmpegConfig.mountFolder + "/" + streamKey
 	outputFile := outputDir + "/index-%v.m3u8"
-	url := serverUrl + "/" + key
+	url := serverUrl + "/" + streamId
 	// create folder if not existed
 	err = os.MkdirAll(outputDir, os.ModePerm)
 	if err != nil {
@@ -85,7 +90,7 @@ func (f *Ffmpeg) NewStream(serverUrl string, key string) {
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
 
-	param, err := ResolutionCmd(1080, 60, supported, resolutionInfo)
+	param, err := ResolutionCmd(resolution, fps, supported, resolutionInfo)
 	if err != nil {
 		return
 	}

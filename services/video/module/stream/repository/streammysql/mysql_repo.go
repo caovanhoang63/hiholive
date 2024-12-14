@@ -1,6 +1,7 @@
 package streammysql
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/caovanhoang63/hiholive/services/video/module/stream/streammodel"
 	"github.com/caovanhoang63/hiholive/shared/go/core"
@@ -32,7 +33,12 @@ func (s *streamRepo) Create(ctx context.Context, create *streammodel.StreamCreat
 
 	create.Mask(core.DbTypeStream)
 
-	if err := s.rdClient.SetEx(ctx, fmt.Sprintf("stream:%s", create.StreamKey), create.Uid, 3600*time.Second).Err(); err != nil {
+	byteData, _ := json.Marshal(core.StreamState{
+		Uid:   create.Uid.String(),
+		State: "pending",
+	})
+
+	if err := s.rdClient.SetEx(ctx, fmt.Sprintf("stream:%s", create.StreamKey), byteData, 3600*time.Second).Err(); err != nil {
 		tx.Rollback()
 		return err
 	}

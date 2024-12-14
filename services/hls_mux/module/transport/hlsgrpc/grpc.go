@@ -1,7 +1,6 @@
 package hlsgrpc
 
 import (
-	"fmt"
 	"github.com/caovanhoang63/hiholive/services/hls_mux/component/ffmpegc"
 	"github.com/caovanhoang63/hiholive/shared/go/proto/pb"
 	"golang.org/x/net/context"
@@ -18,9 +17,11 @@ func NewHlsGRPC(Ffmpeg *ffmpegc.Ffmpeg) *hlsGRPC {
 func (h *hlsGRPC) NewHlsStream(ctx context.Context, req *pb.NewHlsStreamReq) (*pb.NewHlsStreamResp, error) {
 	key := req.StreamKey
 	link := req.ServerUrl
-	fmt.Println("Calllll")
+	fps := req.Fps
+	resolution := req.Resolution
+	streamId := req.StreamId
 
-	go h.Ffmpeg.NewStream(link, key)
+	go h.Ffmpeg.NewStream(streamId, link, key, int(fps), int(resolution))
 
 	return &pb.NewHlsStreamResp{}, nil
 }

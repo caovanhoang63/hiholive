@@ -14,13 +14,19 @@ type hlsClient struct {
 	grpcHlsClient pb.HlsServiceClient
 }
 
-func (ac *hlsClient) NewHlsStream(ctx context.Context, serverUrl, streamKey string) (err error) {
-	_, err = ac.grpcHlsClient.NewHlsStream(ctx, &pb.NewHlsStreamReq{StreamKey: streamKey, ServerUrl: serverUrl})
+func (ac *hlsClient) NewHlsStream(ctx context.Context, streamId string, serverUrl, streamKey string, fps, resolution int) (err error) {
+	_, err = ac.grpcHlsClient.NewHlsStream(ctx, &pb.NewHlsStreamReq{
+		StreamId:   streamId,
+		StreamKey:  streamKey,
+		ServerUrl:  serverUrl,
+		Fps:        int32(fps),
+		Resolution: int32(resolution),
+	})
 	if err != nil {
-		panic(err)
+		return err
 	}
 
-	return err
+	return nil
 }
 
 func ComposeHlsRPCClient(serviceCtx srvctx.ServiceContext) *hlsClient {

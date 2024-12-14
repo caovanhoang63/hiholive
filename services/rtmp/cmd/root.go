@@ -9,7 +9,6 @@ import (
 	"github.com/caovanhoang63/hiholive/shared/go/srvctx/components/ginc"
 	"github.com/caovanhoang63/hiholive/shared/go/srvctx/components/jwtc"
 	"github.com/caovanhoang63/hiholive/shared/go/srvctx/components/redisc"
-	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/yutopp/go-rtmp"
 	"io"
@@ -58,7 +57,7 @@ var rootCmd = &cobra.Command{
 					ControlState: rtmp.StreamControlStateConfig{
 						DefaultBandwidthWindowSize: 6 * 1024 * 1024 / 8,
 					},
-					Logger: log.StandardLogger(),
+					//Logger: log.StandardLogger(),
 				}
 			},
 		})

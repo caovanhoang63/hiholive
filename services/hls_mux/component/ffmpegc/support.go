@@ -1,7 +1,9 @@
 package ffmpegc
 
+// Deprecated:
 var resolutionSupport = []int{180, 240, 480, 720}
 
+// Deprecated:
 var resolutionFpsSupport = map[int][]int{
 	1080: {60},
 	720:  {60},
@@ -11,6 +13,7 @@ var resolutionFpsSupport = map[int][]int{
 	180:  {30},
 }
 
+// Deprecated:
 var vBitRateMap = map[int]int{
 	1080 + 60: 3000,
 	720 + 60:  2000,
@@ -20,6 +23,7 @@ var vBitRateMap = map[int]int{
 	180 + 30:  200,
 }
 
+// Deprecated:
 var widthMap = map[int]int{
 	1080: 1920,
 	720:  1280,

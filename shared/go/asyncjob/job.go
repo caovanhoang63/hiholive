@@ -152,6 +152,20 @@ func (j *job) Execute(ctx context.Context) error {
 	//return <-ch
 }
 
+func (j *job) RunWithRetry(ctx context.Context) error {
+	if err := j.Execute(ctx); err != nil {
+		for {
+			if j.State() == StateRetryFailed {
+				return err
+			}
+			if j.Retry(ctx) == nil {
+				return nil
+			}
+		}
+	}
+	return nil
+}
+
 func (j *job) Retry(ctx context.Context) error {
 	j.retryIndex += 1
 	time.Sleep(j.config.Retires[j.retryIndex])
