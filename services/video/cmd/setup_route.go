@@ -25,7 +25,7 @@ func SetupRoutes(router *gin.RouterGroup, serviceCtx srvctx.ServiceContext) {
 	settingPrv := v1.Group("/setting")
 	settingPrv.Use(middlewares.RequireAuth(ac), middlewares.Authorize(uc, "admin"))
 	settingPrv.POST("", settingService.CreateSystemSetting())
-	settingPrv.PATCH("", settingService.UpdateSystemSetting())
+	settingPrv.PATCH("/:name", settingService.UpdateSystemSetting())
 
 	settingPublic := v1.Group("/setting")
 	settingPublic.GET("", settingService.FindSystemSetting())
