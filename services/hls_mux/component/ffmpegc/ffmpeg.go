@@ -78,9 +78,9 @@ func (f *Ffmpeg) NewStream(streamId, serverUrl, streamKey string, fps, resolutio
 	supported := supportedMap["supported"]
 
 	// output folder for HLS file (.m3u8 and .ts)
-	outputDir := f.ffmpegConfig.mountFolder + "/" + streamKey
+	outputDir := f.ffmpegConfig.mountFolder + "/" + streamId
 	outputFile := outputDir + "/index-%v.m3u8"
-	url := serverUrl + "/" + streamId
+	url := serverUrl + "/" + streamKey
 	// create folder if not existed
 	err = os.MkdirAll(outputDir, os.ModePerm)
 	if err != nil {
