@@ -132,7 +132,6 @@ func (f *Ffmpeg) NewStream(streamId, serverUrl, streamKey string, fps, resolutio
 		"-tune", "zerolatency",
 	}
 
-	fmt.Println(param)
 	args = append(args, param...)
 	args = append(args,
 		"-threads", "2", // Set the number of threads for encoding/decoding (2 threads in this case)
@@ -148,7 +147,8 @@ func (f *Ffmpeg) NewStream(streamId, serverUrl, streamKey string, fps, resolutio
 		outputFile, // Output file name (the playlist and segments will be written to this location)
 	)
 
-	cmd := exec.Command("ffmpeg", args...)
+	ctx, cancel := context.WithCancel(context.Background())
+	cmd := exec.CommandContext(ctx, "ffmpeg", args...)
 
 	// write log output of FFmpeg
 	cmd.Stdout = log.Writer()
@@ -161,12 +161,14 @@ func (f *Ffmpeg) NewStream(streamId, serverUrl, streamKey string, fps, resolutio
 		}
 	}()
 
-	if err = cmd.Run(); err != nil {
-		log.Fatalf("FFmpeg err : %v", err)
-	}
+	go func() {
+		if err = cmd.Run(); err != nil {
+			log.Println("FFmpeg err : %v", err)
+		}
+	}()
 
 	return func() error {
-		sigChan <- syscall.SIGINT
+		cancel()
 		return nil
 	}
 }
