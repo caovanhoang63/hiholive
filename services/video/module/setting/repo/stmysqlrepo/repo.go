@@ -1,6 +1,7 @@
 package stmysqlrepo
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/caovanhoang63/hiholive/services/video/module/setting/stmodel"
@@ -28,8 +29,8 @@ func (r *repo) Create(ctx context.Context, create *stmodel.SettingCreate) error 
 		tx.Rollback()
 		return err
 	}
-
-	if err := r.rdClient.Set(ctx, fmt.Sprintf("system_setting:%s", create.Name), create.Value, 0).Err(); err != nil {
+	b, _ := json.Marshal(create.Value)
+	if err := r.rdClient.Set(ctx, fmt.Sprintf("system_setting:%s", create.Name), b, 0).Err(); err != nil {
 		tx.Rollback()
 		return err
 	}

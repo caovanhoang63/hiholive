@@ -34,6 +34,10 @@ func (s *systemSettingBizImpl) Create(ctx context.Context, requester core.Reques
 		return core.ErrForbidden
 	}
 
+	if field, err := core.Validator.ValidateField(create); err != nil {
+		return core.ErrInvalidInput(field)
+	}
+
 	old, err := s.repo.FindByName(ctx, create.Name)
 	if err != nil && !errors.Is(err, core.ErrRecordNotFound) {
 		return core.ErrInternalServerError.WithWrap(err)
@@ -53,6 +57,9 @@ func (s *systemSettingBizImpl) Create(ctx context.Context, requester core.Reques
 func (s *systemSettingBizImpl) Update(ctx context.Context, requester core.Requester, name string, update *stmodel.SettingUpdate) error {
 	if requester.GetRole() != "admin" {
 		return core.ErrForbidden
+	}
+	if field, err := core.Validator.ValidateField(update); err != nil {
+		return core.ErrInvalidInput(field)
 	}
 
 	_, err := s.repo.FindByName(ctx, name)
