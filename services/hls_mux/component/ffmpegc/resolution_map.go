@@ -13,6 +13,7 @@ type streamInfo struct {
 	fps          int
 }
 
+// ToCmd generates a slice of FFmpeg command arguments based on stream properties and target height, resolution, and FPS.
 func (s *streamInfo) ToCmd(height int, originResolution int, originFps int) []string {
 	if s.height == originResolution && s.fps == originFps {
 		return []string{
