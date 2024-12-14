@@ -1,7 +1,11 @@
 package ffmpegc
 
 import (
+	"encoding/json"
+	"fmt"
 	"github.com/caovanhoang63/hiholive/shared/go/srvctx"
+	"github.com/redis/go-redis/v9"
+	"golang.org/x/net/context"
 	"log"
 	"os"
 	"os/exec"
@@ -10,16 +14,18 @@ import (
 )
 
 var (
-	DefaultConfig = NewFfmpegConfig("./hls_output")
+	DefaultConfig = NewFfmpegConfig("./hls_output", nil)
 )
 
 type FfmpegConfig struct {
 	mountFolder string
+	rd          *redis.Client
 }
 
-func NewFfmpegConfig(mountFolder string) *FfmpegConfig {
+func NewFfmpegConfig(mountFolder string, rd *redis.Client) *FfmpegConfig {
 	return &FfmpegConfig{
 		mountFolder: mountFolder,
+		rd:          rd,
 	}
 }
 
@@ -40,15 +46,38 @@ func (f *Ffmpeg) WithConfig(config *FfmpegConfig) *Ffmpeg {
 	return f
 }
 
+type ResolutionInfo struct {
+	Width  int                   `json:"width"`
+	Height int                   `json:"height"`
+	Fps    map[string]FpsBitRate `json:"fps"`
+}
+
+type FpsBitRate struct {
+	ABitRate int `json:"aBitRate"`
+	VBitRate int `json:"vBitRate"`
+}
+
 func (f *Ffmpeg) NewStream(serverUrl string, key string) {
-	log.Println(serverUrl)
+	result1, err := f.ffmpegConfig.rd.Get(context.Background(), "system_setting:STREAM_RESOLUTION_SUPPORT").Result()
+	result2, err := f.ffmpegConfig.rd.Get(context.Background(), "system_setting:STREAM_RESOLUTION_INFO").Result()
+	if err != nil {
+		return
+	}
+
+	supportedMap := map[string][]int{}
+	resolutionInfo := map[string]ResolutionInfo{}
+
+	json.Unmarshal([]byte(result1), &supportedMap)
+	json.Unmarshal([]byte(result2), &resolutionInfo)
+
+	supported := supportedMap["supported"]
 
 	// output folder for HLS file (.m3u8 and .ts)
 	outputDir := f.ffmpegConfig.mountFolder + "/" + key
 	outputFile := outputDir + "/index-%v.m3u8"
 	url := serverUrl + "/" + key
 	// create folder if not existed
-	err := os.MkdirAll(outputDir, os.ModePerm)
+	err = os.MkdirAll(outputDir, os.ModePerm)
 	if err != nil {
 		log.Fatalf("Lỗi khi tạo thư mục: %v", err)
 	}
@@ -56,7 +85,7 @@ func (f *Ffmpeg) NewStream(serverUrl string, key string) {
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
 
-	param, err := ResolutionCmd(1080, 60)
+	param, err := ResolutionCmd(1080, 60, supported, resolutionInfo)
 	if err != nil {
 		return
 	}
@@ -92,6 +121,7 @@ func (f *Ffmpeg) NewStream(serverUrl string, key string) {
 		"-tune", "zerolatency",
 	}
 
+	fmt.Println(param)
 	args = append(args, param...)
 	args = append(args,
 		"-threads", "2", // Set the number of threads for encoding/decoding (2 threads in this case)

@@ -9,6 +9,7 @@ import (
 	"github.com/caovanhoang63/hiholive/shared/go/srvctx/components/ginc/middlewares"
 	"github.com/caovanhoang63/hiholive/shared/go/srvctx/components/gormc"
 	"github.com/caovanhoang63/hiholive/shared/go/srvctx/components/jwtc"
+	"github.com/caovanhoang63/hiholive/shared/go/srvctx/components/redisc"
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/cobra"
 
@@ -22,6 +23,7 @@ func newServiceCtx() srvctx.ServiceContext {
 		srvctx.WithComponent(gormc.NewGormDB(core.KeyCompMySQL, "")),
 		srvctx.WithComponent(jwtc.NewJWT(core.KeyCompJWT)),
 		srvctx.WithComponent(core.NewConfig()),
+		srvctx.WithComponent(redisc.NewRedis(core.KeyRedis)),
 		//srvctx.WithComponent(rabbitpubsub.NewRabbitPubSub(core.KeyCompRabbitMQ)),
 	)
 }
@@ -38,6 +40,7 @@ var rootCmd = &cobra.Command{
 		}
 
 		ginComp := serviceCtx.MustGet(core.KeyCompGIN).(core.GINComponent)
+		rd := serviceCtx.MustGet(core.KeyRedis).(core.RedisComponent)
 		router := ginComp.GetRouter()
 
 		router.Static("/static", "hls_output")
@@ -47,7 +50,7 @@ var rootCmd = &cobra.Command{
 			c.JSON(200, "pong")
 		})
 
-		ffmpeg := ffmpegc.NewFfmpeg(serviceCtx).WithConfig(nil)
+		ffmpeg := ffmpegc.NewFfmpeg(serviceCtx).WithConfig(ffmpegc.NewFfmpegConfig("/hls_output", rd.GetClient()))
 
 		go StartGRPCServices(ffmpeg, serviceCtx)
 
