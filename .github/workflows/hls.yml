@@ -58,11 +58,8 @@ jobs:
               docker pull caovanhoang204/${APP_NAME}:latest &&
               docker run -d --name ${APP_NAME} \
               --network hiholive \
+              -v ./hls_output/:/app/hls_output/ \
               -v ${PWD}/.env:/app/.env \
-              --cap-add SYS_ADMIN --device /dev/fuse \
-              --security-opt apparmor:unconfined \
-              -v ${PWD}/.passwd-s3fs:/app/.passwd-s3fs \
-              -p 3000:3000 \
               -v ${PWD}/.log/:/app/.log/ \
               caovanhoang204/${APP_NAME}:latest
           '
