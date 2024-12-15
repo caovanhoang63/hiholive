@@ -38,7 +38,7 @@ var rootCmd = &cobra.Command{
 
 		ffmpeg := ffmpegc.NewFfmpeg(serviceCtx).WithConfig(ffmpegc.NewFfmpegConfig("./hls_output", rd.GetClient()))
 
-		go StartGRPCServices(ffmpeg, serviceCtx)
+		StartGRPCServices(ffmpeg, serviceCtx)
 	},
 }
 
