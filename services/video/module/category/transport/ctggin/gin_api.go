@@ -30,7 +30,9 @@ func (a *categoryApi) CreateCategory() gin.HandlerFunc {
 			core.WriteErrorResponse(c, err)
 			return
 		}
-		c.JSON(200, core.ResponseData(true))
+
+		create.Mask(core.DbTypeCategory)
+		c.JSON(200, core.ResponseData(&create.Uid))
 	}
 }
 
@@ -74,28 +76,14 @@ func (a *categoryApi) DeleteCategory() gin.HandlerFunc {
 			core.WriteErrorResponse(c, err)
 			return
 		}
+
 		c.JSON(200, core.ResponseData(true))
 	}
 }
 
 func (a *categoryApi) FindCategories() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		uid, err := core.FromBase58(c.Param("id"))
-		if err != nil {
-			core.WriteErrorResponse(c, core.ErrBadRequest.WithError(err.Error()))
-			return
-		}
-		data, err := a.biz.FindCategory(c.Request.Context(), int(uid.GetLocalID()))
-		if err != nil {
-			core.WriteErrorResponse(c, err)
-			return
-		}
-		c.JSON(200, core.ResponseData(data))
-	}
-}
 
-func (a *categoryApi) FindCategoryById() gin.HandlerFunc {
-	return func(c *gin.Context) {
 		var filter ctgmodel.CategoryFilter
 		var paging core.Paging
 
@@ -116,6 +104,28 @@ func (a *categoryApi) FindCategoryById() gin.HandlerFunc {
 			core.WriteErrorResponse(c, err)
 			return
 		}
+
+		for i := range data {
+			data[i].Mask()
+		}
 		c.JSON(200, core.SuccessResponse(data, paging, filter))
+
+	}
+}
+
+func (a *categoryApi) FindCategoryById() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		uid, err := core.FromBase58(c.Param("id"))
+		if err != nil {
+			core.WriteErrorResponse(c, core.ErrBadRequest.WithError(err.Error()))
+			return
+		}
+		data, err := a.biz.FindCategory(c.Request.Context(), int(uid.GetLocalID()))
+		if err != nil {
+			core.WriteErrorResponse(c, err)
+			return
+		}
+		data.Mask()
+		c.JSON(200, core.ResponseData(data))
 	}
 }

@@ -19,6 +19,7 @@ func NewGinApi(biz stbiz.SystemSettingBiz) *ginApi {
 func (api *ginApi) CreateSystemSetting() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var data stmodel.SettingCreate
+
 		if err := c.ShouldBindJSON(&data); err != nil {
 			fmt.Println(err.Error())
 			core.WriteErrorResponse(c, core.ErrBadRequest.WithError(err.Error()))
@@ -31,6 +32,8 @@ func (api *ginApi) CreateSystemSetting() gin.HandlerFunc {
 			core.WriteErrorResponse(c, err)
 			return
 		}
+
+		data.Mask(core.DbTypeSystemSetting)
 
 		c.JSON(200, core.ResponseData(true))
 	}

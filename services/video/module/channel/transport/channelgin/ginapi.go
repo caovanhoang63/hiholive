@@ -36,7 +36,10 @@ func (g *ginAPI) CreateChannel() func(c *gin.Context) {
 			core.WriteErrorResponse(c, err)
 			return
 		}
-		c.JSON(http.StatusOK, core.ResponseData(true))
+
+		data.Mask(core.DbTypeChannel)
+
+		c.JSON(http.StatusOK, core.ResponseData(&data.Uid))
 
 	}
 }

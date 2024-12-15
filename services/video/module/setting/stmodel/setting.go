@@ -7,7 +7,7 @@ import (
 type Setting struct {
 	core.BaseModel `bson:",inline"`
 	Name           string `json:"name" form:"name" gorm:"column:name"`
-	Value          any    `gorm:"serializer:json"`
+	Value          any    `gorm:"serializer:json" json:"value" form:"value"`
 	Status         int    `json:"status" form:"status" gorm:"column:status"`
 }
 

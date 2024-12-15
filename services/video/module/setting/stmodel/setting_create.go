@@ -1,11 +1,14 @@
 package stmodel
 
+import "github.com/caovanhoang63/hiholive/shared/go/core"
+
 type SettingCreate struct {
-	Name  string `json:"name" gorm:"column:name" validate:"required"`
-	Value any    `gorm:"serializer:json"  validate:"required"`
+	core.BaseModel `bson:",inline"`
+	Name           string `json:"name" gorm:"column:name" validate:"required"`
+	Value          any    `gorm:"serializer:json" json:"value" form:"value" validate:"required"`
 }
 
 type SettingUpdate struct {
 	Name  *string `json:"name" form:"name" gorm:"column:name"`
-	Value any     `gorm:"serializer:json" validate:"required"`
+	Value any     `gorm:"serializer:json" json:"value" form:"value" validate:"required"`
 }
