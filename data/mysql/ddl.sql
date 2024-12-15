@@ -45,6 +45,7 @@ CREATE TABLE `channels` (
                             `id` int NOT NULL AUTO_INCREMENT,
                             `user_id` INT NOT NULL,
                             `panel` JSON,
+                            `image` JSON,
                             `description` TEXT,
                             `url` VARCHAR(2083),
                             `contact` VARCHAR(255),
