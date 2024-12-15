@@ -39,6 +39,6 @@ func SetupRoutes(router *gin.RouterGroup, serviceCtx srvctx.ServiceContext) {
 	ctgPrv.DELETE("/:id", ctgService.DeleteCategory())
 
 	ctgPublic := v1.Group("/category")
+	ctgPublic.GET("", ctgService.FindCategories())
 	ctgPublic.GET("/:id", ctgService.FindCategoryById())
-	ctgPublic.GET("/", ctgService.FindCategories())
 }
