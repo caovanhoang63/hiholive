@@ -12,6 +12,7 @@ func SetupRoutes(router *gin.RouterGroup, serviceCtx srvctx.ServiceContext) {
 	channelService := composer.ComposeChannelAPIService(serviceCtx)
 	streamService := composer.ComposeStreamAPIService(serviceCtx)
 	settingService := composer.ComposeSystemSettingApiService(serviceCtx)
+	ctgService := composer.ComposeCategoryApiService(serviceCtx)
 
 	ac := composer.ComposeAuthRPCClient(serviceCtx)
 	uc := composer.ComposeUserRPCClient(serviceCtx)
@@ -30,4 +31,14 @@ func SetupRoutes(router *gin.RouterGroup, serviceCtx srvctx.ServiceContext) {
 	settingPublic := v1.Group("/setting")
 	settingPublic.GET("", settingService.FindSystemSetting())
 	settingPublic.GET("/:name", settingService.FindSystemSettingByName())
+
+	ctgPrv := v1.Group("/category")
+	ctgPrv.Use(middlewares.RequireAuth(ac), middlewares.Authorize(uc, "admin"))
+	ctgPrv.POST("", ctgService.CreateCategory())
+	ctgPrv.PATCH("/:id", ctgService.UpdateCategory())
+	ctgPrv.DELETE("/:id", ctgService.DeleteCategory())
+
+	ctgPublic := v1.Group("/category")
+	ctgPublic.GET("/:id", ctgService.FindCategoryById())
+	ctgPublic.GET("/", ctgService.FindCategories())
 }

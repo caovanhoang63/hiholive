@@ -1,6 +1,9 @@
 package composer
 
 import (
+	"github.com/caovanhoang63/hiholive/services/video/module/category/ctgbiz"
+	"github.com/caovanhoang63/hiholive/services/video/module/category/repository/ctgmysqlrepo"
+	"github.com/caovanhoang63/hiholive/services/video/module/category/transport/ctggin"
 	"github.com/caovanhoang63/hiholive/services/video/module/channel/channelbiz"
 	"github.com/caovanhoang63/hiholive/services/video/module/channel/repository/channelmysql"
 	"github.com/caovanhoang63/hiholive/services/video/module/channel/transport/channelgin"
@@ -56,5 +59,21 @@ func ComposeSystemSettingApiService(serviceCtx srvctx.ServiceContext) SystemSett
 	repo := stmysqlrepo.New(db.GetDB(), rd.GetClient())
 	biz := stbiz.NewSystemSettingBiz(repo)
 	service := stgin.NewGinApi(biz)
+	return service
+}
+
+type CategoryService interface {
+	CreateCategory() gin.HandlerFunc
+	UpdateCategory() gin.HandlerFunc
+	FindCategories() gin.HandlerFunc
+	FindCategoryById() gin.HandlerFunc
+	DeleteCategory() gin.HandlerFunc
+}
+
+func ComposeCategoryApiService(serviceCtx srvctx.ServiceContext) CategoryService {
+	db := serviceCtx.MustGet(core.KeyCompMySQL).(core.GormComponent)
+	ctgRepo := ctgmysqlrepo.NewMysqlRepo(db.GetDB())
+	ctgBiz := ctgbiz.NewCategoryBiz(ctgRepo)
+	service := ctggin.NewCategoryApi(ctgBiz)
 	return service
 }
