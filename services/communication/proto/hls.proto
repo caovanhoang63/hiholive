@@ -1,0 +1,19 @@
+syntax = "proto3";
+package pb;
+
+message NewHlsStreamReq {
+  string stream_id = 1;
+  string stream_key = 2;
+  string server_url = 3;
+  int32 resolution = 4;
+  int32 fps = 5;
+}
+
+message NewHlsStreamResp {
+}
+
+service HlsService {
+
+
+  rpc NewHlsStream(NewHlsStreamReq) returns (NewHlsStreamResp);
+}

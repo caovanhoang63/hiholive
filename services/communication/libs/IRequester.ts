@@ -2,7 +2,7 @@
 export const RequesterKey = "requester"
 
 export interface IRequester {
-    userId: number;
+    userId?: number;
     userRole?: string;
 }
 

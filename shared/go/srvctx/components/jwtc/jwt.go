@@ -99,7 +99,7 @@ func (j *jwtx) ParseToken(ctx context.Context, tokenString string) (claims *jwt.
 		return []byte(j.secret), nil
 	})
 
-	if !token.Valid {
+	if err != nil || !token.Valid {
 		return nil, errors.WithStack(err)
 	}
 

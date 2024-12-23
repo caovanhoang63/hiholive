@@ -8,39 +8,14 @@ import logger from "morgan"
 import cookieParser from "cookie-parser";
 import {createServer} from "node:http";
 import {Server} from "socket.io";
-import * as AWS from "@aws-sdk/client-dynamodb";
 import {socketSetup} from "./setupSocket";
 dotenv.config();
 
-const accessKey = process.env.S3_API_KEY
-const secretAccessKey = process.env.S3_SECRET
-
-export const client = new AWS.DynamoDB({
-    region: "ap-southeast-1",
-    credentials : {
-        accessKeyId : accessKey!,
-        secretAccessKey : secretAccessKey!
-    }
-});
-
-
-(async () => {
-    const r =await client.listTables()
-    console.log(r.TableNames)
-})()
 
 const app: Express = express();
 const port = process.env.EXPRESS_PORT || 3000;
-
-
-
 const httpServer = createServer(app);
-export const io = new Server(httpServer);
-
-io.on("connection", socketSetup);
-
-
-
+const io = new Server(httpServer);
 (BigInt.prototype as any).toJSON = function () {
     return this.toString();
 };
@@ -54,10 +29,12 @@ app.use(helmet());
 app.use(bodyParser.json());
 app.use(express.urlencoded({extended: false}));
 app.use(cookieParser());
+io.on("connection", socketSetup);
 
 app.get("/ping",(req, res) => {
     res.status(200).json("pong")
-})
+});
+
 
 
 httpServer.listen(port, () => {
