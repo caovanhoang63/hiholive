@@ -3,15 +3,41 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "dev" : "nodemon index.js",
+    "dev": "nodemon index.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.716.0",
+    "@types/cookie-parser": "^1.4.8",
+    "@types/morgan": "^1.9.9",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
     "dotenv": "^16.4.7",
-    "express": "^4.21.2"
+    "eslint-plugin-neverthrow": "^1.1.4",
+    "express": "^4.21.2",
+    "grpc": "^1.24.11",
+    "helmet": "^8.0.0",
+    "joi": "^17.13.3",
+    "morgan": "^1.10.0",
+    "neverthrow": "^8.1.1",
+    "reflect-metadata": "^0.2.2",
+    "socket.io": "^4.8.1",
+    "uuid": "^11.0.3"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/dotenv": "^6.1.1",
+    "@types/express": "^5.0.0",
+    "@types/helmet": "^0.0.48",
+    "@types/node": "^22.10.2",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.7.2"
+  },
+  "optionalDependencies": {
+    "bufferutil": "^4.0.8",
+    "utf-8-validate": "^6.0.5"
   }
 }
-
