@@ -11,9 +11,10 @@ export interface ChatMessage {
 export interface ChatMessageCreate {
     streamId : number,
     messageId: string,
-    timestamp: Date,
     userId : number,
     createdAt: Date,
     updatedAt: Date,
     message: string,
 }
+
+export const ChatMessageTableName = "chatMessages";
