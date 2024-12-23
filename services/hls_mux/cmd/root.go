@@ -24,7 +24,6 @@ func newServiceCtx() srvctx.ServiceContext {
 		srvctx.WithComponent(jwtc.NewJWT(core.KeyCompJWT)),
 		srvctx.WithComponent(core.NewConfig()),
 		srvctx.WithComponent(redisc.NewRedis(core.KeyRedis)),
-		//srvctx.WithComponent(rabbitpubsub.NewRabbitPubSub(core.KeyCompRabbitMQ)),
 	)
 }
 

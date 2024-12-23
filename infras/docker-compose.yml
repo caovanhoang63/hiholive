@@ -20,6 +20,7 @@ services:
     ports:
       - "5672:5672"
       - "15672:15672"
+      - "5671:5671"
     networks:
       - hiholive
     environment:

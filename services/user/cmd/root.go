@@ -8,6 +8,7 @@ import (
 	"github.com/caovanhoang63/hiholive/shared/go/srvctx/components/ginc/middlewares"
 	"github.com/caovanhoang63/hiholive/shared/go/srvctx/components/gormc"
 	"github.com/caovanhoang63/hiholive/shared/go/srvctx/components/jwtc"
+	rabbitpubsub "github.com/caovanhoang63/hiholive/shared/go/srvctx/components/pubsub/rabbitmq"
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/cobra"
 	"net/http"
@@ -21,6 +22,7 @@ func newServiceCtx() srvctx.ServiceContext {
 		srvctx.WithComponent(gormc.NewGormDB(core.KeyCompMySQL, "")),
 		srvctx.WithComponent(jwtc.NewJWT(core.KeyCompJWT)),
 		srvctx.WithComponent(core.NewConfig()),
+		srvctx.WithComponent(rabbitpubsub.NewRabbitPubSub(core.KeyCompRabbitMQ)),
 	)
 }
 
@@ -47,6 +49,7 @@ var rootCmd = &cobra.Command{
 		})
 
 		go StartGRPCServices(serviceCtx)
+		go StartSubscriber(serviceCtx)
 
 		SetupRoutes(router.Group(""), serviceCtx)
 

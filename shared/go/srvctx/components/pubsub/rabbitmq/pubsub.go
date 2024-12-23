@@ -29,7 +29,9 @@ func (pb *rabbitPubSub) InitFlags() {
 
 func (pb *rabbitPubSub) Activate(serviceContext srvctx.ServiceContext) error {
 	rabbitConn, err := amqp.Dial(pb.dsn)
+
 	logger := serviceContext.Logger(pb.id)
+
 	if err != nil {
 		return err
 	}
@@ -140,13 +142,13 @@ func (pb *rabbitPubSub) Subscribe(ctx context.Context, exchange string) (<-chan 
 	failOnError(err, "Failed to register a consumer")
 	ch := make(chan *pubsub.Message)
 
+	// TODO: handle this error
 	go func() {
 		for d := range msgs {
 			var mess pubsub.Message
 			mess.Unmarshal(d.Body)
 			ch <- &mess
 		}
-
 	}()
 
 	return ch, func() {

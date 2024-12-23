@@ -1,16 +1,14 @@
-package subcriberengine
+package subengine
 
 import (
-	"fmt"
 	"github.com/caovanhoang63/hiholive/shared/go/asyncjob"
 	"github.com/caovanhoang63/hiholive/shared/go/core"
 	"github.com/caovanhoang63/hiholive/shared/go/srvctx"
 	"github.com/caovanhoang63/hiholive/shared/go/srvctx/components/pubsub"
-	log "github.com/sirupsen/logrus"
 	"golang.org/x/net/context"
 )
 
-type consumerJob struct {
+type ConsumerJob struct {
 	Title   string
 	Handler func(ctx context.Context, message *pubsub.Message) error
 }
@@ -18,16 +16,28 @@ type consumerJob struct {
 type consumerEngine struct {
 	appCtx srvctx.ServiceContext
 	pb     pubsub.Pubsub
+	jobs   map[string][]ConsumerJob
+	logger srvctx.Logger
 }
 
-func NewEngine(appCtx srvctx.ServiceContext) *consumerEngine {
+func NewEngine(appCtx srvctx.ServiceContext, pb pubsub.Pubsub) *consumerEngine {
+	logger := appCtx.Logger("subengine")
 	return &consumerEngine{
+		jobs:   make(map[string][]ConsumerJob),
+		pb:     pb,
+		logger: logger,
 		appCtx: appCtx,
 	}
 }
 
 func (engine *consumerEngine) Start() error {
-
+	for topic, jobs := range engine.jobs {
+		err := engine.startSubTopic(topic, true, jobs...)
+		if err != nil {
+			engine.logger.Infof("Error starting sub topic %s: %v", topic, err)
+			continue
+		}
+	}
 	return nil
 }
 
@@ -35,15 +45,22 @@ type GroupJob interface {
 	Run(ctx context.Context) error
 }
 
-func (engine *consumerEngine) startSubTopic(topic string, isConcurrent bool, consumerJobs ...consumerJob) error {
+func (engine *consumerEngine) Subscribe(topic string, consumerJobs ...ConsumerJob) {
+	if _, ok := engine.jobs[topic]; !ok {
+		engine.jobs[topic] = make([]ConsumerJob, 0)
+	}
+	engine.jobs[topic] = append(engine.jobs[topic], consumerJobs...)
+}
+
+func (engine *consumerEngine) startSubTopic(topic string, isConcurrent bool, consumerJobs ...ConsumerJob) error {
 	c, _ := engine.pb.Subscribe(context.Background(), topic)
 	for _, item := range consumerJobs {
-		log.Printf("Set up consumer for: %s", item.Title)
+		engine.logger.Infof("Set up consumer for: %s", item.Title)
 	}
 
-	getJobHandler := func(job *consumerJob, message *pubsub.Message) asyncjob.JobHandler {
+	getJobHandler := func(job *ConsumerJob, message *pubsub.Message) asyncjob.JobHandler {
 		return func(ctx context.Context) error {
-			log.Printf("running job for %s for. Value %s \n", job.Title, message.Data)
+			engine.logger.Infof("running job for %s for. Value %s \n", job.Title, message.Data)
 			return job.Handler(ctx, message)
 		}
 	}
@@ -52,7 +69,7 @@ func (engine *consumerEngine) startSubTopic(topic string, isConcurrent bool, con
 		core.AppRecover()
 		for {
 			msg := <-c
-			fmt.Println("Message: ", msg.Data)
+			engine.logger.Infof("Message: ", msg.Data)
 			jobHdlArr := make([]asyncjob.Job, len(consumerJobs))
 
 			for i := range consumerJobs {
@@ -62,7 +79,7 @@ func (engine *consumerEngine) startSubTopic(topic string, isConcurrent bool, con
 			group := asyncjob.NewGroup(isConcurrent, jobHdlArr...)
 
 			if err := group.Run(context.Background()); err != nil {
-				log.Println("Err:", err)
+				engine.logger.Errorf("Err:", err)
 			}
 		}
 	}()

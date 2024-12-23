@@ -1,4 +1,4 @@
-package composer
+package usercomposer
 
 import (
 	"github.com/caovanhoang63/hiholive/services/user/module/user/biz"

@@ -1,4 +1,4 @@
-package composer
+package usercomposer
 
 import (
 	"context"
