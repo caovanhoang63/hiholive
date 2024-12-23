@@ -4,7 +4,7 @@ import {Filter} from "../model/filter";
 import {ChatMessage, ChatMessageCreate, ChatMessageTableName} from "../model/model";
 import {IChatRepo} from "./IRepository";
 import {dynamoClient} from "../../../dynamoClient";
-import {PutCommand} from "@aws-sdk/lib-dynamodb";
+import {DeleteCommand, PutCommand, QueryCommand} from "@aws-sdk/lib-dynamodb";
 import {createInternalError} from "../../../libs/errors";
 import {marshall} from "@aws-sdk/util-dynamodb";
 
@@ -12,7 +12,6 @@ export class ChatDynamoRepo implements IChatRepo {
 
 
     create(create: ChatMessageCreate): ResultAsync<void, Error> {
-
         return fromPromise(dynamoClient.send(new PutCommand({
                 TableName: ChatMessageTableName,
                 Item: {
@@ -34,10 +33,42 @@ export class ChatDynamoRepo implements IChatRepo {
     }
 
     list(filter: Filter, paging: Paging): ResultAsync<ChatMessage[], Error> {
-        throw new Error("Method not implemented.");
+        return fromPromise(dynamoClient.send(new QueryCommand({
+
+            KeyConditionExpression :"streamId = :streamId",
+            ExpressionAttributeValues: {
+                ":streamId" : filter.streamId
+            },
+
+            Limit: paging.limit,
+
+            TableName: ChatMessageTableName
+        })),
+            e => createInternalError(e)).andThen(
+                r=> {
+                    if (r.$metadata.httpStatusCode != 200) {
+                        return errAsync(createInternalError())
+                    }
+                    return okAsync(r.Items as ChatMessage[]);
+            }
+        )
     }
 
     delete(streamId: number, messageId: string): ResultAsync<void, Error> {
-        throw new Error("Method not implemented.");
+        return fromPromise(dynamoClient.send(new DeleteCommand({
+                Key: {
+                    "streamId" : streamId,
+                    "messageId" : messageId
+                },
+                TableName: ChatMessageTableName
+            })),
+            e => createInternalError(e)).andThen(
+            r=> {
+                if (r.$metadata.httpStatusCode != 200) {
+                    return errAsync(createInternalError())
+                }
+                return okAsync(undefined);
+            }
+        )
     }
 }
