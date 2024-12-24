@@ -2,7 +2,7 @@ import {DefaultEventsMap, Socket} from "socket.io";
 import {Authentication} from "./libs/rthandler/authentication";
 import {IRequester} from "./libs/IRequester";
 import {ChatDynamoRepo} from "./module/chat/repository/dynamo";
-import {v4 as uuidv4} from 'uuid';
+import {v7 as uuidv7} from 'uuid';
 import {Paging} from "./libs/paging";
 
 export const socketSetup = (socket:  Socket<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>) => {
@@ -55,7 +55,7 @@ export const socketSetup = (socket:  Socket<DefaultEventsMap, DefaultEventsMap, 
         const r = await repo.create({
             createdAt: new Date(),
             message: "asdasdas",
-            messageId: uuidv4(),
+            messageId: uuidv7(),
             streamId: 123,
             updatedAt: new Date(),
             userId: 123

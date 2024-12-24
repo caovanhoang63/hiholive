@@ -6,7 +6,6 @@ import {IChatRepo} from "./IRepository";
 import {dynamoClient} from "../../../dynamoClient";
 import {DeleteCommand, PutCommand, QueryCommand} from "@aws-sdk/lib-dynamodb";
 import {createInternalError} from "../../../libs/errors";
-import {marshall} from "@aws-sdk/util-dynamodb";
 
 export class ChatDynamoRepo implements IChatRepo {
 

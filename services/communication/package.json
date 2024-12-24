@@ -3,9 +3,11 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon index.ts",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "npx nodemon --watch src --ext ts,tsx --exec tsx index.ts",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc"
   },
+  "type": "module",
   "author": "",
   "license": "ISC",
   "description": "",
@@ -29,6 +31,7 @@
     "joi": "^17.13.3",
     "morgan": "^1.10.0",
     "neverthrow": "^8.1.1",
+    "redis": "^4.7.0",
     "reflect-metadata": "^0.2.2",
     "socket.io": "^4.8.1",
     "uuid": "^11.0.3"
@@ -43,6 +46,7 @@
     "grpc_tools_node_protoc_ts": "^5.3.3",
     "grpc-tools": "^1.12.4",
     "ts-node": "^10.9.2",
+    "tsx": "^4.19.2",
     "typescript": "^5.7.2"
   },
   "optionalDependencies": {

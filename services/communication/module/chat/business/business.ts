@@ -5,6 +5,7 @@ import { Filter } from "../model/filter";
 import { ChatMessageCreate, ChatMessage } from "../model/model";
 import {IChatBusiness} from "./IBusiness";
 import {IChatRepo} from "../repository/IRepository";
+import {createUnauthorizedError} from "../../../libs/errors";
 
 
 export class ChatBusiness implements IChatBusiness {
@@ -16,6 +17,7 @@ export class ChatBusiness implements IChatBusiness {
 
     create(requester: IRequester, create: ChatMessageCreate): ResultAsync<void, Error> {
         return fromPromise((async () => {
+            if (!requester.userId) return err(createUnauthorizedError())
             create.userId = requester.userId
             const r =  await this.chatRepo.create(create)
             if (r.isErr()) {

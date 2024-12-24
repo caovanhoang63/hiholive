@@ -7,8 +7,9 @@ import bodyParser from "body-parser";
 import logger from "morgan"
 import cookieParser from "cookie-parser";
 import {createServer} from "node:http";
-import {Server} from "socket.io";
 import {socketSetup} from "./setupSocket";
+import {redisClient} from "./redisClient";
+import {Server} from "socket.io";
 dotenv.config();
 
 
@@ -20,6 +21,10 @@ const io = new Server(httpServer);
     return this.toString();
 };
 
+// (async () => {
+//     const r = await redisClient.ping()
+//     console.log(r)
+// })()
 
 
 
