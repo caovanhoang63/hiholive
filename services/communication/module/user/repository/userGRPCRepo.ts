@@ -20,7 +20,7 @@ export class UserGRPCRepo implements IUserRepo {
                    if (e) {
                        return reject(errAsync(createInternalError(e)))
                    }
-                   if (!r) return reject(createEntityNotFoundError("stream"))
+                   if (!r) return reject(createEntityNotFoundError("user"))
                    if (r) {
                         return resolve(okAsync({
                            id : r.user.id,
