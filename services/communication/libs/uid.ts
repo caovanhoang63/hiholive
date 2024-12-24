@@ -28,21 +28,22 @@ export class UID   {
     static DecomposeUID(s:  string) : Result<UID,Error>  {
         const uid = BigInt(s)
         if (!uid) return err(new Error("Invalid UID"))
-        console.log(uid )
         const u  = new UID (
-            Number (uid >> BigInt(28)),
+            Number(uid >> BigInt(28)),
             Number((uid >> BigInt(18)) & BigInt(0x3FF)),
             Number((uid >> BigInt(0)) & BigInt(0x3FFF))
         )
-        console.log(u.localID)
         return ok(u)
     }
     toString(): string {
-        const val  =
-            ((this._localID) << 28) |
-            ((this._objectType) << 18) |
-            (this._shardID);
+        const val=(
+                (BigInt(this._localID) << 28n) |
+                (BigInt(this._objectType) << 18n) |
+                (BigInt(this._shardID)));
         return base58.encode(Buffer.from(val.toString()));
+    }
+    toJSON(): string {
+        return this.toString();
     }
 }
 

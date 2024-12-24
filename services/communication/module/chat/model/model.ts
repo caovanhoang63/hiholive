@@ -1,4 +1,4 @@
-import {User} from "../../user/model/user";
+import {User, UserRes} from "../../user/model/user";
 
 export interface ChatMessage {
     streamId : number,
@@ -19,5 +19,14 @@ export interface ChatMessageCreate {
     updatedAt: Date,
     message: string,
 }
+export interface ChatMessageResponse {
+    streamId : string,
+    messageId: string,
+    user: UserRes,
+    message: string,
+    createdAt: Date,
+    updatedAt: Date,
+}
+
 
 export const ChatMessageTableName = "chatMessages";

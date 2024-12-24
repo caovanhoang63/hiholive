@@ -9,3 +9,10 @@ export interface User {
     lastName: string,
     avatar : Image
 }
+
+export interface UserRes {
+    id : string ,
+    firstName : string,
+    lastName: string,
+    avatar : Image
+}
