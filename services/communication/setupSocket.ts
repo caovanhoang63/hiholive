@@ -6,12 +6,14 @@ import {Paging} from "./libs/paging";
 import {StreamRepo} from "./module/stream/repository/streamRepo";
 import {StreamBusiness} from "./module/stream/business/streamBusiness";
 import {UID} from "./libs/uid";
+import {ChatBusiness} from "./module/chat/business/business";
+import {ChatSkio} from "./module/chat/transport/chatskio";
+import {ChatMessageCreate} from "./module/chat/model/model";
 
 export const socketSetup = (socket:  Socket<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>) => {
-    const repo = new ChatDynamoRepo()
+    let requester : IRequester | null = null
 
     socket.on("authentication",async message => {
-        let requester : IRequester | null = null
         if (!message.token) {
             socket.emit("authentication","unauthorized")
             return
@@ -29,32 +31,12 @@ export const socketSetup = (socket:  Socket<DefaultEventsMap, DefaultEventsMap, 
         )
     })
 
-    socket.on("get", async message => {
-        const r = await repo.list({streamId: 123},new Paging(1,20))
-        if (r.isErr()) {
-            console.log(r.error)
-            return
-        }
-        console.log(r.value)
-
-    })
-
-
-    socket.on("delete", async message => {
-        const r = await repo.delete(123,message.messageId)
-        if (r.isErr()) {
-            console.log(r.error)
-            return
-        }
-    })
-
     socket.on("joinStream",async (message) => {
         if (!message.streamId) {
             socket.emit("joinStream", "error")
             return
         }
         const uid = message.streamId
-
         await UID.FromBase58(uid).match(
             async r => {
                 const repo = new StreamRepo()
@@ -65,6 +47,15 @@ export const socketSetup = (socket:  Socket<DefaultEventsMap, DefaultEventsMap, 
                     socket.emit("joinStream", stream.error);
                 }
                 socket.join(message.streamId)
+
+                const chatRepo = new ChatDynamoRepo()
+                const chatBiz = new ChatBusiness(chatRepo)
+                const chatSkio = new ChatSkio(chatBiz)
+
+                socket.on("sendMessage",async (message) => {
+                    message.streamId = r.localID
+                    await chatSkio.sendMessage(socket,requester,message as ChatMessageCreate)
+                })
             },
             e => {
                 console.log(e)
@@ -72,6 +63,7 @@ export const socketSetup = (socket:  Socket<DefaultEventsMap, DefaultEventsMap, 
             }
         )
     })
+
     socket.on("disconnect",()=> {
         console.log("Client disconnect")
     })

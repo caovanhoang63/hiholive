@@ -38,7 +38,7 @@ export class UID   {
         return ok(u)
     }
     toString(): string {
-        const val =
+        const val  =
             ((this._localID) << 28) |
             ((this._objectType) << 18) |
             (this._shardID);

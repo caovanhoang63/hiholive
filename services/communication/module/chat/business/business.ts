@@ -6,7 +6,7 @@ import { ChatMessageCreate, ChatMessage } from "../model/model";
 import {IChatBusiness} from "./IBusiness";
 import {IChatRepo} from "../repository/IRepository";
 import {createUnauthorizedError} from "../../../libs/errors";
-
+import {v7} from "uuid";
 
 export class ChatBusiness implements IChatBusiness {
     private chatRepo : IChatRepo;
@@ -19,6 +19,9 @@ export class ChatBusiness implements IChatBusiness {
         return fromPromise((async () => {
             if (!requester.userId) return err(createUnauthorizedError())
             create.userId = requester.userId
+            create.createdAt = new Date()
+            create.updatedAt = new Date()
+            create.messageId = v7();
             const r =  await this.chatRepo.create(create)
             if (r.isErr()) {
                 return err(r.error)
