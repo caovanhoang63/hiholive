@@ -2,16 +2,20 @@ import {DefaultEventsMap, Socket} from "socket.io";
 import {Authentication} from "./module/rthandler/authentication";
 import {IRequester} from "./libs/IRequester";
 import {ChatDynamoRepo} from "./module/chat/repository/dynamo";
-import {Paging} from "./libs/paging";
 import {StreamRepo} from "./module/stream/repository/streamRepo";
 import {StreamBusiness} from "./module/stream/business/streamBusiness";
 import {UID} from "./libs/uid";
 import {ChatBusiness} from "./module/chat/business/business";
 import {ChatSkio} from "./module/chat/transport/chatskio";
 import {ChatMessageCreate} from "./module/chat/model/model";
+import {Nullable} from "./libs/nullable";
+import {User} from "./module/user/model/user";
+import {UserGRPCRepo} from "./module/user/repository/userGRPCRepo";
+import {createInternalError, createUnauthorizedError} from "./libs/errors";
 
 export const socketSetup = (socket:  Socket<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>) => {
-    let requester : IRequester | null = null
+    let requester : Nullable<IRequester> = null;
+    let user: Nullable<User> = null;
 
     socket.on("authentication",async message => {
         if (!message.token) {
@@ -20,13 +24,29 @@ export const socketSetup = (socket:  Socket<DefaultEventsMap, DefaultEventsMap, 
         }
         const result = await  Authentication(message.token)
         result.match(
-            ok => {
-                requester = ok
-                socket.emit("authentication", "ok")
+            async ok => {
+                if (!ok) {
+                    socket.emit("authentication", createUnauthorizedError())
+                    return
+                }
+                const userRepo = new UserGRPCRepo();
+                const ur = await userRepo.getUserById(ok.userId!)
+                ur.match(
+                    r => {
+                        socket.emit("authentication", true)
+                        requester = ok
+                        console.log(r)
+                        user = r
+                    },
+                    e => {
+                        console.log(e)
+                        socket.emit("authentication", createInternalError(e))
+                    }
+                )
             },
             e => {
                 console.log(e)
-                socket.emit("authentication", "unauthorized")
+                socket.emit("authentication",  createUnauthorizedError())
             }
         )
     })
@@ -54,7 +74,7 @@ export const socketSetup = (socket:  Socket<DefaultEventsMap, DefaultEventsMap, 
 
                 socket.on("sendMessage",async (message) => {
                     message.streamId = r.localID
-                    await chatSkio.sendMessage(socket,requester,message as ChatMessageCreate)
+                    await chatSkio.sendMessage(socket,requester,user!,message as ChatMessageCreate)
                 })
             },
             e => {

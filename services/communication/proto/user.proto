@@ -1,5 +1,7 @@
 syntax = "proto3";
 package pb;
+import "image.proto";
+
 message GetUserByIdReq {
   int32 id = 1;
 }
@@ -22,6 +24,7 @@ message PublicUserInfo {
   int32 id = 1;
   string first_name = 2;
   string last_name = 3;
+  Image avatar = 4;
 }
 
 message PublicUserInfoResp {
@@ -32,6 +35,7 @@ message PublicUsersInfoResp {
   repeated PublicUserInfo users = 1;
 }
 
+
 message GetUserRoleReq {
   int32 id = 1;
 }
@@ -41,7 +45,8 @@ message GetUserRoleReps {
 }
 
 service UserService {
-
   rpc CreateUser(CreateUserReq) returns (NewUserIdResp);
   rpc GetUserRole(GetUserRoleReq) returns (GetUserRoleReps);
+  rpc GetUserById(GetUserByIdReq) returns (PublicUserInfoResp);
+  rpc GetUsersByIds(GetUsersByIdsReq) returns (PublicUsersInfoResp);
 }

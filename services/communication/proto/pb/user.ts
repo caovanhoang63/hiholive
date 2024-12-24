@@ -3,6 +3,7 @@
  * compiler version: 0.0.0
  * source: user.proto
  * git: https://github.com/thesayyn/protoc-gen-ts */
+import * as dependency_1 from "./image";
 import * as pb_1 from "google-protobuf";
 import * as grpc_1 from "@grpc/grpc-js";
 export namespace pb {
@@ -326,6 +327,7 @@ export namespace pb {
             id?: number;
             first_name?: string;
             last_name?: string;
+            avatar?: dependency_1.pb.Image;
         }) {
             super();
             pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], this.#one_of_decls);
@@ -338,6 +340,9 @@ export namespace pb {
                 }
                 if ("last_name" in data && data.last_name != undefined) {
                     this.last_name = data.last_name;
+                }
+                if ("avatar" in data && data.avatar != undefined) {
+                    this.avatar = data.avatar;
                 }
             }
         }
@@ -359,10 +364,20 @@ export namespace pb {
         set last_name(value: string) {
             pb_1.Message.setField(this, 3, value);
         }
+        get avatar() {
+            return pb_1.Message.getWrapperField(this, dependency_1.pb.Image, 4) as dependency_1.pb.Image;
+        }
+        set avatar(value: dependency_1.pb.Image) {
+            pb_1.Message.setWrapperField(this, 4, value);
+        }
+        get has_avatar() {
+            return pb_1.Message.getField(this, 4) != null;
+        }
         static fromObject(data: {
             id?: number;
             first_name?: string;
             last_name?: string;
+            avatar?: ReturnType<typeof dependency_1.pb.Image.prototype.toObject>;
         }): PublicUserInfo {
             const message = new PublicUserInfo({});
             if (data.id != null) {
@@ -374,6 +389,9 @@ export namespace pb {
             if (data.last_name != null) {
                 message.last_name = data.last_name;
             }
+            if (data.avatar != null) {
+                message.avatar = dependency_1.pb.Image.fromObject(data.avatar);
+            }
             return message;
         }
         toObject() {
@@ -381,6 +399,7 @@ export namespace pb {
                 id?: number;
                 first_name?: string;
                 last_name?: string;
+                avatar?: ReturnType<typeof dependency_1.pb.Image.prototype.toObject>;
             } = {};
             if (this.id != null) {
                 data.id = this.id;
@@ -390,6 +409,9 @@ export namespace pb {
             }
             if (this.last_name != null) {
                 data.last_name = this.last_name;
+            }
+            if (this.avatar != null) {
+                data.avatar = this.avatar.toObject();
             }
             return data;
         }
@@ -403,6 +425,8 @@ export namespace pb {
                 writer.writeString(2, this.first_name);
             if (this.last_name.length)
                 writer.writeString(3, this.last_name);
+            if (this.has_avatar)
+                writer.writeMessage(4, this.avatar, () => this.avatar.serialize(writer));
             if (!w)
                 return writer.getResultBuffer();
         }
@@ -420,6 +444,9 @@ export namespace pb {
                         break;
                     case 3:
                         message.last_name = reader.readString();
+                        break;
+                    case 4:
+                        reader.readMessage(message.avatar, () => message.avatar = dependency_1.pb.Image.deserialize(reader));
                         break;
                     default: reader.skipField();
                 }
@@ -747,11 +774,31 @@ export namespace pb {
                 requestDeserialize: (bytes: Buffer) => GetUserRoleReq.deserialize(new Uint8Array(bytes)),
                 responseSerialize: (message: GetUserRoleReps) => Buffer.from(message.serialize()),
                 responseDeserialize: (bytes: Buffer) => GetUserRoleReps.deserialize(new Uint8Array(bytes))
+            },
+            GetUserById: {
+                path: "/pb.UserService/GetUserById",
+                requestStream: false,
+                responseStream: false,
+                requestSerialize: (message: GetUserByIdReq) => Buffer.from(message.serialize()),
+                requestDeserialize: (bytes: Buffer) => GetUserByIdReq.deserialize(new Uint8Array(bytes)),
+                responseSerialize: (message: PublicUserInfoResp) => Buffer.from(message.serialize()),
+                responseDeserialize: (bytes: Buffer) => PublicUserInfoResp.deserialize(new Uint8Array(bytes))
+            },
+            GetUsersByIds: {
+                path: "/pb.UserService/GetUsersByIds",
+                requestStream: false,
+                responseStream: false,
+                requestSerialize: (message: GetUsersByIdsReq) => Buffer.from(message.serialize()),
+                requestDeserialize: (bytes: Buffer) => GetUsersByIdsReq.deserialize(new Uint8Array(bytes)),
+                responseSerialize: (message: PublicUsersInfoResp) => Buffer.from(message.serialize()),
+                responseDeserialize: (bytes: Buffer) => PublicUsersInfoResp.deserialize(new Uint8Array(bytes))
             }
         };
         [method: string]: grpc_1.UntypedHandleCall;
         abstract CreateUser(call: grpc_1.ServerUnaryCall<CreateUserReq, NewUserIdResp>, callback: grpc_1.sendUnaryData<NewUserIdResp>): void;
         abstract GetUserRole(call: grpc_1.ServerUnaryCall<GetUserRoleReq, GetUserRoleReps>, callback: grpc_1.sendUnaryData<GetUserRoleReps>): void;
+        abstract GetUserById(call: grpc_1.ServerUnaryCall<GetUserByIdReq, PublicUserInfoResp>, callback: grpc_1.sendUnaryData<PublicUserInfoResp>): void;
+        abstract GetUsersByIds(call: grpc_1.ServerUnaryCall<GetUsersByIdsReq, PublicUsersInfoResp>, callback: grpc_1.sendUnaryData<PublicUsersInfoResp>): void;
     }
     export class UserServiceClient extends grpc_1.makeGenericClientConstructor(UnimplementedUserServiceService.definition, "UserService", {}) {
         constructor(address: string, credentials: grpc_1.ChannelCredentials, options?: Partial<grpc_1.ChannelOptions>) {
@@ -762,6 +809,12 @@ export namespace pb {
         };
         GetUserRole: GrpcUnaryServiceInterface<GetUserRoleReq, GetUserRoleReps> = (message: GetUserRoleReq, metadata: grpc_1.Metadata | grpc_1.CallOptions | grpc_1.requestCallback<GetUserRoleReps>, options?: grpc_1.CallOptions | grpc_1.requestCallback<GetUserRoleReps>, callback?: grpc_1.requestCallback<GetUserRoleReps>): grpc_1.ClientUnaryCall => {
             return super.GetUserRole(message, metadata, options, callback);
+        };
+        GetUserById: GrpcUnaryServiceInterface<GetUserByIdReq, PublicUserInfoResp> = (message: GetUserByIdReq, metadata: grpc_1.Metadata | grpc_1.CallOptions | grpc_1.requestCallback<PublicUserInfoResp>, options?: grpc_1.CallOptions | grpc_1.requestCallback<PublicUserInfoResp>, callback?: grpc_1.requestCallback<PublicUserInfoResp>): grpc_1.ClientUnaryCall => {
+            return super.GetUserById(message, metadata, options, callback);
+        };
+        GetUsersByIds: GrpcUnaryServiceInterface<GetUsersByIdsReq, PublicUsersInfoResp> = (message: GetUsersByIdsReq, metadata: grpc_1.Metadata | grpc_1.CallOptions | grpc_1.requestCallback<PublicUsersInfoResp>, options?: grpc_1.CallOptions | grpc_1.requestCallback<PublicUsersInfoResp>, callback?: grpc_1.requestCallback<PublicUsersInfoResp>): grpc_1.ClientUnaryCall => {
+            return super.GetUsersByIds(message, metadata, options, callback);
         };
     }
 }

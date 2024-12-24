@@ -1,7 +1,7 @@
 import Joi from "joi";
 
 export type Image =  {
-    id : string;
+    id : number;
     width? : number;
     height? : number;
     url: string;

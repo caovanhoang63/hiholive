@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.5.1
 // - protoc             (unknown)
-// source: proto/hls.proto
+// source: hls.proto
 
 package pb
 
@@ -115,5 +115,5 @@ var HlsService_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "proto/hls.proto",
+	Metadata: "hls.proto",
 }

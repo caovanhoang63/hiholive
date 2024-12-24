@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+package pb;
+
+option go_package = "pb/";
+
+message Image {
+  int64 id = 1;
+  string url = 2;
+  int32 width = 3;
+  int32 height = 4;
+  string cloud_name = 6;
+  string extension = 7;
+}

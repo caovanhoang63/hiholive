@@ -10,7 +10,6 @@ export const Authentication = (token: string) : ResultAsync<IRequester, Error > 
     return fromPromise(new Promise<ResultAsync<IRequester, Error>>((resolve, reject) => {
         const requester = {} as IRequester;
         authService.IntrospectToken(new IntrospectReq({ access_token: token }), (e, r) => {
-            console.log(e)
             if (e) {
                 return resolve(errAsync(createUnauthorizedError()));
             }

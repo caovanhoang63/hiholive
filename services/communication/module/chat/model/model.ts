@@ -1,6 +1,9 @@
+import {User} from "../../user/model/user";
+
 export interface ChatMessage {
     streamId : number,
     messageId: string,
+    user: User,
     userId : number,
     message: string,
     createdAt: Date,

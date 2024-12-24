@@ -12,6 +12,8 @@ var jspb = require('google-protobuf');
 var goog = jspb;
 var global = Function('return this')();
 
+var image_pb = require('./image_pb.js');
+goog.object.extend(proto, image_pb);
 goog.exportSymbol('proto.pb.CreateUserReq', null, global);
 goog.exportSymbol('proto.pb.GetUserByIdReq', null, global);
 goog.exportSymbol('proto.pb.GetUserRoleReps', null, global);
@@ -850,7 +852,8 @@ proto.pb.PublicUserInfo.toObject = function(includeInstance, msg) {
   var f, obj = {
     id: jspb.Message.getFieldWithDefault(msg, 1, 0),
     firstName: jspb.Message.getFieldWithDefault(msg, 2, ""),
-    lastName: jspb.Message.getFieldWithDefault(msg, 3, "")
+    lastName: jspb.Message.getFieldWithDefault(msg, 3, ""),
+    avatar: (f = msg.getAvatar()) && image_pb.Image.toObject(includeInstance, f)
   };
 
   if (includeInstance) {
@@ -898,6 +901,11 @@ proto.pb.PublicUserInfo.deserializeBinaryFromReader = function(msg, reader) {
     case 3:
       var value = /** @type {string} */ (reader.readString());
       msg.setLastName(value);
+      break;
+    case 4:
+      var value = new image_pb.Image;
+      reader.readMessage(value,image_pb.Image.deserializeBinaryFromReader);
+      msg.setAvatar(value);
       break;
     default:
       reader.skipField();
@@ -947,6 +955,14 @@ proto.pb.PublicUserInfo.serializeBinaryToWriter = function(message, writer) {
     writer.writeString(
       3,
       f
+    );
+  }
+  f = message.getAvatar();
+  if (f != null) {
+    writer.writeMessage(
+      4,
+      f,
+      image_pb.Image.serializeBinaryToWriter
     );
   }
 };
@@ -1003,6 +1019,43 @@ proto.pb.PublicUserInfo.prototype.getLastName = function() {
  */
 proto.pb.PublicUserInfo.prototype.setLastName = function(value) {
   return jspb.Message.setProto3StringField(this, 3, value);
+};
+
+
+/**
+ * optional Image avatar = 4;
+ * @return {?proto.pb.Image}
+ */
+proto.pb.PublicUserInfo.prototype.getAvatar = function() {
+  return /** @type{?proto.pb.Image} */ (
+    jspb.Message.getWrapperField(this, image_pb.Image, 4));
+};
+
+
+/**
+ * @param {?proto.pb.Image|undefined} value
+ * @return {!proto.pb.PublicUserInfo} returns this
+*/
+proto.pb.PublicUserInfo.prototype.setAvatar = function(value) {
+  return jspb.Message.setWrapperField(this, 4, value);
+};
+
+
+/**
+ * Clears the message field making it undefined.
+ * @return {!proto.pb.PublicUserInfo} returns this
+ */
+proto.pb.PublicUserInfo.prototype.clearAvatar = function() {
+  return this.setAvatar(undefined);
+};
+
+
+/**
+ * Returns whether this field is set.
+ * @return {boolean}
+ */
+proto.pb.PublicUserInfo.prototype.hasAvatar = function() {
+  return jspb.Message.getField(this, 4) != null;
 };
 
 
