@@ -11,10 +11,12 @@ import (
 
 type StreamRepo interface {
 	Create(ctx context.Context, create *streammodel.StreamCreate) error
+	FindStreamByID(ctx context.Context, id int) (*streammodel.Stream, error)
 }
 
 type StreamBiz interface {
 	Create(ctx context.Context, requester core.Requester, create *streammodel.StreamCreate) (*streammodel.StreamCreateResponse, error)
+	FindStreamById(ctx context.Context, id int) (*streammodel.Stream, error)
 }
 
 type ChannelRepo interface {
@@ -33,6 +35,19 @@ func NewStreamBiz(streamRepo StreamRepo, channelRepo ChannelRepo) *streamBiz {
 	}
 }
 
+func (s *streamBiz) FindStreamById(ctx context.Context, id int) (*streammodel.Stream, error) {
+	r, err := s.streamRepo.FindStreamByID(ctx, id)
+	if err != nil {
+		return nil, core.ErrInternalServerError.WithWrap(err)
+	}
+
+	if r == nil {
+		return nil, core.ErrNotFound
+	}
+
+	return r, nil
+}
+
 func (s *streamBiz) Create(ctx context.Context, requester core.Requester, create *streammodel.StreamCreate) (*streammodel.StreamCreateResponse, error) {
 	if requester.GetRole() != "streamer" {
 		return nil, core.ErrForbidden
@@ -40,7 +55,7 @@ func (s *streamBiz) Create(ctx context.Context, requester core.Requester, create
 
 	channel, err := s.channelRepo.FindUserChannel(ctx, requester.GetUserId())
 	if err != nil {
-		return nil, core.ErrInternalServerError.WithTrace(err)
+		return nil, core.ErrInternalServerError.WithWrap(err)
 	}
 
 	create.ChannelId = channel.Id

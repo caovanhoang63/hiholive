@@ -12,8 +12,10 @@ import (
 	"github.com/caovanhoang63/hiholive/services/video/module/setting/transport/stgin"
 	"github.com/caovanhoang63/hiholive/services/video/module/stream/repository/streammysql"
 	"github.com/caovanhoang63/hiholive/services/video/module/stream/streambiz"
-	"github.com/caovanhoang63/hiholive/services/video/module/stream/transport/streamgin"
+	"github.com/caovanhoang63/hiholive/services/video/module/stream/transport/strmgin"
+	"github.com/caovanhoang63/hiholive/services/video/module/stream/transport/strmgrpc"
 	"github.com/caovanhoang63/hiholive/shared/go/core"
+	"github.com/caovanhoang63/hiholive/shared/go/proto/pb"
 	"github.com/caovanhoang63/hiholive/shared/go/srvctx"
 
 	"github.com/gin-gonic/gin"
@@ -42,7 +44,7 @@ func ComposeStreamAPIService(serviceCtx srvctx.ServiceContext) StreamService {
 	channelRepo := channelmysql.NewChannelMysqlRepo(db.GetDB())
 	streamRepo := streammysql.NewStreamMysqlRepo(db.GetDB(), rd.GetClient())
 	biz := streambiz.NewStreamBiz(streamRepo, channelRepo)
-	streamService := streamgin.NewStreamApi(biz, serviceCtx)
+	streamService := strmgin.NewStreamApi(biz, serviceCtx)
 	return streamService
 }
 
@@ -75,5 +77,15 @@ func ComposeCategoryApiService(serviceCtx srvctx.ServiceContext) CategoryService
 	ctgRepo := ctgmysqlrepo.NewMysqlRepo(db.GetDB())
 	ctgBiz := ctgbiz.NewCategoryBiz(ctgRepo)
 	service := ctggin.NewCategoryApi(ctgBiz)
+	return service
+}
+
+func ComposeStreamGRPCService(serviceCtx srvctx.ServiceContext) pb.StreamServiceServer {
+	db := serviceCtx.MustGet(core.KeyCompMySQL).(core.GormComponent)
+	rd := serviceCtx.MustGet(core.KeyRedis).(core.RedisComponent)
+	channelRepo := channelmysql.NewChannelMysqlRepo(db.GetDB())
+	streamRepo := streammysql.NewStreamMysqlRepo(db.GetDB(), rd.GetClient())
+	biz := streambiz.NewStreamBiz(streamRepo, channelRepo)
+	service := strmgrpc.NewStreamGRPC(biz, serviceCtx)
 	return service
 }

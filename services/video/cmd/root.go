@@ -48,6 +48,7 @@ var rootCmd = &cobra.Command{
 			c.JSON(http.StatusOK, gin.H{"data": "pong"})
 		})
 
+		go StartGRPCServices(serviceCtx)
 		SetupRoutes(router.Group(""), serviceCtx)
 
 		if err := router.Run(fmt.Sprintf(":%d", ginComp.GetPort())); err != nil {

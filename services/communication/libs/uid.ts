@@ -21,17 +21,20 @@ export class UID   {
     }
     static FromBase58(s : string)  {
         const decodedBuffer = base58.decode(s);
+
         const decodedStr = String.fromCharCode(...decodedBuffer);
             return UID.DecomposeUID(decodedStr);
     }
     static DecomposeUID(s:  string) : Result<UID,Error>  {
-        const uid = parseInt(s)
+        const uid = BigInt(s)
         if (!uid) return err(new Error("Invalid UID"))
+        console.log(uid )
         const u  = new UID (
-            uid >> 28,
-            uid >> 18 & 0x3FF,
-            uid >> 0 & 0x3FFF
+            Number (uid >> BigInt(28)),
+            Number((uid >> BigInt(18)) & BigInt(0x3FF)),
+            Number((uid >> BigInt(0)) & BigInt(0x3FFF))
         )
+        console.log(u.localID)
         return ok(u)
     }
     toString(): string {

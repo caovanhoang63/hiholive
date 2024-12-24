@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package pb;
+
+
+message FindStreamReq {
+  int32 id = 1;
+}
+
+message FindStreamResp {
+  string title = 1;
+  string state = 2;
+  int32 status = 3;
+  int32 channel_id = 4;
+}
+
+service StreamService {
+  rpc FindStreamById(FindStreamReq) returns (FindStreamResp);
+}

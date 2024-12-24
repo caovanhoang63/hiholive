@@ -1,4 +1,4 @@
-package streamgin
+package strmgin
 
 import (
 	"github.com/caovanhoang63/hiholive/services/video/module/stream/streambiz"

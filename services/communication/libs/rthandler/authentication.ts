@@ -1,15 +1,16 @@
 import {errAsync, fromPromise, ok, okAsync, ResultAsync} from "neverthrow";
 import {IRequester} from "../IRequester";
-import {createForbiddenError, createUnauthorizedError} from "../errors";
-import {authService} from "../../grpcClients";
+import {createUnauthorizedError} from "../errors";
+import {UID} from "../uid";
+import {authService} from "../../authGRPCService";
 import {pb} from "../../proto/pb/auth";
 import IntrospectReq = pb.IntrospectReq;
-import {UID} from "../uid";
 
 export const Authentication = (token: string) : ResultAsync<IRequester, Error > => {
     return fromPromise(new Promise<ResultAsync<IRequester, Error>>((resolve, reject) => {
         const requester = {} as IRequester;
         authService.IntrospectToken(new IntrospectReq({ access_token: token }), (e, r) => {
+            console.log(e)
             if (e) {
                 return resolve(errAsync(createUnauthorizedError()));
             }
