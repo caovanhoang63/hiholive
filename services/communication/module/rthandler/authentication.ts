@@ -1,7 +1,7 @@
-import {errAsync, fromPromise, ok, okAsync, ResultAsync} from "neverthrow";
-import {IRequester} from "../IRequester";
-import {createUnauthorizedError} from "../errors";
-import {UID} from "../uid";
+import {errAsync, fromPromise, okAsync, ResultAsync} from "neverthrow";
+import {IRequester} from "../../libs/IRequester";
+import {createUnauthorizedError} from "../../libs/errors";
+import {UID} from "../../libs/uid";
 import {authService} from "../../authGRPCService";
 import {pb} from "../../proto/pb/auth";
 import IntrospectReq = pb.IntrospectReq;

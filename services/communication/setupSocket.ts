@@ -1,8 +1,7 @@
 import {DefaultEventsMap, Socket} from "socket.io";
-import {Authentication} from "./libs/rthandler/authentication";
+import {Authentication} from "./module/rthandler/authentication";
 import {IRequester} from "./libs/IRequester";
 import {ChatDynamoRepo} from "./module/chat/repository/dynamo";
-import {v7 as uuidv7} from 'uuid';
 import {Paging} from "./libs/paging";
 import {StreamRepo} from "./module/stream/repository/streamRepo";
 import {StreamBusiness} from "./module/stream/business/streamBusiness";
