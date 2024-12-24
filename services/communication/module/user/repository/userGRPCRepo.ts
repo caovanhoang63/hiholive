@@ -41,7 +41,7 @@ export class UserGRPCRepo implements IUserRepo {
                 if (e) return  reject(errAsync(e));
 
                 if (r) {
-                    users = r?.users.map((user,i) => {
+                    users = r?.users.map((user) => {
                         return {
                             id : user.id,
                             uid : new UID(user.id, DbTypeUser,1),
