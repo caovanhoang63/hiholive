@@ -36,7 +36,7 @@ export class ChatSkio {
         paging.default()
 
         let  oldCursor = undefined
-        if (message.paging?.cursor) {
+        if (message.paging?.cursor?.streamId && message.paging?.cursor?.messageId ) {
             oldCursor = message.paging?.cursor
             paging.cursor = {
                 streamId :  streamId.value.localID,
