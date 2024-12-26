@@ -11,7 +11,7 @@ type Business interface {
 	CreateNewUser(ctx context.Context, data *usermodel.UserCreate) error
 	GetUserRole(ctx context.Context, userId int) (string, error)
 	FindUserById(ctx context.Context, id int) (*usermodel.User, error)
-	FindUserByIds(ctx context.Context, ids []int) ([]*usermodel.User, error)
+	FindUserByIds(ctx context.Context, ids []int) ([]usermodel.User, error)
 }
 
 type grpcService struct {
@@ -68,7 +68,7 @@ func (s *grpcService) GetUserById(ctx context.Context, req *pb.GetUserByIdReq) (
 }
 
 func (s *grpcService) GetUsersByIds(ctx context.Context, req *pb.GetUsersByIdsReq) (*pb.PublicUsersInfoResp, error) {
-	ids := make([]int, 0, len(req.Ids))
+	ids := make([]int, len(req.Ids))
 
 	for i := range req.Ids {
 		ids[i] = int(req.Ids[i])

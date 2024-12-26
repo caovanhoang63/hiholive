@@ -48,12 +48,16 @@ export class ChatSkio {
         const r = await this._chatBusiness.list(filter,paging)
         r.match(
             list => {
-                console.log(list)
                 const res = list.map(v => {
                     return ({
                         streamId: streamId.value.toString(),
                         messageId: v.messageId.toString(),
-                        user: {},
+                        user: {
+                            id: v.user.uid.toString(),
+                            firstName: v.user.firstName,
+                            lastName:v.user.lastName,
+                            avatar: v.user.avatar
+                        },
                         message: v.message,
                         createdAt: v.createdAt,
                         updatedAt: v.updatedAt,

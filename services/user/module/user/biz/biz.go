@@ -13,7 +13,7 @@ type UserBiz interface {
 	CreateNewUser(ctx context.Context, data *usermodel.UserCreate) error
 	DeleteUser(ctx context.Context, requester core.Requester, id int) error
 	FindUserById(ctx context.Context, id int) (*usermodel.User, error)
-	FindUserByIds(ctx context.Context, ids []int) ([]*usermodel.User, error)
+	FindUserByIds(ctx context.Context, ids []int) ([]usermodel.User, error)
 	FindUsersWithCondition(ctx context.Context, filter *usermodel.UserFilter, paging *core.Paging) ([]usermodel.User, error)
 	UpdateUser(ctx context.Context, requester core.Requester, id int, data *usermodel.UserUpdate) error
 	UpdateToRoleStreamer(ctx context.Context, id int) error
@@ -23,7 +23,7 @@ type UserRepo interface {
 	CreateNewUser(ctx context.Context, data *usermodel.UserCreate) error
 	DeleteUser(ctx context.Context, id int) error
 	FindUserById(ctx context.Context, id int) (*usermodel.User, error)
-	FindUserByIds(ctx context.Context, ids []int) ([]*usermodel.User, error)
+	FindUserByIds(ctx context.Context, ids []int) ([]usermodel.User, error)
 	UpdateUser(ctx context.Context, id int, data *usermodel.UserUpdate) error
 	FindUsersWithCondition(ctx context.Context, filter *usermodel.UserFilter, paging *core.Paging) ([]usermodel.User, error)
 	UpdateUserRole(ctx context.Context, id int, role string) error
@@ -130,9 +130,12 @@ func (b *userBiz) FindUserById(ctx context.Context, id int) (*usermodel.User, er
 	return user, nil
 }
 
-func (b *userBiz) FindUserByIds(ctx context.Context, ids []int) ([]*usermodel.User, error) {
-	//TODO implement me
-	panic("implement me")
+func (b *userBiz) FindUserByIds(ctx context.Context, ids []int) ([]usermodel.User, error) {
+	user, err := b.repo.FindUserByIds(ctx, ids)
+	if err != nil {
+		return nil, core.ErrInternalServerError.WithWrap(err)
+	}
+	return user, nil
 }
 
 func (b *userBiz) UpdateUser(ctx context.Context, requester core.Requester, id int, data *usermodel.UserUpdate) error {

@@ -22,9 +22,13 @@ func (repo *mysqlRepo) DeleteUser(ctx context.Context, id int) error {
 	panic("implement me")
 }
 
-func (repo *mysqlRepo) FindUserByIds(ctx context.Context, ids []int) ([]*usermodel.User, error) {
-	//TODO implement me
-	panic("implement me")
+func (repo *mysqlRepo) FindUserByIds(ctx context.Context, ids []int) ([]usermodel.User, error) {
+	var user []usermodel.User
+	if err := repo.db.Where("id IN (?)", ids).Find(&user).Error; err != nil {
+		return nil, err
+	}
+
+	return user, nil
 }
 
 func (repo *mysqlRepo) UpdateUser(ctx context.Context, id int, data *usermodel.UserUpdate) error {

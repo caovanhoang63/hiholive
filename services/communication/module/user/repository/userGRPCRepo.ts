@@ -36,9 +36,12 @@ export class UserGRPCRepo implements IUserRepo {
     }
     getUserByIds(ids: number[]): ResultAsync<User[], Error> {
         return fromPromise(new Promise<ResultAsync<User[], Error>>((resolve,reject) =>
-            userService.GetUsersByIds(new GetUsersByIdsReq(ids), (e,r ) => {
+            userService.GetUsersByIds(new GetUsersByIdsReq({ids: ids}), (e,r ) => {
                 let users: User[] = []
-                if (e) return  reject(errAsync(e));
+                if (e) {
+                    console.log(e)
+                    return reject(errAsync(createInternalError(e)))
+                }
 
                 if (r) {
                     users = r?.users.map((user) => {
