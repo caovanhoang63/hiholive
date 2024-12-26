@@ -17,6 +17,13 @@ type streamRepo struct {
 	rdClient *redis.Client
 }
 
+func (s *streamRepo) UpdateStream(ctx context.Context, id int, update *streammodel.StreamUpdate) error {
+	if err := s.db.Model(&streammodel.Stream{}).Where("id = ?", id).Updates(update).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
 func NewStreamMysqlRepo(db *gorm.DB, rdClient *redis.Client) *streamRepo {
 	return &streamRepo{
 		db:       db,

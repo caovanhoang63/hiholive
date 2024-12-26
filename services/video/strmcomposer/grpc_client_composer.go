@@ -1,4 +1,4 @@
-package composer
+package strmcomposer
 
 import (
 	"github.com/caovanhoang63/hiholive/shared/go/core"

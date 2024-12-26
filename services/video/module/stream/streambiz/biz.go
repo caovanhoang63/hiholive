@@ -12,11 +12,13 @@ import (
 type StreamRepo interface {
 	Create(ctx context.Context, create *streammodel.StreamCreate) error
 	FindStreamByID(ctx context.Context, id int) (*streammodel.Stream, error)
+	UpdateStream(ctx context.Context, id int, update *streammodel.StreamUpdate) error
 }
 
 type StreamBiz interface {
 	Create(ctx context.Context, requester core.Requester, create *streammodel.StreamCreate) (*streammodel.StreamCreateResponse, error)
 	FindStreamById(ctx context.Context, id int) (*streammodel.Stream, error)
+	UpdateStreamState(ctx context.Context, requester core.Requester, id int, state string) error
 }
 
 type ChannelRepo interface {
@@ -33,6 +35,28 @@ func NewStreamBiz(streamRepo StreamRepo, channelRepo ChannelRepo) *streamBiz {
 		streamRepo:  streamRepo,
 		channelRepo: channelRepo,
 	}
+}
+
+func (s *streamBiz) UpdateStreamState(ctx context.Context, requester core.Requester, id int, state string) error {
+	stream, err := s.FindStreamById(ctx, id)
+	if err != nil {
+		return core.ErrInternalServerError.WithWrap(err)
+	}
+
+	if stream == nil {
+		return core.ErrNotFound
+	}
+
+	if stream.State == state {
+		return nil
+	}
+
+	if err = s.streamRepo.UpdateStream(ctx, id, &streammodel.StreamUpdate{
+		State: &state,
+	}); err != nil {
+		return core.ErrInternalServerError.WithWrap(err)
+	}
+	return nil
 }
 
 func (s *streamBiz) FindStreamById(ctx context.Context, id int) (*streammodel.Stream, error) {

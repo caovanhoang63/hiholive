@@ -51,6 +51,8 @@ var rootCmd = &cobra.Command{
 		})
 
 		go StartGRPCServices(serviceCtx)
+		go StartSubscriber(serviceCtx)
+
 		SetupRoutes(router.Group(""), serviceCtx)
 
 		if err := router.Run(fmt.Sprintf(":%d", ginComp.GetPort())); err != nil {

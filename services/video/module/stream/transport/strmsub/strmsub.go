@@ -1,0 +1,35 @@
+package strmsub
+
+import (
+	"github.com/caovanhoang63/hiholive/services/video/module/stream/streambiz"
+	"github.com/caovanhoang63/hiholive/shared/go/srvctx"
+	"github.com/caovanhoang63/hiholive/shared/go/srvctx/components/pubsub"
+	"github.com/caovanhoang63/hiholive/shared/go/subengine"
+	"golang.org/x/net/context"
+)
+
+type StreamSub struct {
+	biz        streambiz.StreamBiz
+	serviceCtx srvctx.ServiceContext
+}
+
+func NewStreamSub(biz streambiz.StreamBiz, serviceCtx srvctx.ServiceContext) *StreamSub {
+	return &StreamSub{
+		biz:        biz,
+		serviceCtx: serviceCtx,
+	}
+}
+
+func (s *StreamSub) StartStream() subengine.ConsumerJob {
+	return subengine.ConsumerJob{
+		Title: "Update stream's state to running",
+		Handler: func(ctx context.Context, message *pubsub.Message) error {
+			if id, ok := message.Data.(float64); ok {
+				if err := s.biz.UpdateStreamState(ctx, nil, int(id), "running"); err != nil {
+					return err
+				}
+			}
+			return nil
+		},
+	}
+}

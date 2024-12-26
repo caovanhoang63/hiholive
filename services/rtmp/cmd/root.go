@@ -8,6 +8,8 @@ import (
 	"github.com/caovanhoang63/hiholive/shared/go/srvctx"
 	"github.com/caovanhoang63/hiholive/shared/go/srvctx/components/ginc"
 	"github.com/caovanhoang63/hiholive/shared/go/srvctx/components/jwtc"
+	"github.com/caovanhoang63/hiholive/shared/go/srvctx/components/pubsub"
+	rabbitpubsub "github.com/caovanhoang63/hiholive/shared/go/srvctx/components/pubsub/rabbitmq"
 	"github.com/caovanhoang63/hiholive/shared/go/srvctx/components/redisc"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -19,11 +21,12 @@ import (
 
 func newServiceCtx() srvctx.ServiceContext {
 	return srvctx.NewServiceContext(
-		srvctx.WithName("Demo Microservices"),
+		srvctx.WithName("RTMP Service"),
 		srvctx.WithComponent(ginc.NewGin(core.KeyCompGIN)),
 		srvctx.WithComponent(jwtc.NewJWT(core.KeyCompJWT)),
 		srvctx.WithComponent(core.NewConfig()),
 		srvctx.WithComponent(redisc.NewRedis(core.KeyRedis)),
+		srvctx.WithComponent(rabbitpubsub.NewRabbitPubSub(core.KeyCompRabbitMQ)),
 	)
 }
 
@@ -33,6 +36,7 @@ var rootCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		serviceCtx := newServiceCtx()
 		rd := serviceCtx.MustGet(core.KeyRedis).(core.RedisComponent)
+		ps := serviceCtx.MustGet(core.KeyCompRabbitMQ).(pubsub.Pubsub)
 
 		logger := srvctx.GlobalLogger().GetLogger("Rtmp Service")
 		if err := serviceCtx.Load(); err != nil {
@@ -54,7 +58,7 @@ var rootCmd = &cobra.Command{
 		srv := rtmp.NewServer(&rtmp.ServerConfig{
 			OnConnect: func(conn net.Conn) (io.ReadWriteCloser, *rtmp.ConnConfig) {
 				return conn, &rtmp.ConnConfig{
-					Handler: rtmpc.NewHandler(relayService, rd.GetClient(), composer.ComposeHlsRPCClient(serviceCtx)),
+					Handler: rtmpc.NewHandler(relayService, rd.GetClient(), composer.ComposeHlsRPCClient(serviceCtx), ps),
 					ControlState: rtmp.StreamControlStateConfig{
 						DefaultBandwidthWindowSize: 6 * 1024 * 1024 / 8,
 					},

@@ -7,6 +7,7 @@ import (
 	"github.com/caovanhoang63/hiholive/shared/go/asyncjob"
 	"github.com/caovanhoang63/hiholive/shared/go/core"
 	"github.com/caovanhoang63/hiholive/shared/go/srvctx"
+	"github.com/caovanhoang63/hiholive/shared/go/srvctx/components/pubsub"
 	"github.com/pkg/errors"
 	"github.com/redis/go-redis/v9"
 	flvtag "github.com/yutopp/go-flv/tag"
@@ -46,15 +47,18 @@ type Handler struct {
 
 	// sub represents a subscriber for handling events or media streams during RTMP playback sessions.
 	sub *Sub
+
+	ps pubsub.Pubsub
 }
 
 // NewHandler creates and returns a new Handler instance for managing RTMP connections with provided dependencies.
-func NewHandler(relayService *RelayService, rd *redis.Client, hlsClient HlsClient) *Handler {
+func NewHandler(relayService *RelayService, rd *redis.Client, hlsClient HlsClient, ps pubsub.Pubsub) *Handler {
 	return &Handler{
 		logger:       srvctx.DefaultLogger,
 		relayService: relayService,
 		rdClient:     rd,
 		hlsClient:    hlsClient,
+		ps:           ps,
 	}
 
 }
@@ -152,6 +156,13 @@ func (h *Handler) OnSetDataFrame(timestamp uint32, data *rtmpmsg.NetStreamSetDat
 
 	// Format URL động
 	serverUrl := fmt.Sprintf("rtmp://%s:1935/stream", address)
+
+	id, err := core.FromBase58(h.Stream.Uid)
+
+	if err != nil {
+		return core.ErrInternalServerError.WithWrap(err)
+	}
+
 	go func() {
 		job := asyncjob.NewJob(func(ctx context.Context) error {
 			return h.hlsClient.NewHlsStream(ctx, h.Stream.Uid, serverUrl, h.Stream.StreamKey, int(fps), int(height))
@@ -163,10 +174,11 @@ func (h *Handler) OnSetDataFrame(timestamp uint32, data *rtmpmsg.NetStreamSetDat
 			time.Second * 2,
 			time.Second * 4,
 		})
-
-		if err := job.RunWithRetry(context.Background()); err != nil {
+		if err = job.RunWithRetry(context.Background()); err != nil {
 			h.logger.Error(err)
 		}
+
+		_ = h.ps.Publish(context.Background(), core.TopicStreamStart, pubsub.NewMessage(id))
 	}()
 
 	_ = h.pub.Publish(&flvtag.FlvTag{

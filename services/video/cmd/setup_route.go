@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"github.com/caovanhoang63/hiholive/services/video/composer"
+	"github.com/caovanhoang63/hiholive/services/video/strmcomposer"
 	"github.com/caovanhoang63/hiholive/shared/go/srvctx"
 	"github.com/caovanhoang63/hiholive/shared/go/srvctx/components/ginc/middlewares"
 	"github.com/gin-gonic/gin"
@@ -9,13 +9,13 @@ import (
 
 func SetupRoutes(router *gin.RouterGroup, serviceCtx srvctx.ServiceContext) {
 	v1 := router.Group("v1")
-	channelService := composer.ComposeChannelAPIService(serviceCtx)
-	streamService := composer.ComposeStreamAPIService(serviceCtx)
-	settingService := composer.ComposeSystemSettingApiService(serviceCtx)
-	ctgService := composer.ComposeCategoryApiService(serviceCtx)
+	channelService := strmcomposer.ComposeChannelAPIService(serviceCtx)
+	streamService := strmcomposer.ComposeStreamAPIService(serviceCtx)
+	settingService := strmcomposer.ComposeSystemSettingApiService(serviceCtx)
+	ctgService := strmcomposer.ComposeCategoryApiService(serviceCtx)
 
-	ac := composer.ComposeAuthRPCClient(serviceCtx)
-	uc := composer.ComposeUserRPCClient(serviceCtx)
+	ac := strmcomposer.ComposeAuthRPCClient(serviceCtx)
+	uc := strmcomposer.ComposeUserRPCClient(serviceCtx)
 
 	channelPrv := v1.Group("/channel")
 	channelPrv.POST("", middlewares.RequireAuth(ac), middlewares.Authorize(uc, "viewer"), channelService.CreateChannel())
