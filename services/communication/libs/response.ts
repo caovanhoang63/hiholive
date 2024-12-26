@@ -4,7 +4,8 @@ import {createInternalError, Err} from "./errors";
 export interface IResponse {
     data: any,
     paging?: Paging
-    extra?: any
+    extra?: any,
+    code : number
 }
 
 export interface IErrorResponse {
@@ -17,7 +18,8 @@ export interface IErrorResponse {
 export class AppResponse {
     public static SimpleResponse(data: any): IResponse {
         return {
-            data: data
+            data: data,
+            code :200
         }
     }
 
@@ -25,7 +27,8 @@ export class AppResponse {
         return {
             data: data,
             extra: extra,
-            paging: paging
+            paging: paging,
+            code :200
         }
     }
 
