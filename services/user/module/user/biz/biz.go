@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/caovanhoang63/hiholive/services/user/module/user/usermodel"
 	"github.com/caovanhoang63/hiholive/shared/go/core"
+	"strings"
 )
 
 type UserBiz interface {
@@ -96,6 +97,9 @@ func (b *userBiz) CreateNewUser(ctx context.Context, data *usermodel.UserCreate)
 
 	data.Gender = usermodel.Other
 	data.SystemRole = usermodel.RoleUser
+	displayName := strings.Split(data.Email, "@")[0]
+	displayName = displayName + "+" + core.GenSalt(5)
+	data.DisplayName = displayName
 
 	if err := b.repo.CreateNewUser(ctx, data); err != nil {
 		return core.ErrInternalServerError.WithError(err.Error())
