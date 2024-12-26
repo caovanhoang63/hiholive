@@ -8,8 +8,8 @@ export class Paging {
     total: number = 0;
     page: number;
     limit: number;
-    cursor?: number;
-    nextCursor?: number;
+    cursor?: any;
+    nextCursor?: any;
 
     default() {
         if (this.page <= 0)

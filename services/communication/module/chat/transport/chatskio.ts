@@ -8,6 +8,7 @@ import {DbTypeStream} from "../../../libs/dbType";
 import {User} from "../../user/model/user";
 import {ChatMessageFilter} from "../model/chatMessageFilter";
 import {Paging} from "../../../libs/paging";
+import {AppResponse} from "../../../libs/response";
 
 
 export class ChatSkio {
@@ -28,18 +29,39 @@ export class ChatSkio {
             return
         }
 
-
-
         const filter : ChatMessageFilter = {
             streamId: streamId.value.localID
         }
         const paging : Paging = new Paging(message?.paging?.page || 0,message?.paging?.limit || 0)
         paging.default()
 
+        if (message.paging?.cursor) {
+            paging.cursor = {
+                streamId :  streamId.value.localID,
+                messageId : message.paging.cursor.messageId
+            }
+        }
+
+
         const r = await this._chatBusiness.list(filter,paging)
         r.match(
             list => {
-                socket.emit("listChat",list)
+                console.log(list)
+                const res = list.map(v => {
+                    return ({
+                        streamId: streamId.value.toString(),
+                        messageId: v.messageId.toString(),
+                        user: {},
+                        message: v.message,
+                        createdAt: v.createdAt,
+                        updatedAt: v.updatedAt,
+                    } as ChatMessageResponse)
+                })
+                if (paging.nextCursor) {
+                    paging.nextCursor.streamId = new UID(paging.nextCursor.streamId,DbTypeStream,1).toString();
+                }
+                const response = AppResponse.SuccessResponse(res,paging,{})
+                socket.emit("listChat",response)
             },
             err => {
                 console.log(err)
@@ -74,6 +96,8 @@ export class ChatSkio {
                     updatedAt: message.updatedAt,
                 }
                 socket.to(roomId).emit("newMessage",mesRes )
+                socket.emit("sendMessage",true)
+
             },
             e => {
                 console.log(e)

@@ -33,14 +33,14 @@ export class ChatDynamoRepo implements IChatRepo {
 
     list(filter: ChatMessageFilter, paging: Paging): ResultAsync<ChatMessage[], Error> {
         return fromPromise(dynamoClient.send(new QueryCommand({
-
+            ScanIndexForward: false,
             KeyConditionExpression :"streamId = :streamId",
             ExpressionAttributeValues: {
                 ":streamId" : filter.streamId
             },
 
             Limit: paging.limit,
-
+            ExclusiveStartKey : paging.cursor ,
             TableName: ChatMessageTableName
         })),
             e => createInternalError(e)).andThen(
@@ -48,6 +48,7 @@ export class ChatDynamoRepo implements IChatRepo {
                     if (r.$metadata.httpStatusCode != 200) {
                         return errAsync(createInternalError())
                     }
+                    paging.nextCursor = r.LastEvaluatedKey;
                     return okAsync(r.Items as ChatMessage[]);
             }
         )
