@@ -7,6 +7,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./services/communication
     steps:
       # Checkout source code
       - uses: actions/checkout@v4
@@ -23,7 +26,6 @@ jobs:
       # Build Docker image
       - name: Build and Push Docker Image
         uses: docker/build-push-action@v6
-        working-directory: ./services/communication
         with:
           context: .
           push: true
