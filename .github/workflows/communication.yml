@@ -26,7 +26,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: ./services/communication
-          file: Dockerfile
+          file: ./services/communication/Dockerfile
           push: true
           tags: caovanhoang204/hiholive-communication:latest
 
