@@ -38,7 +38,6 @@ export  const socketSetup = (socket:  Socket<DefaultEventsMap, DefaultEventsMap,
                     r => {
                         socket.emit("authentication", true)
                         requester = ok
-                        console.log(r)
                         user = r
                     },
                     e => {
