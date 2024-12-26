@@ -7,9 +7,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./services/communication
     steps:
       # Checkout source code
       - uses: actions/checkout@v4
@@ -27,10 +24,8 @@ jobs:
       # Build Docker image
       - name: Build and Push Docker Image
         uses: docker/build-push-action@v6
-        run: ls
-
         with:
-          context: .
+          context: ./services/communication
           file: Dockerfile
           push: true
           tags: caovanhoang204/hiholive-communication:latest
