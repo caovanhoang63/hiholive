@@ -27,6 +27,7 @@
     "express": "^4.21.2",
     "google-protobuf": "^3.21.4",
     "helmet": "^8.0.0",
+    "inversify": "^6.2.1",
     "joi": "^17.13.3",
     "morgan": "^1.10.0",
     "neverthrow": "^8.1.1",

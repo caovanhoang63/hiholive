@@ -1,5 +1,5 @@
 import {Paging} from "./paging";
-import {Err} from "./errors";
+import {createInternalError, Err} from "./errors";
 
 export interface IResponse {
     data: any,
@@ -29,12 +29,15 @@ export class AppResponse {
         }
     }
 
-    public static ErrorResponse(err: Err): IErrorResponse {
-        return {
-            code: err.code,
-            message: err.message,
-            key: err.key,
-            metadata: err.metadata
+    public static ErrorResponse(err: Error ): IErrorResponse {
+        if (err instanceof Err) {
+            return {
+                code: err.code,
+                message: err.message,
+                key: err.key,
+                metadata: err.metadata
+            }
         }
+        return createInternalError(err)
     }
 }

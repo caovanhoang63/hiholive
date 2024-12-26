@@ -4,6 +4,7 @@ import {ChatMessageFilter} from "../model/chatMessageFilter";
 import {Paging} from "../../../libs/paging";
 import {IRequester} from "../../../libs/IRequester";
 
+
 export interface IChatBusiness {
     create(requester : IRequester,create : ChatMessageCreate) : ResultAsync<void, Error>
     list(filter: ChatMessageFilter, paging: Paging) : ResultAsync<ChatMessage[], Error>

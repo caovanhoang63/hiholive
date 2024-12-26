@@ -7,13 +7,15 @@ import bodyParser from "body-parser";
 import logger from "morgan"
 import cookieParser from "cookie-parser";
 import {createServer} from "node:http";
-import {socketSetup} from "./setupSocket";
+import {socketSetup} from "./socketio/setupSocket";
 import {Server} from "socket.io";
 dotenv.config();
 const app: Express = express();
 const port = process.env.EXPRESS_PORT || 3000;
 const httpServer = createServer(app);
-const io = new Server(httpServer);
+const io = new Server(httpServer,{
+    connectionStateRecovery: {}
+});
 (BigInt.prototype as any).toJSON = function () {
     return this.toString();
 };
@@ -29,11 +31,6 @@ io.on("connection", socketSetup);
 app.get("/ping",(req, res) => {
     res.status(200).json("pong")
 });
-
-
-(async () => {
-
-})()
 
 httpServer.listen(port, () => {
     console.log(`[server]: Server is running at http://localhost:${port}`);

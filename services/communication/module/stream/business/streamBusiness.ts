@@ -2,12 +2,13 @@ import {errAsync, fromPromise, okAsync, ResultAsync} from "neverthrow";
 import { Stream } from "../model/stream";
 import {IStreamRepo} from "../repository/IStreamRepo";
 import {IStreamBusiness} from "./IStreamBusiness";
+import {inject, injectable} from "inversify";
+import TYPES from "../../../types";
 
+
+@injectable()
 export class StreamBusiness implements IStreamBusiness {
-    private readonly _streamRepo: IStreamRepo;
-
-    constructor(streamRepo: IStreamRepo) {
-        this._streamRepo = streamRepo
+    constructor(@inject(TYPES.IStreamRepository)private readonly _streamRepo: IStreamRepo) {
     }
 
     findStreamById(id: number): ResultAsync<Stream, Error> {

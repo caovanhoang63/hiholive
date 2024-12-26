@@ -1,26 +1,24 @@
-import {err, errAsync, fromPromise, okAsync, ResultAsync} from "neverthrow";
+import {errAsync, fromPromise, okAsync, ResultAsync} from "neverthrow";
 import {Paging} from "../../../libs/paging";
 import {ChatMessageFilter} from "../model/chatMessageFilter";
 import {ChatMessage, ChatMessageCreate, ChatMessageTableName} from "../model/model";
 import {IChatRepo} from "./IRepository";
-import {dynamoClient} from "../../../dynamoClient";
 import {DeleteCommand, PutCommand, QueryCommand} from "@aws-sdk/lib-dynamodb";
 import {createInternalError} from "../../../libs/errors";
-import {userService} from "../../../userGRPCClient";
-import {pb} from "../../../proto/pb/user";
-import GetUsersByIdsReq = pb.GetUsersByIdsReq;
-import {User} from "../../user/model/user";
 import {UID} from "../../../libs/uid";
 import {DbTypeUser} from "../../../libs/dbType";
 import {IUserRepo} from "../../user/repository/IUserRepo";
-import {UserGRPCRepo} from "../../user/repository/userGRPCRepo";
+import {inject, injectable} from "inversify";
+import TYPES from "../../../types";
+import * as AWS from "@aws-sdk/client-dynamodb";
 
+@injectable()
 export class ChatDynamoRepo implements IChatRepo {
-    private _userRepo : IUserRepo = new UserGRPCRepo()
-    constructor() {
+    constructor(@inject(TYPES.IUserRepository) private _userRepo : IUserRepo ,
+                @inject(TYPES.DynamoDBClient) private _dynamoClient : AWS.DynamoDB) {
     }
     create(create: ChatMessageCreate): ResultAsync<void, Error> {
-        return fromPromise(dynamoClient.send(new PutCommand({
+        return fromPromise(this._dynamoClient.send(new PutCommand({
                 TableName: ChatMessageTableName,
                 Item: {
                     streamId : create.streamId,
@@ -42,7 +40,7 @@ export class ChatDynamoRepo implements IChatRepo {
 
     list(filter: ChatMessageFilter, paging: Paging): ResultAsync<ChatMessage[], Error> {
         let response: ChatMessage[] = []
-        return fromPromise(dynamoClient.send(new QueryCommand({
+        return fromPromise(this._dynamoClient.send(new QueryCommand({
             ScanIndexForward: false,
             KeyConditionExpression :"streamId = :streamId",
             ExpressionAttributeValues: {
@@ -88,7 +86,7 @@ export class ChatDynamoRepo implements IChatRepo {
     }
 
     delete(streamId: number, messageId: string): ResultAsync<void, Error> {
-        return fromPromise(dynamoClient.send(new DeleteCommand({
+        return fromPromise(this._dynamoClient.send(new DeleteCommand({
                 Key: {
                     "streamId" : streamId,
                     "messageId" : messageId

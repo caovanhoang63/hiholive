@@ -2,20 +2,23 @@ import {errAsync, fromPromise, okAsync, ResultAsync} from "neverthrow";
 import {IUserRepo} from "./IUserRepo";
 import { Nullable } from "../../../libs/nullable";
 import {User} from "../model/user";
-import {userService} from "../../../userGRPCClient";
-import {pb} from "../../../proto/pb/user";
-import GetUserByIdReq = pb.GetUserByIdReq;
 import {createEntityNotFoundError, createInternalError} from "../../../libs/errors";
 import { UID } from "../../../libs/uid";
 import {DbTypeUser} from "../../../libs/dbType";
+import {inject, injectable} from "inversify";
+import TYPES from "../../../types";
+import {pb} from "../../../proto/pb/user";
+import UserServiceClient = pb.UserServiceClient;
+import GetUserByIdReq = pb.GetUserByIdReq;
 import GetUsersByIdsReq = pb.GetUsersByIdsReq;
 
+@injectable()
 export class UserGRPCRepo implements IUserRepo {
-    constructor() {
+    constructor(@inject(TYPES.UserGRPCClient) private _userService : UserServiceClient ) {
     }
     getUserById(id: number): ResultAsync<Nullable<User>, Error> {
        return fromPromise(new Promise<ResultAsync<Nullable<User>, Error>>((resolve,reject) => {
-               userService.GetUserById(new GetUserByIdReq({id : id}), (e,r ) => {
+               this._userService.GetUserById(new GetUserByIdReq({id : id}), (e,r ) => {
 
                    if (e) {
                        return reject(errAsync(createInternalError(e)))
@@ -36,7 +39,7 @@ export class UserGRPCRepo implements IUserRepo {
     }
     getUserByIds(ids: number[]): ResultAsync<User[], Error> {
         return fromPromise(new Promise<ResultAsync<User[], Error>>((resolve,reject) =>
-            userService.GetUsersByIds(new GetUsersByIdsReq({ids: ids}), (e,r ) => {
+            this._userService.GetUsersByIds(new GetUsersByIdsReq({ids: ids}), (e,r ) => {
                 let users: User[] = []
                 if (e) {
                     console.log(e)

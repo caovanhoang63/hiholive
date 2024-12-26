@@ -8,6 +8,7 @@ export interface User {
     firstName : string,
     lastName: string,
     avatar : Image
+    systemRole : string
 }
 
 export interface UserRes {
