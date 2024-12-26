@@ -30,7 +30,8 @@ export class UserGRPCRepo implements IUserRepo {
                            uid : new UID(id, DbTypeUser,1),
                            avatar : r.user.avatar,
                            firstName : r.user.first_name,
-                           lastName : r.user.last_name
+                           lastName : r.user.last_name,
+                            systemRole : ""
                        } as User))
                    }
                })
@@ -53,7 +54,8 @@ export class UserGRPCRepo implements IUserRepo {
                             uid : new UID(user.id, DbTypeUser,1),
                             avatar : user.avatar,
                             firstName : user.first_name,
-                            lastName : user.last_name
+                            lastName : user.last_name,
+                            systemRole : ""
                         } as User
                     })
                 }

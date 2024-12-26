@@ -7,7 +7,7 @@ import {AppResponse} from "../../../libs/response";
 
 export const streamSkio = (socket:  Socket<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>) => {
     const streamBiz = container.get<IStreamBusiness>(TYPES.IStreamBusiness);
-    const onViewStream = async (streamId : string, callBack : (data: any) => void  ) => {
+    const onViewStream = async (streamId : string, callBack? : (data: any) => void  ) => {
         await UID.FromBase58(streamId).match(
             async r => {
                 const  stream = await streamBiz.findStreamById(r.localID)
@@ -17,10 +17,10 @@ export const streamSkio = (socket:  Socket<DefaultEventsMap, DefaultEventsMap, D
                 }
                 socket.data.streamId = streamId
                 socket.join(streamId)
-                callBack(AppResponse.SimpleResponse(true))
+                callBack?.(AppResponse.SimpleResponse(true))
             },
             e => {
-                callBack(AppResponse.ErrorResponse(e))
+                callBack?.(AppResponse.ErrorResponse(e))
             }
         )
 

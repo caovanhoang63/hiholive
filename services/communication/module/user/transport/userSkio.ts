@@ -9,7 +9,7 @@ import {AppResponse} from "../../../libs/response";
 
 export const userSkio = (socket:  Socket<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any> ) =>{
     const userRepo = container.get<IUserRepo>(TYPES.IUserRepository)
-    const onAuthentication = async (token : string, callBack : (data :any) => void )=>  {
+    const onAuthentication = async (token : string, callBack? : (data :any) => void )=>  {
         const result = await  Authentication(token)
         result.match(
             async ok => {
@@ -30,16 +30,16 @@ export const userSkio = (socket:  Socket<DefaultEventsMap, DefaultEventsMap, Def
                                 avatar : r.avatar
                             } as User
                         }
-                        callBack(AppResponse.SimpleResponse(true))
+                        callBack?.(AppResponse.SimpleResponse(true))
                     },
                     e => {
                         console.log(e)
-                        callBack(AppResponse.ErrorResponse(createInternalError(e)))
+                        callBack?.(AppResponse.ErrorResponse(createInternalError(e)))
                     }
                 )
             },
             e => {
-                callBack(AppResponse.ErrorResponse(createUnauthorizedError()))
+                callBack?.(AppResponse.ErrorResponse(createUnauthorizedError()))
             }
         )
     }

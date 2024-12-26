@@ -15,17 +15,17 @@ import {DbTypeStream} from "../../../libs/dbType";
 
 export const chatSkio = (socket : Socket<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>) =>  {
     const chatBiz =  container.get<IChatBusiness>(TYPES.IChatBusiness)
-    const onCreateMessage = async (message : any, callback:(data : any) => void ) => {
+    const onCreateMessage = async (message : any, callback?:(data : any) => void ) => {
         const user = socket.data.user as User
         const streamId = socket.data.streamId
         if (!user || !streamId) {
-            callback(AppResponse.ErrorResponse(createUnauthorizedError()))
+            callback?.(AppResponse.ErrorResponse(createUnauthorizedError()))
             return
         }
         const id = UID.FromBase58(streamId)
         if (id.isErr()) {
             console.log(id.error)
-            callback(createInternalError(id.isErr))
+            callback?.(createInternalError(id.isErr));
             return
         }
         const create = {message : message,streamId: id.value.localID}  as ChatMessageCreate
@@ -47,18 +47,18 @@ export const chatSkio = (socket : Socket<DefaultEventsMap, DefaultEventsMap, Def
                     updatedAt: create.updatedAt,
                 }
                 socket.to(streamId).emit("newMessage",mesRes )
-                callback(AppResponse.SimpleResponse(true))
+                callback?.(AppResponse.SimpleResponse(true))
             },
             e => {
                 console.log(e)
-                callback(createInternalError(e))
+                callback?.(createInternalError(e))
             }
         )
     }
-    const onListMessage = async ({filter, paging} : {filter: ChatMessageFilter, paging: Paging}, callback:(data : any) => void) => {
+    const onListMessage = async ({filter, paging} : {filter: ChatMessageFilter, paging: Paging}, callback?:(data : any) => void) => {
         console.log(filter,paging)
         if (!filter?.streamId) {
-            callback(AppResponse.ErrorResponse(createInvalidRequestError(new Error("streamId is required"))))
+            callback?.(AppResponse.ErrorResponse(createInvalidRequestError(new Error("streamId is required"))))
             return
         }
         let oldCursor = paging.cursor
@@ -67,7 +67,7 @@ export const chatSkio = (socket : Socket<DefaultEventsMap, DefaultEventsMap, Def
         paging.cursor = oldCursor
         const streamId = UID.FromBase58(filter.streamId.toString())
         if (streamId.isErr()) {
-            callback(AppResponse.ErrorResponse(streamId.error))
+            callback?.(AppResponse.ErrorResponse(streamId.error))
             return
         }
         if (paging?.cursor?.streamId && paging?.cursor?.messageId ) {
@@ -103,11 +103,11 @@ export const chatSkio = (socket : Socket<DefaultEventsMap, DefaultEventsMap, Def
                     paging.nextCursor.streamId = new UID(paging.nextCursor.streamId,DbTypeStream,1).toString();
                 }
                 paging.cursor = oldCursor
-                callback(AppResponse.SuccessResponse(res,paging,{}))
+                callback?.(AppResponse.SuccessResponse(res,paging,{}))
             },
             err => {
                 console.log(err)
-                callback(AppResponse.ErrorResponse(err))
+                callback?.(AppResponse.ErrorResponse(err))
             }
         )
     }
