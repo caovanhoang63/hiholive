@@ -13,7 +13,7 @@ import {User} from "./module/user/model/user";
 import {UserGRPCRepo} from "./module/user/repository/userGRPCRepo";
 import {createInternalError, createUnauthorizedError} from "./libs/errors";
 
-export const socketSetup = (socket:  Socket<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>) => {
+export  const socketSetup = (socket:  Socket<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>) => {
     let requester : Nullable<IRequester> = null;
     let user: Nullable<User> = null;
 

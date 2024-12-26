@@ -6,7 +6,7 @@ dotenv.config();
 
 const redisConnStr = process.env.REDIS_DSN || "";
 
-export const redisClient = await  createClient({
+export const redisClient =   createClient({
     url: redisConnStr
-}).on('error', err => console.log('Redis Client Error', err)).connect();
+}).on('error', err => console.log('Redis Client Error', err)).connect().then().catch().finally();
 
