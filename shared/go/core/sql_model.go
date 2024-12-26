@@ -3,10 +3,10 @@ package core
 import "time"
 
 type BaseModel struct {
-	Id        int        `json:"-" gorm:"column:id;" db:"id"`
+	Id        int        `json:"-" gorm:"column:id;" `
 	Uid       *UID       `json:"id" gorm:"-"`
-	CreatedAt *time.Time `json:"createdAt,omitempty" gorm:"column:created_at;"  db:"created_at"`
-	UpdatedAt *time.Time `json:"updatedAt,omitempty" gorm:"column:updated_at;"  db:"updated_at"`
+	CreatedAt *time.Time `json:"createdAt,omitempty" gorm:"column:created_at;" `
+	UpdatedAt *time.Time `json:"updatedAt,omitempty" gorm:"column:updated_at;" `
 }
 
 func NewBaseModel() BaseModel {

@@ -8,10 +8,10 @@ type SystemRole string
 type Gender string
 
 const (
-	RoleAdmin     SystemRole = "admin"
-	RoleStreamer  SystemRole = "streamer"
-	RoleUser      SystemRole = "viewer"
-	RoleModerator SystemRole = "moderator"
+	RoleAdmin     string = "admin"
+	RoleStreamer  string = "streamer"
+	RoleUser      string = "viewer"
+	RoleModerator string = "moderator"
 )
 
 const (
@@ -29,7 +29,7 @@ type User struct {
 	DisplayName    string      `json:"display_name" gorm:"column:display_name"`
 	DateOfBirth    string      `json:"date_of_birth" gorm:"column:date_of_birth"`
 	Gender         Gender      `json:"gender" gorm:"column:gender"`
-	SystemRole     SystemRole  `json:"SystemRole" gorm:"column:system_role"`
+	SystemRole     string      `json:"SystemRole" gorm:"column:system_role"`
 	Avatar         *core.Image `json:"avatar" gorm:"column:avatar"`
 	Bio            string      `json:"bio" gorm:"column:bio"`
 	Status         int         `json:"status" gorm:"column:status"`

@@ -17,6 +17,7 @@ import (
 	"github.com/caovanhoang63/hiholive/shared/go/core"
 	"github.com/caovanhoang63/hiholive/shared/go/proto/pb"
 	"github.com/caovanhoang63/hiholive/shared/go/srvctx"
+	"github.com/caovanhoang63/hiholive/shared/go/srvctx/components/pubsub"
 
 	"github.com/gin-gonic/gin"
 )
@@ -27,9 +28,9 @@ type ChannelService interface {
 
 func ComposeChannelAPIService(serviceCtx srvctx.ServiceContext) ChannelService {
 	db := serviceCtx.MustGet(core.KeyCompMySQL).(core.GormComponent)
-
+	ps := serviceCtx.MustGet(core.KeyCompRabbitMQ).(pubsub.Pubsub)
 	channelRepo := channelmysql.NewChannelMysqlRepo(db.GetDB())
-	biz := channelbiz.NewChannelBiz(channelRepo)
+	biz := channelbiz.NewChannelBiz(channelRepo, ps)
 	userService := channelgin.NewChannelGinApi(biz, serviceCtx)
 	return userService
 }

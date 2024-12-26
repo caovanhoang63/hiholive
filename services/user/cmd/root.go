@@ -8,9 +8,11 @@ import (
 	"github.com/caovanhoang63/hiholive/shared/go/srvctx/components/ginc/middlewares"
 	"github.com/caovanhoang63/hiholive/shared/go/srvctx/components/gormc"
 	"github.com/caovanhoang63/hiholive/shared/go/srvctx/components/jwtc"
+	"github.com/caovanhoang63/hiholive/shared/go/srvctx/components/pubsub"
 	rabbitpubsub "github.com/caovanhoang63/hiholive/shared/go/srvctx/components/pubsub/rabbitmq"
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/cobra"
+	"golang.org/x/net/context"
 	"net/http"
 	"os"
 )
@@ -33,7 +35,7 @@ var rootCmd = &cobra.Command{
 		serviceCtx := newServiceCtx()
 
 		logger := srvctx.GlobalLogger().GetLogger("service")
-
+		pb := serviceCtx.MustGet(core.KeyCompRabbitMQ).(pubsub.Pubsub)
 		if err := serviceCtx.Load(); err != nil {
 			logger.Fatal(err)
 		}
@@ -45,6 +47,7 @@ var rootCmd = &cobra.Command{
 
 		router.Use(middlewares.Cors())
 		router.GET("/ping", func(c *gin.Context) {
+			_ = pb.Publish(context.Background(), "Test", pubsub.NewMessage(nil))
 			c.JSON(http.StatusOK, gin.H{"data": "pong"})
 		})
 

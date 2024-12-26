@@ -30,6 +30,11 @@ app.get("/ping",(req, res) => {
     res.status(200).json("pong")
 });
 
+
+(async () => {
+
+})()
+
 httpServer.listen(port, () => {
     console.log(`[server]: Server is running at http://localhost:${port}`);
 });

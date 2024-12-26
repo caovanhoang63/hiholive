@@ -8,6 +8,7 @@ import (
 	"github.com/caovanhoang63/hiholive/shared/go/srvctx/components/ginc/middlewares"
 	"github.com/caovanhoang63/hiholive/shared/go/srvctx/components/gormc"
 	"github.com/caovanhoang63/hiholive/shared/go/srvctx/components/jwtc"
+	rabbitpubsub "github.com/caovanhoang63/hiholive/shared/go/srvctx/components/pubsub/rabbitmq"
 	"github.com/caovanhoang63/hiholive/shared/go/srvctx/components/redisc"
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/cobra"
@@ -17,12 +18,13 @@ import (
 
 func newServiceCtx() srvctx.ServiceContext {
 	return srvctx.NewServiceContext(
-		srvctx.WithName("Demo Microservices"),
+		srvctx.WithName("Video Service"),
 		srvctx.WithComponent(ginc.NewGin(core.KeyCompGIN)),
 		srvctx.WithComponent(gormc.NewGormDB(core.KeyCompMySQL, "")),
 		srvctx.WithComponent(jwtc.NewJWT(core.KeyCompJWT)),
 		srvctx.WithComponent(core.NewConfig()),
 		srvctx.WithComponent(redisc.NewRedis(core.KeyRedis)),
+		srvctx.WithComponent(rabbitpubsub.NewRabbitPubSub(core.KeyCompRabbitMQ)),
 	)
 }
 

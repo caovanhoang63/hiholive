@@ -9,6 +9,7 @@ type UserCreate struct {
 	LastName       string `json:"last_name" gorm:"column:last_name"`
 	DisplayName    string `json:"display_name" gorm:"column:display_name"`
 	Gender         Gender `json:"gender" gorm:"column:gender"`
+	SystemRole     string `json:"system_role" gorm:"column:system_role"`
 }
 
 func NewUserForCreation(firstName, lastName, email string) UserCreate {

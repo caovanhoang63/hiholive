@@ -19,7 +19,6 @@ CREATE TABLE `auths` (
                          KEY `facebook_id` (`facebook_id`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-
 DROP TABLE IF EXISTS `users`;
 CREATE TABLE `users` (
                          `id` int NOT NULL AUTO_INCREMENT,
@@ -129,14 +128,12 @@ CREATE TABLE `live_streams` (
                                 `category_id` INT,
                                 `is_rerun` boolean default false,
                                 `scheduled_start_time` TIMESTAMP,
-
                                 `actual_start_time` TIMESTAMP,
                                 `actual_end_time` TIMESTAMP,
                                 `peak_concurrent_view` INT,
                                 `total_unique_viewers` INT,
                                 `state` ENUM('scheduled','pending', 'running', 'ended') default 'pending',
                                 stream_key VARCHAR(36),
-
                                 `status` INT DEFAULT 1,
                                 `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                                 `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,

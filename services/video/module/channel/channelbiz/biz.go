@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/caovanhoang63/hiholive/services/video/module/channel/channelmodel"
 	"github.com/caovanhoang63/hiholive/shared/go/core"
+	"github.com/caovanhoang63/hiholive/shared/go/srvctx/components/pubsub"
 	"golang.org/x/net/context"
 )
 
@@ -18,10 +19,11 @@ type ChannelBiz interface {
 
 type channelBiz struct {
 	channelRepo ChannelRepo
+	ps          pubsub.Pubsub
 }
 
-func NewChannelBiz(channelRepo ChannelRepo) *channelBiz {
-	return &channelBiz{channelRepo: channelRepo}
+func NewChannelBiz(channelRepo ChannelRepo, ps pubsub.Pubsub) *channelBiz {
+	return &channelBiz{channelRepo: channelRepo, ps: ps}
 }
 
 func (c *channelBiz) Create(ctx context.Context, requester core.Requester, create *channelmodel.ChannelCreate) error {
@@ -36,9 +38,11 @@ func (c *channelBiz) Create(ctx context.Context, requester core.Requester, creat
 
 	create.UserId = requester.GetUserId()
 
-	if err := c.channelRepo.Create(ctx, create); err != nil {
-		return core.ErrInternalServerError.WithTrace(err)
+	if err = c.channelRepo.Create(ctx, create); err != nil {
+		return core.ErrInternalServerError.WithWrap(err)
 	}
+
+	_ = c.ps.Publish(ctx, core.TopicCreateChannel, pubsub.NewMessage(create.UserId))
 
 	return nil
 }

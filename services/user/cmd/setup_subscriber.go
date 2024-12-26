@@ -11,12 +11,13 @@ import (
 
 func StartSubscriber(serviceCtx srvctx.ServiceContext) {
 	service := usercomposer.ComposeUserSubscriber(serviceCtx)
+
 	pb := serviceCtx.MustGet(core.KeyCompRabbitMQ).(pubsub.Pubsub)
 
 	engine := subengine.NewEngine(serviceCtx, pb)
 
 	engine.Subscribe("Test", service.TestHandler())
-
+	engine.Subscribe(core.TopicCreateChannel, service.UpdateUserToStreamer())
 	go func() {
 		err := engine.Start()
 		if err != nil {
