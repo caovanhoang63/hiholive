@@ -35,7 +35,9 @@ export class ChatSkio {
         const paging : Paging = new Paging(message?.paging?.page || 0,message?.paging?.limit || 0)
         paging.default()
 
+        let  oldCursor = undefined
         if (message.paging?.cursor) {
+            oldCursor = message.paging?.cursor
             paging.cursor = {
                 streamId :  streamId.value.localID,
                 messageId : message.paging.cursor.messageId
@@ -60,6 +62,7 @@ export class ChatSkio {
                 if (paging.nextCursor) {
                     paging.nextCursor.streamId = new UID(paging.nextCursor.streamId,DbTypeStream,1).toString();
                 }
+                paging.cursor = oldCursor
                 const response = AppResponse.SuccessResponse(res,paging,{})
                 socket.emit("listChat",response)
             },
