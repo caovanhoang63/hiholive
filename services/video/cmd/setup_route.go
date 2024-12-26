@@ -17,8 +17,15 @@ func SetupRoutes(router *gin.RouterGroup, serviceCtx srvctx.ServiceContext) {
 	ac := composer.ComposeAuthRPCClient(serviceCtx)
 	uc := composer.ComposeUserRPCClient(serviceCtx)
 
-	channel := v1.Group("/channel")
-	channel.POST("", middlewares.RequireAuth(ac), middlewares.Authorize(uc, "viewer"), channelService.CreateChannel())
+	channelPrv := v1.Group("/channel")
+	channelPrv.POST("", middlewares.RequireAuth(ac), middlewares.Authorize(uc, "viewer"), channelService.CreateChannel())
+
+	channelPub := v1.Group("/channel")
+	channelPub.GET(":id", channelService.FindChannelById())
+	channelPub.GET("", channelService.FindChannels())
+
+	userPub := v1.Group("/user")
+	userPub.GET("/:id/channel", channelService.FindChannelById())
 
 	stream := v1.Group("/stream")
 	stream.POST("", middlewares.RequireAuth(ac), middlewares.Authorize(uc, "streamer"), streamService.CreateStream())

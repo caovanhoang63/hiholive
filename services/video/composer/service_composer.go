@@ -24,6 +24,9 @@ import (
 
 type ChannelService interface {
 	CreateChannel() func(c *gin.Context)
+	FindUserChannel() func(c *gin.Context)
+	FindChannelById() func(c *gin.Context)
+	FindChannels() func(c *gin.Context)
 }
 
 func ComposeChannelAPIService(serviceCtx srvctx.ServiceContext) ChannelService {
