@@ -1,5 +1,6 @@
 import {err, ok, Result} from "neverthrow";
 import base58 from "bs58";
+import {safeToBigInt} from "./safeConvertBigInt";
 export class UID   {
 
     private readonly _localID: number;
@@ -26,7 +27,7 @@ export class UID   {
             return UID.DecomposeUID(decodedStr);
     }
     static DecomposeUID(s:  string) : Result<UID,Error>  {
-        const uid = BigInt(s)
+        const uid = safeToBigInt(s)
         if (!uid) return err(new Error("Invalid UID"))
         const u  = new UID (
             Number(uid >> BigInt(28)),

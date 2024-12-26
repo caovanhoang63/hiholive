@@ -1,7 +1,7 @@
 import {err, errAsync, fromPromise, ok, okAsync, ResultAsync} from "neverthrow";
 import { IRequester } from "../../../libs/IRequester";
 import { Paging } from "../../../libs/paging";
-import { Filter } from "../model/filter";
+import { ChatMessageFilter } from "../model/chatMessageFilter";
 import { ChatMessageCreate, ChatMessage } from "../model/model";
 import {IChatBusiness} from "./IBusiness";
 import {IChatRepo} from "../repository/IRepository";
@@ -31,7 +31,7 @@ export class ChatBusiness implements IChatBusiness {
         })(), e => e as Error)
             .andThen(r=>r);
     }
-    list(filter: Filter, paging: Paging): ResultAsync<ChatMessage[], Error> {
+    list(filter: ChatMessageFilter, paging: Paging): ResultAsync<ChatMessage[], Error> {
         return fromPromise((async () => {
             const r =  await this.chatRepo.list(filter,paging)
             if (r.isErr()) {

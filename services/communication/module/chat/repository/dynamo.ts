@@ -1,6 +1,6 @@
 import {err, errAsync, fromPromise, okAsync, ResultAsync} from "neverthrow";
 import {Paging} from "../../../libs/paging";
-import {Filter} from "../model/filter";
+import {ChatMessageFilter} from "../model/chatMessageFilter";
 import {ChatMessage, ChatMessageCreate, ChatMessageTableName} from "../model/model";
 import {IChatRepo} from "./IRepository";
 import {dynamoClient} from "../../../dynamoClient";
@@ -31,7 +31,7 @@ export class ChatDynamoRepo implements IChatRepo {
             })
     }
 
-    list(filter: Filter, paging: Paging): ResultAsync<ChatMessage[], Error> {
+    list(filter: ChatMessageFilter, paging: Paging): ResultAsync<ChatMessage[], Error> {
         return fromPromise(dynamoClient.send(new QueryCommand({
 
             KeyConditionExpression :"streamId = :streamId",

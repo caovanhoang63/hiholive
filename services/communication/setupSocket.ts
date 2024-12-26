@@ -11,11 +11,14 @@ import {ChatMessageCreate} from "./module/chat/model/model";
 import {Nullable} from "./libs/nullable";
 import {User} from "./module/user/model/user";
 import {UserGRPCRepo} from "./module/user/repository/userGRPCRepo";
-import {createInternalError, createUnauthorizedError} from "./libs/errors";
+import {createInternalError, createInvalidRequestError, createUnauthorizedError} from "./libs/errors";
 
 export  const socketSetup = (socket:  Socket<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>) => {
     let requester : Nullable<IRequester> = null;
     let user: Nullable<User> = null;
+    const chatRepo = new ChatDynamoRepo()
+    const chatBiz = new ChatBusiness(chatRepo)
+    const chatSkio = new ChatSkio(chatBiz)
 
     socket.on("authentication",async message => {
         if (!message.token) {
@@ -51,6 +54,10 @@ export  const socketSetup = (socket:  Socket<DefaultEventsMap, DefaultEventsMap,
         )
     })
 
+    socket.on("listChat", async (message ) => {
+        await chatSkio.listChatMessage(socket,message)
+    })
+
     socket.on("joinStream",async (message) => {
         if (!message.streamId) {
             socket.emit("joinStream", "error")
@@ -67,10 +74,8 @@ export  const socketSetup = (socket:  Socket<DefaultEventsMap, DefaultEventsMap,
                     socket.emit("joinStream", stream.error);
                 }
                 socket.join(message.streamId)
+                socket.emit("joinStream", true);
 
-                const chatRepo = new ChatDynamoRepo()
-                const chatBiz = new ChatBusiness(chatRepo)
-                const chatSkio = new ChatSkio(chatBiz)
 
                 socket.on("sendMessage",async (message) => {
                     message.streamId = r.localID
@@ -79,7 +84,7 @@ export  const socketSetup = (socket:  Socket<DefaultEventsMap, DefaultEventsMap,
             },
             e => {
                 console.log(e)
-                socket.emit("joinStream", e)
+                socket.emit("joinStream", createInvalidRequestError(e))
             }
         )
     })
