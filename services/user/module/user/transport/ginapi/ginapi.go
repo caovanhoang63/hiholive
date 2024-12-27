@@ -14,7 +14,11 @@ type ginAPI struct {
 	serviceCtx srvctx.ServiceContext
 }
 
-func (g *ginAPI) GetUserProfile() func(c *gin.Context) {
+func NewGinAPI(serviceCtx srvctx.ServiceContext, b biz.UserBiz) *ginAPI {
+	return &ginAPI{b, serviceCtx}
+}
+
+func (g *ginAPI) GetUserById() func(c *gin.Context) {
 	return func(c *gin.Context) {
 		uid, err := core.FromBase58(c.Param("id"))
 
@@ -24,6 +28,20 @@ func (g *ginAPI) GetUserProfile() func(c *gin.Context) {
 		}
 
 		user, err := g.biz.FindUserById(c.Request.Context(), int(uid.GetLocalID()))
+		if err != nil {
+			core.WriteErrorResponse(c, core.ErrBadRequest.WithError(err.Error()))
+			return
+		}
+		user.Mask()
+		c.JSON(http.StatusOK, core.ResponseData(user))
+	}
+}
+
+func (g *ginAPI) GetUserProfile() func(c *gin.Context) {
+	return func(c *gin.Context) {
+		requester := c.MustGet(core.KeyRequester).(core.Requester)
+
+		user, err := g.biz.FindUserById(c.Request.Context(), requester.GetUserId())
 		if err != nil {
 			core.WriteErrorResponse(c, core.ErrBadRequest.WithError(err.Error()))
 			return
@@ -61,8 +79,4 @@ func (g *ginAPI) ListUser() func(c *gin.Context) {
 
 		c.JSON(http.StatusOK, core.SuccessResponse(users, paging, filter))
 	}
-}
-
-func NewGinAPI(serviceCtx srvctx.ServiceContext, b biz.UserBiz) *ginAPI {
-	return &ginAPI{b, serviceCtx}
 }

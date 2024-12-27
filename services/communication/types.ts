@@ -23,7 +23,7 @@ const TYPES = {
 
     // Infrastructure
     DynamoDBClient : Symbol.for("DynamoClient"),
-
+    RabbitMQClient : Symbol.for("RabbitMQClient")
 
 
 
