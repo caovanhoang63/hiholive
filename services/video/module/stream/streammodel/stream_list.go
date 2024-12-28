@@ -17,3 +17,15 @@ type StreamList struct {
 	IsRerun        bool      `json:"isRerun" gorm:"column:is_rerun"`
 	State          string    `json:"state" gorm:"column:state"`
 }
+
+func (s *StreamList) Mask() {
+	s.BaseModel.Mask(core.DbTypeStream)
+	s.ChannelFakeId = core.NewUIDP(uint32(s.ChannelId), core.DbTypeChannel, 0)
+	s.CategoryFakeId = core.NewUIDP(uint32(s.CategoryId), core.DbTypeCategory, 0)
+	if s.Category != nil {
+		s.Category.Mask(core.DbTypeCategory)
+	}
+	if s.Channel != nil {
+		s.Channel.Mask()
+	}
+}

@@ -81,8 +81,8 @@ func (s *streamRepo) FindStreamByID(ctx context.Context, id int) (*streammodel.S
 	return &stream, nil
 }
 
-func (s *streamRepo) FindStreams(ctx context.Context, filter *streammodel.StreamFilter, paging *core.Paging) ([]streammodel.Stream, error) {
-	var result []streammodel.Stream
+func (s *streamRepo) FindStreams(ctx context.Context, filter *streammodel.StreamFilter, paging *core.Paging) ([]streammodel.StreamList, error) {
+	var result []streammodel.StreamList
 
 	db := s.db.Table(streammodel.Stream{}.TableName()).Where("status in (1)")
 

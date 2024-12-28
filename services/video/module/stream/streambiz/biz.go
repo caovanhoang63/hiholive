@@ -14,14 +14,14 @@ type StreamRepo interface {
 	Create(ctx context.Context, create *streammodel.StreamCreate) error
 	FindStreamByID(ctx context.Context, id int) (*streammodel.Stream, error)
 	UpdateStream(ctx context.Context, id int, update *streammodel.StreamUpdate) error
-	FindStreams(ctx context.Context, filter *streammodel.StreamFilter, paging *core.Paging) ([]streammodel.Stream, error)
+	FindStreams(ctx context.Context, filter *streammodel.StreamFilter, paging *core.Paging) ([]streammodel.StreamList, error)
 }
 
 type StreamBiz interface {
 	Create(ctx context.Context, requester core.Requester, create *streammodel.StreamCreate) (*streammodel.StreamCreateResponse, error)
 	FindStreamById(ctx context.Context, id int) (*streammodel.Stream, error)
 	UpdateStreamState(ctx context.Context, requester core.Requester, id int, state string) error
-	FindStreams(ctx context.Context, filter *streammodel.StreamFilter, paging *core.Paging) ([]streammodel.Stream, error)
+	FindStreams(ctx context.Context, filter *streammodel.StreamFilter, paging *core.Paging) ([]streammodel.StreamList, error)
 }
 
 type ChannelRepo interface {
@@ -42,7 +42,7 @@ func NewStreamBiz(streamRepo StreamRepo, channelRepo ChannelRepo, ps pubsub.Pubs
 	}
 }
 
-func (s *streamBiz) FindStreams(ctx context.Context, filter *streammodel.StreamFilter, paging *core.Paging) ([]streammodel.Stream, error) {
+func (s *streamBiz) FindStreams(ctx context.Context, filter *streammodel.StreamFilter, paging *core.Paging) ([]streammodel.StreamList, error) {
 	if err := filter.Process(); err != nil {
 		return nil, core.ErrBadRequest.WithError(err.Error())
 	}
