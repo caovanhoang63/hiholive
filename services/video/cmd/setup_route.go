@@ -50,6 +50,6 @@ func SetupRoutes(router *gin.RouterGroup, serviceCtx srvctx.ServiceContext) {
 	ctgPublic.GET("", ctgService.FindCategories())
 	ctgPublic.GET("/:id", ctgService.FindCategoryById())
 
-	upload := v1.Group("/upload")
-	upload.POST("", uploadService.UploadImage())
+	uploadPub := v1.Group("/upload/image")
+	uploadPub.POST("", uploadService.UploadImage())
 }
