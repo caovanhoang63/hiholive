@@ -93,7 +93,7 @@ func (s *streamBiz) Create(ctx context.Context, requester core.Requester, create
 		return nil, core.ErrInternalServerError.WithTrace(err)
 	}
 
-	_ = s.ps.Publish(ctx, core.TopicCreateStream, pubsub.NewMessage(create))
+	_ = s.ps.Publish(ctx, core.TopicStreamCreate, pubsub.NewMessage(create))
 
 	return &streammodel.StreamCreateResponse{
 		StreamId:  create.Uid,

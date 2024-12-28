@@ -10,6 +10,7 @@ import (
 	"github.com/caovanhoang63/hiholive/shared/go/srvctx/components/pubsub"
 	"github.com/pkg/errors"
 	"github.com/redis/go-redis/v9"
+	log "github.com/sirupsen/logrus"
 	flvtag "github.com/yutopp/go-flv/tag"
 	"github.com/yutopp/go-rtmp"
 	rtmpmsg "github.com/yutopp/go-rtmp/message"
@@ -96,13 +97,14 @@ func (h *Handler) OnPublish(ctx *rtmp.StreamContext, timestamp uint32, cmd *rtmp
 	if err != nil {
 		return errors.Wrap(err, "Failed to create pubsub")
 	}
-	byteData, err := h.rdClient.Get(context.Background(), fmt.Sprintf("stream:%s", cmd.PublishingName)).Result()
+	byteData, err := h.rdClient.Get(context.Background(), fmt.Sprintf("streamKey:%s", cmd.PublishingName)).Result()
 
 	var streamInfo core.StreamState
 	_ = json.Unmarshal([]byte(byteData), &streamInfo)
 
 	streamInfo.StreamKey = cmd.PublishingName
 	if errors.Is(err, redis.Nil) || err != nil {
+		log.Print(err)
 		return errors.New("PublishingName does not exist")
 	}
 
@@ -178,9 +180,10 @@ func (h *Handler) OnSetDataFrame(timestamp uint32, data *rtmpmsg.NetStreamSetDat
 			h.logger.Error(err)
 		}
 
-		_ = h.ps.Publish(context.Background(), core.TopicStreamStart, pubsub.NewMessage(id))
 	}()
-
+	if err = h.ps.Publish(context.Background(), core.TopicStreamStart, pubsub.NewMessage(id)); err != nil {
+		h.logger.Error(err)
+	}
 	_ = h.pub.Publish(&flvtag.FlvTag{
 		TagType:   flvtag.TagTypeScriptData,
 		Timestamp: timestamp,

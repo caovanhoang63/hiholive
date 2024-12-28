@@ -18,7 +18,7 @@ func StartSubscriber(serviceCtx srvctx.ServiceContext) {
 	engine := subengine.NewEngine(serviceCtx, pb)
 
 	engine.Subscribe(core.TopicStreamStart, streamService.StartStream())
-	engine.Subscribe(core.TopicCreateStream, categoryService.IncreaseTotalContent())
+	engine.Subscribe(core.TopicStreamCreate, categoryService.IncreaseTotalContent())
 
 	go func() {
 		err := engine.Start()
