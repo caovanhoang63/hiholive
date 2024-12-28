@@ -11,7 +11,7 @@ type StreamCreate struct {
 	Title              string     `json:"title" gorm:"column:title" validate:"required"`
 	Description        string     `json:"description" gorm:"column:description" validate:"required"`
 	ChannelId          int        `json:"-" gorm:"column:channel_id"`
-	ChannelFakeId      *core.UID  `json:"ChannelId" gorm:"-"`
+	ChannelFakeId      *core.UID  `json:"channelId" gorm:"-"`
 	CategoryId         int        `json:"-" gorm:"column:category_id"`
 	CategoryFakeId     *core.UID  `json:"categoryId" gorm:"-"`
 	IsRerun            bool       `json:"isRerun" gorm:"column:is_rerun"`
@@ -21,8 +21,12 @@ type StreamCreate struct {
 }
 
 func (s *StreamCreate) UnMask() {
-	s.CategoryId = int(s.CategoryFakeId.GetLocalID())
-	s.ChannelId = int(s.ChannelFakeId.GetLocalID())
+	if s.CategoryFakeId != nil {
+		s.CategoryId = int(s.CategoryFakeId.GetLocalID())
+	}
+	if s.ChannelFakeId != nil {
+		s.ChannelId = int(s.ChannelFakeId.GetLocalID())
+	}
 }
 
 type StreamCreateResponse struct {

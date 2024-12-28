@@ -10,11 +10,13 @@ type Stream struct {
 	core.BaseModel     `json:",inline"`
 	ChannelId          int        `json:"-" gorm:"column:channel_id"`
 	ChannelFakeId      *core.UID  `json:"ChannelId" gorm:"-"`
+	Channel            *Channel   `json:"channel" gorm:"foreignkey:ChannelId"`
 	Title              string     `json:"title" gorm:"column:title"`
 	Notification       string     `json:"notification" gorm:"column:notification"`
 	Description        string     `json:"description" gorm:"column:description"`
 	CategoryId         int        `json:"-" gorm:"column:category_id"`
-	CategoryFakeId     *core.UID  `json:"categoryId" gorm:"-"`
+	Category           *Category  `json:"category" gorm:"foreignkey:CategoryId;preload=false"`
+	CategoryFakeId     *core.UID  `json:"-" gorm:"-"`
 	IsRerun            bool       `json:"isRerun" gorm:"column:is_rerun"`
 	StreamKey          *uuid.UUID `json:"streamKey" gorm:"column:stream_key"`
 	State              string     `json:"state" gorm:"column:state"`
@@ -26,6 +28,11 @@ type Stream struct {
 	Status             int        `json:"status" gorm:"column:status"`
 }
 
+type Category struct {
+	core.BaseModel `json:",inline"`
+	Name           string `json:"name" gorm:"column:name"`
+}
+
 func (Stream) TableName() string {
 	return "live_streams"
 }
@@ -34,6 +41,12 @@ func (s *Stream) Mask() {
 	s.BaseModel.Mask(core.DbTypeStream)
 	s.ChannelFakeId = core.NewUIDP(uint32(s.ChannelId), core.DbTypeChannel, 0)
 	s.CategoryFakeId = core.NewUIDP(uint32(s.CategoryId), core.DbTypeCategory, 0)
+	if s.Category != nil {
+		s.Category.Mask(core.DbTypeCategory)
+	}
+	if s.Channel != nil {
+		s.Channel.Mask()
+	}
 }
 
 const (

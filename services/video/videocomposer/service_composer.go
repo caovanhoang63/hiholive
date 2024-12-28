@@ -1,4 +1,4 @@
-package strmcomposer
+package videocomposer
 
 import (
 	"github.com/caovanhoang63/hiholive/services/video/module/category/ctgbiz"
@@ -14,10 +14,13 @@ import (
 	"github.com/caovanhoang63/hiholive/services/video/module/stream/streambiz"
 	"github.com/caovanhoang63/hiholive/services/video/module/stream/transport/strmgin"
 	"github.com/caovanhoang63/hiholive/services/video/module/stream/transport/strmgrpc"
+	"github.com/caovanhoang63/hiholive/services/video/module/upload/transport/uploadgin"
+	"github.com/caovanhoang63/hiholive/services/video/module/upload/uploadbiz"
 	"github.com/caovanhoang63/hiholive/shared/go/core"
 	"github.com/caovanhoang63/hiholive/shared/go/proto/pb"
 	"github.com/caovanhoang63/hiholive/shared/go/srvctx"
 	"github.com/caovanhoang63/hiholive/shared/go/srvctx/components/pubsub"
+	"github.com/caovanhoang63/hiholive/shared/go/uploadprovider"
 
 	"github.com/gin-gonic/gin"
 )
@@ -40,14 +43,17 @@ func ComposeChannelAPIService(serviceCtx srvctx.ServiceContext) ChannelService {
 
 type StreamService interface {
 	CreateStream() gin.HandlerFunc
+	GetStreamById() gin.HandlerFunc
+	FindStreams() gin.HandlerFunc
 }
 
 func ComposeStreamAPIService(serviceCtx srvctx.ServiceContext) StreamService {
 	db := serviceCtx.MustGet(core.KeyCompMySQL).(core.GormComponent)
 	rd := serviceCtx.MustGet(core.KeyRedis).(core.RedisComponent)
+	ps := serviceCtx.MustGet(core.KeyCompRabbitMQ).(pubsub.Pubsub)
 	channelRepo := channelmysql.NewChannelMysqlRepo(db.GetDB())
 	streamRepo := streammysql.NewStreamMysqlRepo(db.GetDB(), rd.GetClient())
-	biz := streambiz.NewStreamBiz(streamRepo, channelRepo)
+	biz := streambiz.NewStreamBiz(streamRepo, channelRepo, ps)
 	streamService := strmgin.NewStreamApi(biz, serviceCtx)
 	return streamService
 }
@@ -87,9 +93,21 @@ func ComposeCategoryApiService(serviceCtx srvctx.ServiceContext) CategoryService
 func ComposeStreamGRPCService(serviceCtx srvctx.ServiceContext) pb.StreamServiceServer {
 	db := serviceCtx.MustGet(core.KeyCompMySQL).(core.GormComponent)
 	rd := serviceCtx.MustGet(core.KeyRedis).(core.RedisComponent)
+	ps := serviceCtx.MustGet(core.KeyCompRabbitMQ).(pubsub.Pubsub)
 	channelRepo := channelmysql.NewChannelMysqlRepo(db.GetDB())
 	streamRepo := streammysql.NewStreamMysqlRepo(db.GetDB(), rd.GetClient())
-	biz := streambiz.NewStreamBiz(streamRepo, channelRepo)
+	biz := streambiz.NewStreamBiz(streamRepo, channelRepo, ps)
 	service := strmgrpc.NewStreamGRPC(biz, serviceCtx)
+	return service
+}
+
+type UploadService interface {
+	UploadImage() gin.HandlerFunc
+}
+
+func ComposeUploadAPIService(serviceCtx srvctx.ServiceContext) UploadService {
+	provider := serviceCtx.MustGet(core.KeyS3).(uploadprovider.UploadProvider)
+	biz := uploadbiz.NewUploadBiz(provider)
+	service := uploadgin.NewUploadGin(biz, serviceCtx)
 	return service
 }

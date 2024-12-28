@@ -12,8 +12,9 @@ import (
 )
 
 type UserService interface {
-	GetUserProfile() func(c *gin.Context)
+	GetUserById() func(c *gin.Context)
 	ListUser() func(c *gin.Context)
+	GetUserProfile() func(c *gin.Context)
 }
 
 func ComposeUserAPIService(serviceCtx srvctx.ServiceContext) UserService {

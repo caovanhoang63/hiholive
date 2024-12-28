@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"github.com/caovanhoang63/hiholive/services/video/strmcomposer"
+	"github.com/caovanhoang63/hiholive/services/video/videocomposer"
 	"github.com/caovanhoang63/hiholive/shared/go/srvctx"
 	"github.com/caovanhoang63/hiholive/shared/go/srvctx/components/ginc/middlewares"
 	"github.com/gin-gonic/gin"
@@ -9,13 +9,14 @@ import (
 
 func SetupRoutes(router *gin.RouterGroup, serviceCtx srvctx.ServiceContext) {
 	v1 := router.Group("v1")
-	channelService := strmcomposer.ComposeChannelAPIService(serviceCtx)
-	streamService := strmcomposer.ComposeStreamAPIService(serviceCtx)
-	settingService := strmcomposer.ComposeSystemSettingApiService(serviceCtx)
-	ctgService := strmcomposer.ComposeCategoryApiService(serviceCtx)
+	channelService := videocomposer.ComposeChannelAPIService(serviceCtx)
+	streamService := videocomposer.ComposeStreamAPIService(serviceCtx)
+	settingService := videocomposer.ComposeSystemSettingApiService(serviceCtx)
+	ctgService := videocomposer.ComposeCategoryApiService(serviceCtx)
+	uploadService := videocomposer.ComposeUploadAPIService(serviceCtx)
 
-	ac := strmcomposer.ComposeAuthRPCClient(serviceCtx)
-	uc := strmcomposer.ComposeUserRPCClient(serviceCtx)
+	ac := videocomposer.ComposeAuthRPCClient(serviceCtx)
+	uc := videocomposer.ComposeUserRPCClient(serviceCtx)
 
 	channelPrv := v1.Group("/channel")
 	channelPrv.POST("", middlewares.RequireAuth(ac), middlewares.Authorize(uc, "viewer"), channelService.CreateChannel())
@@ -27,8 +28,12 @@ func SetupRoutes(router *gin.RouterGroup, serviceCtx srvctx.ServiceContext) {
 	userPub := v1.Group("/user")
 	userPub.GET("/:id/channel", channelService.FindChannelById())
 
-	stream := v1.Group("/stream")
-	stream.POST("", middlewares.RequireAuth(ac), middlewares.Authorize(uc, "streamer"), streamService.CreateStream())
+	streamPrv := v1.Group("/stream")
+	streamPrv.POST("", middlewares.RequireAuth(ac), middlewares.Authorize(uc, "streamer"), streamService.CreateStream())
+
+	streamPub := v1.Group("/stream")
+	streamPub.GET(":id", streamService.GetStreamById())
+	streamPub.GET("", streamService.FindStreams())
 
 	settingPrv := v1.Group("/setting")
 	settingPrv.Use(middlewares.RequireAuth(ac), middlewares.Authorize(uc, "admin"))
@@ -48,4 +53,7 @@ func SetupRoutes(router *gin.RouterGroup, serviceCtx srvctx.ServiceContext) {
 	ctgPublic := v1.Group("/category")
 	ctgPublic.GET("", ctgService.FindCategories())
 	ctgPublic.GET("/:id", ctgService.FindCategoryById())
+
+	uploadPub := v1.Group("/upload/image")
+	uploadPub.POST("", uploadService.UploadImage())
 }

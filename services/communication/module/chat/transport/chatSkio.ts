@@ -18,8 +18,12 @@ export const chatSkio = (socket : Socket<DefaultEventsMap, DefaultEventsMap, Def
     const onCreateMessage = async (message : any, callback?:(data : any) => void ) => {
         const user = socket.data.user as User
         const streamId = socket.data.streamId
-        if (!user || !streamId) {
+        if (!user ) {
             callback?.(AppResponse.ErrorResponse(createUnauthorizedError()))
+            return
+        }
+        if (!streamId) {
+            callback?.(AppResponse.ErrorResponse(createInvalidRequestError(new Error("You are not viewing any stream"))))
             return
         }
         const id = UID.FromBase58(streamId)

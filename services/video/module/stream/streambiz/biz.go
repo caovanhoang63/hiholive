@@ -5,6 +5,7 @@ import (
 	"github.com/caovanhoang63/hiholive/services/video/module/channel/channelmodel"
 	"github.com/caovanhoang63/hiholive/services/video/module/stream/streammodel"
 	"github.com/caovanhoang63/hiholive/shared/go/core"
+	"github.com/caovanhoang63/hiholive/shared/go/srvctx/components/pubsub"
 	"github.com/google/uuid"
 	"golang.org/x/net/context"
 )
@@ -13,12 +14,14 @@ type StreamRepo interface {
 	Create(ctx context.Context, create *streammodel.StreamCreate) error
 	FindStreamByID(ctx context.Context, id int) (*streammodel.Stream, error)
 	UpdateStream(ctx context.Context, id int, update *streammodel.StreamUpdate) error
+	FindStreams(ctx context.Context, filter *streammodel.StreamFilter, paging *core.Paging) ([]streammodel.StreamList, error)
 }
 
 type StreamBiz interface {
 	Create(ctx context.Context, requester core.Requester, create *streammodel.StreamCreate) (*streammodel.StreamCreateResponse, error)
 	FindStreamById(ctx context.Context, id int) (*streammodel.Stream, error)
 	UpdateStreamState(ctx context.Context, requester core.Requester, id int, state string) error
+	FindStreams(ctx context.Context, filter *streammodel.StreamFilter, paging *core.Paging) ([]streammodel.StreamList, error)
 }
 
 type ChannelRepo interface {
@@ -28,13 +31,27 @@ type ChannelRepo interface {
 type streamBiz struct {
 	streamRepo  StreamRepo
 	channelRepo ChannelRepo
+	ps          pubsub.Pubsub
 }
 
-func NewStreamBiz(streamRepo StreamRepo, channelRepo ChannelRepo) *streamBiz {
+func NewStreamBiz(streamRepo StreamRepo, channelRepo ChannelRepo, ps pubsub.Pubsub) *streamBiz {
 	return &streamBiz{
 		streamRepo:  streamRepo,
 		channelRepo: channelRepo,
+		ps:          ps,
 	}
+}
+
+func (s *streamBiz) FindStreams(ctx context.Context, filter *streammodel.StreamFilter, paging *core.Paging) ([]streammodel.StreamList, error) {
+	if err := filter.Process(); err != nil {
+		return nil, core.ErrBadRequest.WithError(err.Error())
+	}
+
+	data, err := s.streamRepo.FindStreams(ctx, filter, paging)
+	if err != nil {
+		return nil, core.ErrInternalServerError.WithWrap(err)
+	}
+	return data, nil
 }
 
 func (s *streamBiz) UpdateStreamState(ctx context.Context, requester core.Requester, id int, state string) error {
@@ -60,6 +77,7 @@ func (s *streamBiz) UpdateStreamState(ctx context.Context, requester core.Reques
 }
 
 func (s *streamBiz) FindStreamById(ctx context.Context, id int) (*streammodel.Stream, error) {
+
 	r, err := s.streamRepo.FindStreamByID(ctx, id)
 	if err != nil {
 		return nil, core.ErrInternalServerError.WithWrap(err)
@@ -84,13 +102,13 @@ func (s *streamBiz) Create(ctx context.Context, requester core.Requester, create
 
 	create.ChannelId = channel.Id
 	streamKey, _ := uuid.NewUUID()
-	fmt.Println(streamKey)
 	create.StreamKey = &streamKey
-
 	if err = s.streamRepo.Create(ctx, create); err != nil {
 		fmt.Println(err)
 		return nil, core.ErrInternalServerError.WithTrace(err)
 	}
+
+	_ = s.ps.Publish(ctx, core.TopicStreamCreate, pubsub.NewMessage(create))
 
 	return &streammodel.StreamCreateResponse{
 		StreamId:  create.Uid,

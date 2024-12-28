@@ -39,6 +39,11 @@ CREATE TABLE `users` (
                          KEY `status` (`status`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+ALTER TABLE `users`
+    ADD COLUMN `user_name` VARCHAR(255) AFTER `last_name`;
+ALTER TABLE `users`
+    ADD KEY `user_name`(`user_name`) USING BTREE;
+
 DROP TABLE IF EXISTS `channels`;
 CREATE TABLE `channels` (
                             `id` int NOT NULL AUTO_INCREMENT,
@@ -54,6 +59,15 @@ CREATE TABLE `channels` (
                             PRIMARY KEY (`id`),
                             KEY `status` (`status`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+ALTER TABLE `channels`
+    ADD COLUMN `display_name` VARCHAR(255) AFTER `user_id`;
+
+ALTER TABLE `channels`
+    ADD COLUMN `user_name` VARCHAR(255) AFTER `user_id`;
+
+ALTER TABLE `channels`
+    ADD KEY `user_name` (`user_name`) USING BTREE ;
 
 DROP TABLE IF EXISTS `channel_analytics`;
 CREATE TABLE `channel_analytics` (
@@ -87,6 +101,7 @@ CREATE TABLE `categories` (
                               `name` VARCHAR(255),
                               `description` TEXT,
                               `image` JSON,
+                              `total_content` INT DEFAULT 0,
                               `status` INT DEFAULT 1,
                               `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                               `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,

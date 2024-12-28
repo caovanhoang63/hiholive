@@ -2,5 +2,6 @@ package core
 
 const (
 	TopicCreateChannel = "TopicCreateChannel"
-	TopicStreamStart
+	TopicStreamCreate  = "TopicStreamCreate"
+	TopicStreamStart   = "TopicStreamStart"
 )

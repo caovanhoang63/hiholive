@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/caovanhoang63/hiholive/services/video/strmcomposer"
+	"github.com/caovanhoang63/hiholive/services/video/videocomposer"
 	"github.com/caovanhoang63/hiholive/shared/go/core"
 	"github.com/caovanhoang63/hiholive/shared/go/proto/pb"
 	"github.com/caovanhoang63/hiholive/shared/go/srvctx"
@@ -25,7 +25,7 @@ func StartGRPCServices(serviceCtx srvctx.ServiceContext) {
 
 	s := grpc.NewServer()
 
-	pb.RegisterStreamServiceServer(s, strmcomposer.ComposeStreamGRPCService(serviceCtx))
+	pb.RegisterStreamServiceServer(s, videocomposer.ComposeStreamGRPCService(serviceCtx))
 
 	if err := s.Serve(lis); err != nil {
 		log.Fatalln(err)

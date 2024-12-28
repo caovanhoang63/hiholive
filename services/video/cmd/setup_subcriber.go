@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"github.com/caovanhoang63/hiholive/services/video/strmcomposer"
+	"github.com/caovanhoang63/hiholive/services/video/videocomposer"
 	"github.com/caovanhoang63/hiholive/shared/go/core"
 	"github.com/caovanhoang63/hiholive/shared/go/srvctx"
 	"github.com/caovanhoang63/hiholive/shared/go/srvctx/components/pubsub"
@@ -10,13 +10,15 @@ import (
 )
 
 func StartSubscriber(serviceCtx srvctx.ServiceContext) {
-	service := strmcomposer.ComposeStreamSubscriber(serviceCtx)
+	streamService := videocomposer.ComposeStreamSubscriber(serviceCtx)
+	categoryService := videocomposer.ComposeCategorySubscriber(serviceCtx)
 
 	pb := serviceCtx.MustGet(core.KeyCompRabbitMQ).(pubsub.Pubsub)
 
 	engine := subengine.NewEngine(serviceCtx, pb)
 
-	engine.Subscribe(core.TopicStreamStart, service.StartStream())
+	engine.Subscribe(core.TopicStreamStart, streamService.StartStream())
+	engine.Subscribe(core.TopicStreamCreate, categoryService.IncreaseTotalContent())
 
 	go func() {
 		err := engine.Start()

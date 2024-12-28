@@ -2,6 +2,7 @@ package strmsub
 
 import (
 	"github.com/caovanhoang63/hiholive/services/video/module/stream/streambiz"
+	"github.com/caovanhoang63/hiholive/shared/go/core"
 	"github.com/caovanhoang63/hiholive/shared/go/srvctx"
 	"github.com/caovanhoang63/hiholive/shared/go/srvctx/components/pubsub"
 	"github.com/caovanhoang63/hiholive/shared/go/subengine"
@@ -24,8 +25,14 @@ func (s *StreamSub) StartStream() subengine.ConsumerJob {
 	return subengine.ConsumerJob{
 		Title: "Update stream's state to running",
 		Handler: func(ctx context.Context, message *pubsub.Message) error {
-			if id, ok := message.Data.(float64); ok {
-				if err := s.biz.UpdateStreamState(ctx, nil, int(id), "running"); err != nil {
+
+			if uid, ok := message.Data.(string); ok {
+				id, err := core.FromBase58(uid)
+				if err != nil {
+					return err
+				}
+
+				if err = s.biz.UpdateStreamState(ctx, nil, int(id.GetLocalID()), "running"); err != nil {
 					return err
 				}
 			}

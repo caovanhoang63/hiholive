@@ -21,7 +21,9 @@ import { IStreamRepo } from './module/stream/repository/IStreamRepo';
 import {StreamRepo} from "./module/stream/repository/streamRepo";
 import {IStreamBusiness} from "./module/stream/business/IStreamBusiness";
 import {StreamBusiness} from "./module/stream/business/streamBusiness";
-
+import amqplib, {Connection} from "amqplib";
+import {IPubSub} from "./component/pubsub/IPubsub";
+import {RabbitPubSub} from "./component/pubsub/rabbitPubsub";
 
 dotenv.config();
 
@@ -31,7 +33,7 @@ const videoAddress = process.env.GRPC_VIDEO_ADDRESS || "";
 const authAddress = process.env.GRPC_AUTH_ADDRESS || "";
 const accessKey = process.env.S3_API_KEY || "";
 const secretAccessKey = process.env.S3_SECRET || "";
-
+const rabbitDSN = process.env.RABBITMQ_DSN || "";
 const container = new Container();
 // Repository
 container.bind<IChatRepo>(TYPES.IChatRepository).to(ChatDynamoRepo).inRequestScope();
@@ -41,7 +43,6 @@ container.bind<IStreamRepo>(TYPES.IStreamRepository).to(StreamRepo).inRequestSco
 // Business
 container.bind<IChatBusiness>(TYPES.IChatBusiness).to(ChatBusiness).inRequestScope();
 container.bind<IStreamBusiness>(TYPES.IStreamBusiness).to(StreamBusiness).inRequestScope();
-
 container.bind<RedisClientType<RedisDefaultModules & RedisModules, RedisFunctions, RedisScripts>>("RedisClient").toDynamicValue( () => {
     const client = createClient({ url: redisConnStr });
     client.connect().then().catch().finally();
@@ -69,5 +70,13 @@ container.bind<AWS.DynamoDB>(TYPES.DynamoDBClient).toDynamicValue(() => {
         },
     },);
 }).inSingletonScope();
+
+container.bind<IPubSub>(TYPES.PubSub).to(RabbitPubSub)
+
+container.bind<Promise<Connection>>(TYPES.RabbitMQClient).toDynamicValue(() => {
+    const conn =amqplib.connect(rabbitDSN);
+
+    return conn
+}).inSingletonScope()
 
 export {container};
