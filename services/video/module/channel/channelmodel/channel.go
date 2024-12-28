@@ -7,6 +7,9 @@ type Channel struct {
 	UserId         int         `json:"-" gorm:"column:user_id"`
 	UserUID        *core.UID   `json:"userId" gorm:"-"`
 	Panel          *core.Image `json:"panel" gorm:"column:panel"`
+	Image          *core.Image `json:"image" gorm:"column:image"`
+	UserName       string      `json:"userName" gorm:"column:user_name"`
+	DisplayName    string      `json:"displayName" gorm:"column:display_name"`
 	Description    string      `json:"description" gorm:"column:description"`
 	Url            string      `json:"url" gorm:"column:url"`
 	Contact        string      `json:"contact" gorm:"column:contact"`

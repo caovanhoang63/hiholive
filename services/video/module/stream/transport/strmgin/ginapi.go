@@ -21,6 +21,33 @@ func NewStreamApi(biz streambiz.StreamBiz, srvctx srvctx.ServiceContext) *ginAPI
 	}
 }
 
+func (g *ginAPI) FindStreams() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var paging core.Paging
+		var filter streammodel.StreamFilter
+		if err := c.ShouldBindQuery(&filter); err != nil {
+			core.WriteErrorResponse(c, core.ErrBadRequest)
+			return
+		}
+		if err := c.ShouldBindQuery(&paging); err != nil {
+			core.WriteErrorResponse(c, core.ErrBadRequest)
+			return
+		}
+		paging.Process()
+		data, err := g.biz.FindStreams(c, &filter, &paging)
+
+		if err != nil {
+			core.WriteErrorResponse(c, err)
+			return
+		}
+
+		for i := range data {
+			data[i].Mask()
+		}
+		c.JSON(http.StatusOK, core.SuccessResponse(data, paging, filter))
+	}
+}
+
 func (g *ginAPI) CreateStream() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var data streammodel.StreamCreate

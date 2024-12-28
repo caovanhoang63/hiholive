@@ -10,6 +10,7 @@ type Stream struct {
 	core.BaseModel     `json:",inline"`
 	ChannelId          int        `json:"-" gorm:"column:channel_id"`
 	ChannelFakeId      *core.UID  `json:"ChannelId" gorm:"-"`
+	Channel            *Channel   `json:"channel" gorm:"foreignkey:ChannelId"`
 	Title              string     `json:"title" gorm:"column:title"`
 	Notification       string     `json:"notification" gorm:"column:notification"`
 	Description        string     `json:"description" gorm:"column:description"`
@@ -42,6 +43,9 @@ func (s *Stream) Mask() {
 	s.CategoryFakeId = core.NewUIDP(uint32(s.CategoryId), core.DbTypeCategory, 0)
 	if s.Category != nil {
 		s.Category.Mask(core.DbTypeCategory)
+	}
+	if s.Channel != nil {
+		s.Channel.Mask()
 	}
 }
 

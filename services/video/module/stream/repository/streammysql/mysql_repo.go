@@ -61,6 +61,7 @@ func (s *streamRepo) Create(ctx context.Context, create *streammodel.StreamCreat
 	tx.Commit()
 	return nil
 }
+
 func (s *streamRepo) FindStreamByID(ctx context.Context, id int) (*streammodel.Stream, error) {
 	var stream streammodel.Stream
 	r, err := s.rdClient.Get(ctx, fmt.Sprintf("streamKey:%d", id)).Result()
@@ -70,7 +71,7 @@ func (s *streamRepo) FindStreamByID(ctx context.Context, id int) (*streammodel.S
 			return &stream, nil
 		}
 	}
-	if err = s.db.Preload("Category").Where("id = ?", id).First(&stream).Error; err != nil {
+	if err = s.db.Preload("Category").Preload("Channel").Where("id = ?", id).First(&stream).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, nil
 		}
@@ -78,4 +79,55 @@ func (s *streamRepo) FindStreamByID(ctx context.Context, id int) (*streammodel.S
 	}
 
 	return &stream, nil
+}
+
+func (s *streamRepo) FindStreams(ctx context.Context, filter *streammodel.StreamFilter, paging *core.Paging) ([]streammodel.Stream, error) {
+	var result []streammodel.Stream
+
+	db := s.db.Table(streammodel.Stream{}.TableName()).Where("status in (1)")
+
+	if filter != nil {
+		if filter.CategoryId != 0 {
+			db = db.Where("category_id = ?", filter.CategoryId)
+		}
+		if filter.ChannelId != 0 {
+			db = db.Where("channel_id = ?", filter.ChannelId)
+		}
+		if filter.State != "" {
+			db = db.Where("state = ?", filter.State)
+		}
+
+		if filter.Title != "" {
+			db = db.Where("title LIKE ?", "%"+filter.Title+"%")
+		}
+	}
+
+	if err := db.Count(&paging.Total).Error; err != nil {
+		return nil, err
+	}
+
+	db.Preload("Category").Preload("Channel").Find(&result)
+
+	// paging
+	if v := paging.FakeCursor; v != "" {
+		uid, err := core.FromBase58(v)
+		if err != nil {
+			return nil, err
+		}
+		db = db.Where("id  < ? ", uid.GetLocalID())
+	} else {
+		db = db.Offset(paging.GetOffSet())
+	}
+
+	if err := db.Limit(paging.Limit).Order("id desc").Find(&result).Error; err != nil {
+		return nil, err
+	}
+
+	if len(result) > 0 {
+		last := result[len(result)-1]
+		last.Mask()
+		paging.NextCursor = last.Uid.String()
+	}
+
+	return result, nil
 }

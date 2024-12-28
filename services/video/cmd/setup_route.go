@@ -33,6 +33,7 @@ func SetupRoutes(router *gin.RouterGroup, serviceCtx srvctx.ServiceContext) {
 
 	streamPub := v1.Group("/stream")
 	streamPub.GET(":id", streamService.GetStreamById())
+	streamPub.GET("", streamService.FindStreams())
 
 	settingPrv := v1.Group("/setting")
 	settingPrv.Use(middlewares.RequireAuth(ac), middlewares.Authorize(uc, "admin"))
