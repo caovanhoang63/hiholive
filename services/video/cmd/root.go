@@ -10,6 +10,7 @@ import (
 	"github.com/caovanhoang63/hiholive/shared/go/srvctx/components/jwtc"
 	rabbitpubsub "github.com/caovanhoang63/hiholive/shared/go/srvctx/components/pubsub/rabbitmq"
 	"github.com/caovanhoang63/hiholive/shared/go/srvctx/components/redisc"
+	"github.com/caovanhoang63/hiholive/shared/go/uploadprovider"
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/cobra"
 	"net/http"
@@ -25,6 +26,7 @@ func newServiceCtx() srvctx.ServiceContext {
 		srvctx.WithComponent(core.NewConfig()),
 		srvctx.WithComponent(redisc.NewRedis(core.KeyRedis)),
 		srvctx.WithComponent(rabbitpubsub.NewRabbitPubSub(core.KeyCompRabbitMQ)),
+		srvctx.WithComponent(uploadprovider.NewS3Provider(core.KeyS3)),
 	)
 }
 
@@ -50,6 +52,7 @@ var rootCmd = &cobra.Command{
 			c.JSON(http.StatusOK, gin.H{"data": "pong"})
 		})
 
+		RegisterImageFormat()
 		go StartGRPCServices(serviceCtx)
 		go StartSubscriber(serviceCtx)
 

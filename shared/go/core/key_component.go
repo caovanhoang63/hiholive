@@ -7,4 +7,5 @@ const (
 	KeyCompConf     = "config"
 	KeyCompRabbitMQ = "rabbitmq"
 	KeyRedis        = "redis"
+	KeyS3           = "s3"
 )

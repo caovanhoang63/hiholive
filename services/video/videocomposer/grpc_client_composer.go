@@ -1,4 +1,4 @@
-package strmcomposer
+package videocomposer
 
 import (
 	"github.com/caovanhoang63/hiholive/shared/go/core"

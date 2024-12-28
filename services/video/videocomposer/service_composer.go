@@ -1,4 +1,4 @@
-package strmcomposer
+package videocomposer
 
 import (
 	"github.com/caovanhoang63/hiholive/services/video/module/category/ctgbiz"
@@ -14,10 +14,13 @@ import (
 	"github.com/caovanhoang63/hiholive/services/video/module/stream/streambiz"
 	"github.com/caovanhoang63/hiholive/services/video/module/stream/transport/strmgin"
 	"github.com/caovanhoang63/hiholive/services/video/module/stream/transport/strmgrpc"
+	"github.com/caovanhoang63/hiholive/services/video/module/upload/transport/uploadgin"
+	"github.com/caovanhoang63/hiholive/services/video/module/upload/uploadbiz"
 	"github.com/caovanhoang63/hiholive/shared/go/core"
 	"github.com/caovanhoang63/hiholive/shared/go/proto/pb"
 	"github.com/caovanhoang63/hiholive/shared/go/srvctx"
 	"github.com/caovanhoang63/hiholive/shared/go/srvctx/components/pubsub"
+	"github.com/caovanhoang63/hiholive/shared/go/uploadprovider"
 
 	"github.com/gin-gonic/gin"
 )
@@ -91,5 +94,16 @@ func ComposeStreamGRPCService(serviceCtx srvctx.ServiceContext) pb.StreamService
 	streamRepo := streammysql.NewStreamMysqlRepo(db.GetDB(), rd.GetClient())
 	biz := streambiz.NewStreamBiz(streamRepo, channelRepo)
 	service := strmgrpc.NewStreamGRPC(biz, serviceCtx)
+	return service
+}
+
+type UploadService interface {
+	UploadImage() gin.HandlerFunc
+}
+
+func ComposeUploadAPIService(serviceCtx srvctx.ServiceContext) UploadService {
+	provider := serviceCtx.MustGet(core.KeyS3).(uploadprovider.UploadProvider)
+	biz := uploadbiz.NewUploadBiz(provider)
+	service := uploadgin.NewUploadGin(biz, serviceCtx)
 	return service
 }
