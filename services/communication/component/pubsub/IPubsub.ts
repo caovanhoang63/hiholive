@@ -7,7 +7,7 @@ export interface Message {
     channel : string,
     createdAt : Date
 }
-
+export type ConsumerJob = (message:Message) => void
 export function createMessage(data: any) : Message {
     return {
         channel: "",
@@ -19,5 +19,6 @@ export function createMessage(data: any) : Message {
 
 export interface IPubSub {
     publish(topic: string, message: Message): ResultAsync<void, Error>;
-    subscribe(topic: string): ResultAsync<[Message[], () => void], Error>;
+    subscribe(topic: string,fn : ConsumerJob[] ): ResultAsync<void, Error>;
+    start() :Promise<void>
 }

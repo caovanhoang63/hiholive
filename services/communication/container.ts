@@ -22,6 +22,8 @@ import {StreamRepo} from "./module/stream/repository/streamRepo";
 import {IStreamBusiness} from "./module/stream/business/IStreamBusiness";
 import {StreamBusiness} from "./module/stream/business/streamBusiness";
 import amqplib, {Connection} from "amqplib";
+import {IPubSub} from "./component/pubsub/IPubsub";
+import {RabbitPubSub} from "./component/pubsub/rabbitPubsub";
 
 dotenv.config();
 
@@ -41,7 +43,6 @@ container.bind<IStreamRepo>(TYPES.IStreamRepository).to(StreamRepo).inRequestSco
 // Business
 container.bind<IChatBusiness>(TYPES.IChatBusiness).to(ChatBusiness).inRequestScope();
 container.bind<IStreamBusiness>(TYPES.IStreamBusiness).to(StreamBusiness).inRequestScope();
-const rabbit = new Connection('amqp://guest:guest@localhost:5672')
 container.bind<RedisClientType<RedisDefaultModules & RedisModules, RedisFunctions, RedisScripts>>("RedisClient").toDynamicValue( () => {
     const client = createClient({ url: redisConnStr });
     client.connect().then().catch().finally();
@@ -70,10 +71,12 @@ container.bind<AWS.DynamoDB>(TYPES.DynamoDBClient).toDynamicValue(() => {
     },);
 }).inSingletonScope();
 
-container.bind<Connection>(TYPES.RabbitMQClient).toDynamicValue(() => {
-    const conn = amqplib.connect('amqp://localhost');
-    conn.then().catch().finally()
+container.bind<IPubSub>(TYPES.PubSub).to(RabbitPubSub)
+
+container.bind<Promise<Connection>>(TYPES.RabbitMQClient).toDynamicValue(() => {
+    const conn =amqplib.connect(rabbitDSN);
+
     return conn
-})
+}).inSingletonScope()
 
 export {container};
