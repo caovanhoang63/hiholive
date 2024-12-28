@@ -41,3 +41,23 @@ func (g *ginAPI) CreateStream() gin.HandlerFunc {
 
 	}
 }
+
+func (g *ginAPI) GetStreamById() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		uid, err := core.FromBase58(c.Param("id"))
+		if err != nil {
+			core.WriteErrorResponse(c, core.ErrBadRequest.WithError(err.Error()))
+			return
+		}
+
+		data, err := g.biz.FindStreamById(c.Request.Context(), int(uid.GetLocalID()))
+		if err != nil {
+			core.WriteErrorResponse(c, err)
+			return
+		}
+		data.Mask()
+
+		c.JSON(http.StatusOK, core.ResponseData(data))
+	}
+
+}

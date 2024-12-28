@@ -27,14 +27,13 @@ func (s *CategorySub) IncreaseTotalContent() subengine.ConsumerJob {
 	return subengine.ConsumerJob{
 		Title: "Increase Category Total Content When a stream create ",
 		Handler: func(ctx context.Context, message *pubsub.Message) error {
-			data, ok := message.Data.(map[string]any)
+			uid, ok := message.Data.(map[string]any)["categoryId"]
 			if !ok {
 				return errors.New("invalid data format")
 			}
 
-			uid, ok := data["categoryId"]
-			if !ok {
-				return errors.New("invalid data")
+			if uid == nil {
+				return nil
 			}
 
 			if id, err := core.FromBase58(uid.(string)); err == nil {

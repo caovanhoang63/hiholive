@@ -28,8 +28,11 @@ func SetupRoutes(router *gin.RouterGroup, serviceCtx srvctx.ServiceContext) {
 	userPub := v1.Group("/user")
 	userPub.GET("/:id/channel", channelService.FindChannelById())
 
-	stream := v1.Group("/stream")
-	stream.POST("", middlewares.RequireAuth(ac), middlewares.Authorize(uc, "streamer"), streamService.CreateStream())
+	streamPrv := v1.Group("/stream")
+	streamPrv.POST("", middlewares.RequireAuth(ac), middlewares.Authorize(uc, "streamer"), streamService.CreateStream())
+
+	streamPub := v1.Group("/stream")
+	streamPub.GET(":id", streamService.GetStreamById())
 
 	settingPrv := v1.Group("/setting")
 	settingPrv.Use(middlewares.RequireAuth(ac), middlewares.Authorize(uc, "admin"))

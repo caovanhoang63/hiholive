@@ -43,6 +43,7 @@ func ComposeChannelAPIService(serviceCtx srvctx.ServiceContext) ChannelService {
 
 type StreamService interface {
 	CreateStream() gin.HandlerFunc
+	GetStreamById() gin.HandlerFunc
 }
 
 func ComposeStreamAPIService(serviceCtx srvctx.ServiceContext) StreamService {

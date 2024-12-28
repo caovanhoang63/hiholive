@@ -34,6 +34,7 @@ func NewStreamMysqlRepo(db *gorm.DB, rdClient *redis.Client) *streamRepo {
 func (s *streamRepo) Create(ctx context.Context, create *streammodel.StreamCreate) error {
 	tx := s.db.Begin()
 
+	create.UnMask()
 	if err := tx.Table(streammodel.Stream{}.TableName()).Create(&create).Error; err != nil {
 		tx.Rollback()
 		return err
@@ -69,8 +70,7 @@ func (s *streamRepo) FindStreamByID(ctx context.Context, id int) (*streammodel.S
 			return &stream, nil
 		}
 	}
-
-	if err = s.db.Where("id = ?", id).First(&stream).Error; err != nil {
+	if err = s.db.Preload("Category").Where("id = ?", id).First(&stream).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, nil
 		}
