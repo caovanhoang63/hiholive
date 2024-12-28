@@ -10,13 +10,15 @@ import (
 )
 
 func StartSubscriber(serviceCtx srvctx.ServiceContext) {
-	service := videocomposer.ComposeStreamSubscriber(serviceCtx)
+	streamService := videocomposer.ComposeStreamSubscriber(serviceCtx)
+	categoryService := videocomposer.ComposeCategorySubscriber(serviceCtx)
 
 	pb := serviceCtx.MustGet(core.KeyCompRabbitMQ).(pubsub.Pubsub)
 
 	engine := subengine.NewEngine(serviceCtx, pb)
 
-	engine.Subscribe(core.TopicStreamStart, service.StartStream())
+	engine.Subscribe(core.TopicStreamStart, streamService.StartStream())
+	engine.Subscribe(core.TopicCreateStream, categoryService.IncreaseTotalContent())
 
 	go func() {
 		err := engine.Start()

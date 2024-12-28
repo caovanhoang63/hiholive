@@ -48,9 +48,10 @@ type StreamService interface {
 func ComposeStreamAPIService(serviceCtx srvctx.ServiceContext) StreamService {
 	db := serviceCtx.MustGet(core.KeyCompMySQL).(core.GormComponent)
 	rd := serviceCtx.MustGet(core.KeyRedis).(core.RedisComponent)
+	ps := serviceCtx.MustGet(core.KeyCompRabbitMQ).(pubsub.Pubsub)
 	channelRepo := channelmysql.NewChannelMysqlRepo(db.GetDB())
 	streamRepo := streammysql.NewStreamMysqlRepo(db.GetDB(), rd.GetClient())
-	biz := streambiz.NewStreamBiz(streamRepo, channelRepo)
+	biz := streambiz.NewStreamBiz(streamRepo, channelRepo, ps)
 	streamService := strmgin.NewStreamApi(biz, serviceCtx)
 	return streamService
 }
@@ -90,9 +91,10 @@ func ComposeCategoryApiService(serviceCtx srvctx.ServiceContext) CategoryService
 func ComposeStreamGRPCService(serviceCtx srvctx.ServiceContext) pb.StreamServiceServer {
 	db := serviceCtx.MustGet(core.KeyCompMySQL).(core.GormComponent)
 	rd := serviceCtx.MustGet(core.KeyRedis).(core.RedisComponent)
+	ps := serviceCtx.MustGet(core.KeyCompRabbitMQ).(pubsub.Pubsub)
 	channelRepo := channelmysql.NewChannelMysqlRepo(db.GetDB())
 	streamRepo := streammysql.NewStreamMysqlRepo(db.GetDB(), rd.GetClient())
-	biz := streambiz.NewStreamBiz(streamRepo, channelRepo)
+	biz := streambiz.NewStreamBiz(streamRepo, channelRepo, ps)
 	service := strmgrpc.NewStreamGRPC(biz, serviceCtx)
 	return service
 }

@@ -5,6 +5,7 @@ import (
 	"github.com/caovanhoang63/hiholive/services/video/module/channel/channelmodel"
 	"github.com/caovanhoang63/hiholive/services/video/module/stream/streammodel"
 	"github.com/caovanhoang63/hiholive/shared/go/core"
+	"github.com/caovanhoang63/hiholive/shared/go/srvctx/components/pubsub"
 	"github.com/google/uuid"
 	"golang.org/x/net/context"
 )
@@ -28,12 +29,14 @@ type ChannelRepo interface {
 type streamBiz struct {
 	streamRepo  StreamRepo
 	channelRepo ChannelRepo
+	ps          pubsub.Pubsub
 }
 
-func NewStreamBiz(streamRepo StreamRepo, channelRepo ChannelRepo) *streamBiz {
+func NewStreamBiz(streamRepo StreamRepo, channelRepo ChannelRepo, ps pubsub.Pubsub) *streamBiz {
 	return &streamBiz{
 		streamRepo:  streamRepo,
 		channelRepo: channelRepo,
+		ps:          ps,
 	}
 }
 
@@ -84,13 +87,13 @@ func (s *streamBiz) Create(ctx context.Context, requester core.Requester, create
 
 	create.ChannelId = channel.Id
 	streamKey, _ := uuid.NewUUID()
-	fmt.Println(streamKey)
 	create.StreamKey = &streamKey
-
 	if err = s.streamRepo.Create(ctx, create); err != nil {
 		fmt.Println(err)
 		return nil, core.ErrInternalServerError.WithTrace(err)
 	}
+
+	_ = s.ps.Publish(ctx, core.TopicCreateStream, pubsub.NewMessage(create))
 
 	return &streammodel.StreamCreateResponse{
 		StreamId:  create.Uid,

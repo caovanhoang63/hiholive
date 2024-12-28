@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/caovanhoang63/hiholive/services/video/module/category/ctgmodel"
 	"github.com/caovanhoang63/hiholive/shared/go/core"
+	log "github.com/sirupsen/logrus"
 	"golang.org/x/net/context"
 )
 
@@ -13,9 +14,11 @@ type CategoryBiz interface {
 	DeleteCategory(ctx context.Context, requester core.Requester, id int) error
 	FindCategory(ctx context.Context, id int) (*ctgmodel.Category, error)
 	FindCategories(ctx context.Context, filter *ctgmodel.CategoryFilter, paging *core.Paging) ([]ctgmodel.Category, error)
+	IncreaseTotalContent(ctx context.Context, id int) error
 }
 
 type CategoryRepo interface {
+	IncreaseTotalContent(ctx context.Context, id int) error
 	CreateCategory(ctx context.Context, create *ctgmodel.CategoryCreate) error
 	UpdateCategory(ctx context.Context, id int, update *ctgmodel.CategoryUpdate) error
 	DeleteCategory(ctx context.Context, id int) error
@@ -28,6 +31,14 @@ type categoryBiz struct {
 }
 
 func NewCategoryBiz(ctgRepo CategoryRepo) *categoryBiz { return &categoryBiz{ctgRepo: ctgRepo} }
+
+func (c *categoryBiz) IncreaseTotalContent(ctx context.Context, id int) error {
+	if err := c.ctgRepo.IncreaseTotalContent(ctx, id); err != nil {
+		log.Println(err)
+		return core.ErrInternalServerError.WithWrap(err)
+	}
+	return nil
+}
 
 func (c *categoryBiz) CreateCategory(ctx context.Context, requester core.Requester, create *ctgmodel.CategoryCreate) error {
 	if requester.GetRole() != "admin" {

@@ -48,6 +48,16 @@ func (m *mysqlRepo) FindCategory(ctx context.Context, id int) (*ctgmodel.Categor
 	return &data, nil
 }
 
+func (m *mysqlRepo) IncreaseTotalContent(ctx context.Context, id int) error {
+	if err := m.db.
+		Table(ctgmodel.Category{}.TableName()).Where("id = ?", id).
+		UpdateColumn("total_content", gorm.Expr("total_content + ? ", 1)).
+		Error; err != nil {
+		return err
+	}
+	return nil
+}
+
 func (m *mysqlRepo) FindCategories(ctx context.Context, filter *ctgmodel.CategoryFilter, paging *core.Paging) ([]ctgmodel.Category, error) {
 	var result []ctgmodel.Category
 

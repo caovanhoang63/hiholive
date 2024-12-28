@@ -92,7 +92,7 @@ func (a *categoryApi) FindCategories() gin.HandlerFunc {
 			return
 		}
 
-		if err := c.ShouldBindQuery(paging); err != nil {
+		if err := c.ShouldBindQuery(&paging); err != nil {
 			core.WriteErrorResponse(c, core.ErrBadRequest.WithWrap(err))
 			return
 		}
