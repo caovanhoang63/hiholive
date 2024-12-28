@@ -87,6 +87,7 @@ CREATE TABLE `categories` (
                               `name` VARCHAR(255),
                               `description` TEXT,
                               `image` JSON,
+                              `total_content` INT DEFAULT 0,
                               `status` INT DEFAULT 1,
                               `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                               `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
