@@ -1,4 +1,4 @@
-import {DefaultEventsMap, Socket} from "socket.io";
+import {DefaultEventsMap, Server, Socket} from "socket.io";
 import {container} from "../../../container";
 import {IStreamBusiness} from "../business/IStreamBusiness";
 import TYPES from "../../../types";
@@ -6,7 +6,9 @@ import {UID} from "../../../libs/uid";
 import {AppResponse} from "../../../libs/response";
 import {createInvalidRequestError} from "../../../libs/errors";
 
-export const streamSkio = (socket:  Socket<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>) => {
+export const streamSkio = (
+    io:  Server<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>,
+    socket:  Socket<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>) => {
     const streamBiz = container.get<IStreamBusiness>(TYPES.IStreamBusiness);
     const onViewStream = async (streamId : string, callBack? : (data: any) => void  ) => {
         await UID.FromBase58(streamId).match(
@@ -26,7 +28,7 @@ export const streamSkio = (socket:  Socket<DefaultEventsMap, DefaultEventsMap, D
         )
 
     }
-    const onLeaveStream = async (message : any, callBack? : (data: any) => void   ) => {
+    const onLeaveStream = async (message : any, callBack? : (data: any) => void ) => {
         const streamId = socket.data.streamId
         if (!streamId) return
         if (socket.rooms.has(streamId)) {
@@ -35,7 +37,17 @@ export const streamSkio = (socket:  Socket<DefaultEventsMap, DefaultEventsMap, D
 
         }
     }
+    const onGetView = async (streamId : string,callBack? : (data: any) => void) => {
+        if (!streamId) return
+        if (io.sockets.adapter.rooms.has(streamId)) {
+            callBack?.(AppResponse.SimpleResponse(io.sockets.adapter.rooms.get(streamId)?.size))
+            return
+        } else {
+            callBack?.(AppResponse.ErrorResponse(createInvalidRequestError(new Error("stream not found or not have any viewer"))))
+        }
+    }
     socket.on("stream:view",onViewStream)
     socket.on("stream:leave",onLeaveStream)
+    socket.on("stream:getView",onGetView)
     socket.on("disconnect",onLeaveStream)
 }

@@ -43,7 +43,7 @@ container.bind<IStreamRepo>(TYPES.IStreamRepository).to(StreamRepo).inRequestSco
 // Business
 container.bind<IChatBusiness>(TYPES.IChatBusiness).to(ChatBusiness).inRequestScope();
 container.bind<IStreamBusiness>(TYPES.IStreamBusiness).to(StreamBusiness).inRequestScope();
-container.bind<RedisClientType<RedisDefaultModules & RedisModules, RedisFunctions, RedisScripts>>("RedisClient").toDynamicValue( () => {
+container.bind<RedisClientType<RedisDefaultModules & RedisModules, RedisFunctions, RedisScripts>>(TYPES.RedisClient).toDynamicValue( () => {
     const client = createClient({ url: redisConnStr });
     client.connect().then().catch().finally();
     return client;

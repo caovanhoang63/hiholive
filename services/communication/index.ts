@@ -14,12 +14,30 @@ import {container} from "./container";
 import TYPES from "./types";
 import {IPubSub} from "./component/pubsub/IPubsub";
 import {SubscriberSetup} from "./subcriber";
+import {RedisClientType, RedisDefaultModules, RedisFunctions, RedisModules, RedisScripts} from "redis";
+import {createAdapter} from "@socket.io/redis-adapter";
 dotenv.config();
 const app: Express = express();
 const port = process.env.EXPRESS_PORT || 3000;
 const httpServer = createServer(app);
+
+const rdClient = container.get
+    <RedisClientType>(TYPES.RedisClient);
+const pub = rdClient.duplicate();
+const sub = pub.duplicate();
+
+(async () => {
+    await Promise.all([
+        pub.connect(),
+        sub.connect()
+    ]);
+})();
+
+
+
 const io = new Server(httpServer,{
-    connectionStateRecovery: {}
+    connectionStateRecovery: {},
+    adapter: createAdapter(pub, sub)
 });
 (BigInt.prototype as any).toJSON = function () {
     return this.toString();
@@ -29,13 +47,15 @@ const io = new Server(httpServer,{
     await SubscriberSetup();
 })()
 
+
+
 app.use(logger('dev'));
 app.use(cors());
 app.use(helmet());
 app.use(bodyParser.json());
 app.use(express.urlencoded({extended: false}));
 app.use(cookieParser());
-io.on("connection", socketSetup);
+io.on("connection", (socket)  => socketSetup(io,socket));
 
 app.get("/ping",(req, res) => {
     res.status(200).json("pong")

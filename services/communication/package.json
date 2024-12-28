@@ -16,6 +16,7 @@
     "@aws-sdk/util-dynamodb": "^3.716.0",
     "@grpc/grpc-js": "^1.12.5",
     "@grpc/proto-loader": "^0.7.13",
+    "@socket.io/redis-adapter": "^8.3.0",
     "@types/amqplib": "^0.10.6",
     "@types/cookie-parser": "^1.4.8",
     "@types/google-protobuf": "^3.15.12",
