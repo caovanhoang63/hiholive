@@ -11,7 +11,6 @@ import (
 	"github.com/caovanhoang63/hiholive/shared/go/srvctx/components/pubsub"
 	rabbitpubsub "github.com/caovanhoang63/hiholive/shared/go/srvctx/components/pubsub/rabbitmq"
 	"github.com/caovanhoang63/hiholive/shared/go/srvctx/components/redisc"
-	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/yutopp/go-rtmp"
 	"io"
@@ -57,12 +56,13 @@ var rootCmd = &cobra.Command{
 		relayService := rtmpc.NewRelayService()
 		srv := rtmp.NewServer(&rtmp.ServerConfig{
 			OnConnect: func(conn net.Conn) (io.ReadWriteCloser, *rtmp.ConnConfig) {
+
 				return conn, &rtmp.ConnConfig{
 					Handler: rtmpc.NewHandler(relayService, rd.GetClient(), composer.ComposeHlsRPCClient(serviceCtx), ps),
 					ControlState: rtmp.StreamControlStateConfig{
 						DefaultBandwidthWindowSize: 6 * 1024 * 1024 / 8,
 					},
-					Logger: log.StandardLogger(),
+					Logger: nil,
 				}
 			},
 		})

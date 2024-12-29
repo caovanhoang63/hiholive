@@ -69,6 +69,10 @@ func (h *Handler) OnServe(conn *rtmp.Conn) {
 	h.conn = conn
 }
 
+func (h *Handler) OnStop() {
+
+}
+
 // OnConnect validates the application name during an RTMP connection request and initializes the connection process.
 func (h *Handler) OnConnect(timestamp uint32, cmd *rtmpmsg.NetConnectionConnect) error {
 	h.logger.WithField(srvctx.Field{"cmd": cmd}).Info("OnConnect")
@@ -254,4 +258,8 @@ func (h *Handler) OnClose() {
 		fmt.Println("Sub close ")
 		_ = h.sub.Close()
 	}
+}
+
+func (h *Handler) OnError(e error) {
+	fmt.Println(e)
 }
