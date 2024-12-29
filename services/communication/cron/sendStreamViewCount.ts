@@ -7,7 +7,7 @@ import {createMessage, IPubSub} from "../component/pubsub/IPubsub";
 import {TopicUpdateStreamViewCount} from "../libs/topic";
 
 export const jobUpdateStreamViewCount = new CronJob(
-    '*/10 * * * * *', // cronTime
+    '*/30 * * * * *', // cronTime
     function () {
         const rdClient = container.get<RedisClientType>(TYPES.RedisClient)
         const ps = container.get<IPubSub>(TYPES.PubSub)
