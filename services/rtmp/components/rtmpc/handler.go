@@ -96,7 +96,9 @@ func (h *Handler) OnPublish(ctx *rtmp.StreamContext, timestamp uint32, cmd *rtmp
 	}
 	pubsub, err := h.relayService.NewPubsub(cmd.PublishingName)
 	if err != nil {
-		return errors.Wrap(err, "Failed to create pubsub")
+		if !errors.Is(err, ErrAlreadyPublished) && h.streamState != "error" {
+			return errors.Wrap(err, "Failed to create pubsub")
+		}
 	}
 	byteData, err := h.rdClient.Get(context.Background(), fmt.Sprintf("streamKey:%s", cmd.PublishingName)).Result()
 
@@ -256,8 +258,8 @@ func (h *Handler) OnVideo(timestamp uint32, payload io.Reader) error {
 func (h *Handler) OnClose() {
 	h.logger.Infof("OnClose")
 	if h.pub != nil {
-		h.handleEndStream()
 		_ = h.pub.Close()
+		h.handleEndStream()
 	}
 
 	if h.sub != nil {

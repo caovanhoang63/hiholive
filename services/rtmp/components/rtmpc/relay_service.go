@@ -1,6 +1,7 @@
 package rtmpc
 
 import (
+	"errors"
 	"fmt"
 	"sync"
 )
@@ -18,12 +19,14 @@ func NewRelayService() *RelayService {
 	}
 }
 
+var ErrAlreadyPublished = errors.New("already published")
+
 func (s *RelayService) NewPubsub(key string) (*Pubsub, error) {
 	s.m.Lock()
 	defer s.m.Unlock()
 
-	if _, ok := s.streams[key]; ok {
-		return nil, fmt.Errorf("Already published: %s", key)
+	if pubsub, ok := s.streams[key]; ok {
+		return pubsub, ErrAlreadyPublished
 	}
 
 	pubsub := NewPubsub(s, key)
