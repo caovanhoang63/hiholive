@@ -136,8 +136,8 @@ func (f *Ffmpeg) NewStream(streamId, serverUrl, streamKey string, fps, resolutio
 
 	args = append(args, param...)
 	args = append(args,
-		"-threads", "2", // Set the number of threads for encoding/decoding (2 threads in this case)
-		"-hls_time", "2", // Set the duration (in seconds) of each HLS segment (2 seconds per segment)
+		"-threads", "0", // Set the number of threads for encoding/decoding (2 threads in this case)
+		"-hls_time", "1", // Set the duration (in seconds) of each HLS segment (2 seconds per segment)
 		"-hls_list_size", "0", // Set the number of playlist entries (0 means unlimited, keeps all segments in the playlist)
 		"-hls_flags", "independent_segments", // Use independent segments, allowing segments to be played individually without depending on previous ones
 		"-http_persistent", "0", // Disable HTTP persistent connections (each segment is requested in a new connection)
