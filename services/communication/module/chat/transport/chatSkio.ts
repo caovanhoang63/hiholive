@@ -48,7 +48,6 @@ export const chatSkio = (socket : Socket<DefaultEventsMap, DefaultEventsMap, Def
                     createdAt: create.createdAt,
                     updatedAt: create.updatedAt,
                 }
-                console.log(mesRes)
                 socket.to(streamId).emit("newMessage",mesRes )
                 callback?.(AppResponse.SimpleResponse(true))
             },

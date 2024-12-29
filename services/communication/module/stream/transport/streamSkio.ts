@@ -18,7 +18,7 @@ export const streamSkio = (
                     console.log(stream.error)
                     callBack?.(stream.error);
                 }
-                socket.data.streamId = r.localID
+                socket.data.streamId = r.localID.toString()
                 socket.join(r.localID.toString())
                 callBack?.(AppResponse.SimpleResponse(true))
             },
