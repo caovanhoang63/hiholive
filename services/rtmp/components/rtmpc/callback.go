@@ -10,13 +10,12 @@ import (
 )
 
 // onEventCallback receive a flv tag input and convert it into a rtmpc message  chunk
-func onEventCallback(conn *rtmp.Conn, streamID uint32) func(flv *flvtag.FlvTag) error {
+func onEventCallback(ctx context.Context, conn *rtmp.Conn, streamID uint32) func(flv *flvtag.FlvTag) error {
 	return func(flv *flvtag.FlvTag) error {
 		buf := new(bytes.Buffer)
 
 		switch flv.Data.(type) {
 
-		// TODO: Convert to AAC instead of Flv audio
 		case *flvtag.AudioData:
 			d := flv.Data.(*flvtag.AudioData)
 
@@ -25,8 +24,6 @@ func onEventCallback(conn *rtmp.Conn, streamID uint32) func(flv *flvtag.FlvTag) 
 				return err
 			}
 
-			// TODO: Fix these values
-			ctx := context.Background()
 			chunkStreamID := 5
 			return conn.Write(ctx, chunkStreamID, flv.Timestamp, &rtmp.ChunkMessage{
 				StreamID: streamID,
@@ -43,8 +40,6 @@ func onEventCallback(conn *rtmp.Conn, streamID uint32) func(flv *flvtag.FlvTag) 
 				return err
 			}
 
-			// TODO: Fix these values
-			ctx := context.Background()
 			chunkStreamID := 6
 			return conn.Write(ctx, chunkStreamID, flv.Timestamp, &rtmp.ChunkMessage{
 				StreamID: streamID,
@@ -70,8 +65,6 @@ func onEventCallback(conn *rtmp.Conn, streamID uint32) func(flv *flvtag.FlvTag) 
 				return err
 			}
 
-			// TODO: Fix these values
-			ctx := context.Background()
 			chunkStreamID := 8
 			return conn.Write(ctx, chunkStreamID, flv.Timestamp, &rtmp.ChunkMessage{
 				StreamID: streamID,

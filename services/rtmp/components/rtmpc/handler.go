@@ -130,7 +130,10 @@ func (h *Handler) OnPlay(ctx *rtmp.StreamContext, timestamp uint32, cmd *rtmpmsg
 	}
 
 	sub := pubsub.Sub()
-	sub.eventCallback = onEventCallback(h.conn, ctx.StreamID)
+
+	con := context.Background()
+
+	sub.eventCallback = onEventCallback(con, h.conn, ctx.StreamID)
 
 	h.sub = sub
 
