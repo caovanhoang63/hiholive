@@ -257,11 +257,6 @@ func (h *Handler) OnVideo(timestamp uint32, payload io.Reader) error {
 // OnClose cleans up resources associated with the handler by closing the publisher and subscriber, if they are initialized.
 func (h *Handler) OnClose() {
 	h.logger.Infof("OnClose")
-	if h.pub != nil {
-		_ = h.pub.Close()
-		h.handleEndStream()
-	}
-
 	if h.sub != nil {
 		fmt.Println("Sub close ")
 		_ = h.sub.Close()
@@ -272,7 +267,7 @@ func (h *Handler) OnError(e error) {
 	fmt.Println("OnError:", e)
 	ctx, cancel := context.WithCancel(context.Background())
 	h.cancelErrorFunc = cancel
-	go func() {
+	go func(ctx context.Context) {
 		defer core.AppRecover()
 		h.streamState = "error"
 
@@ -284,11 +279,14 @@ func (h *Handler) OnError(e error) {
 		case <-ctx.Done(): // Context cancelled ( Streamer reconnect to server)
 			fmt.Println("Error handling was canceled.")
 		}
-	}()
+	}(ctx)
 }
 
 func (h *Handler) OnStop() {
-
+	if h.pub != nil {
+		_ = h.pub.Close()
+		h.handleEndStream()
+	}
 }
 
 func (h *Handler) handleEndStream() {
