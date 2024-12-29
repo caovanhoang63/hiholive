@@ -2,7 +2,7 @@ package authgrpcrepo
 
 import (
 	"fmt"
-	pb2 "github.com/caovanhoang63/hiholive/shared/go/proto/pb"
+	pb2 "github.com/caovanhoang63/hiholive/shared/golang/proto/pb"
 	"github.com/pkg/errors"
 	"golang.org/x/net/context"
 )

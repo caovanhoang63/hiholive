@@ -2,7 +2,7 @@ package hlsgrpc
 
 import (
 	"github.com/caovanhoang63/hiholive/services/hls_mux/component/ffmpegc"
-	"github.com/caovanhoang63/hiholive/shared/go/proto/pb"
+	"github.com/caovanhoang63/hiholive/shared/golang/proto/pb"
 	"golang.org/x/net/context"
 )
 

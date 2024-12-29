@@ -2,9 +2,9 @@ package strmsub
 
 import (
 	"github.com/caovanhoang63/hiholive/services/video/module/stream/streammodel"
-	"github.com/caovanhoang63/hiholive/shared/go/core"
-	"github.com/caovanhoang63/hiholive/shared/go/srvctx/components/pubsub"
-	"github.com/caovanhoang63/hiholive/shared/go/subengine"
+	"github.com/caovanhoang63/hiholive/shared/golang/core"
+	"github.com/caovanhoang63/hiholive/shared/golang/srvctx/components/pubsub"
+	"github.com/caovanhoang63/hiholive/shared/golang/subengine"
 	"github.com/pkg/errors"
 	"golang.org/x/net/context"
 )

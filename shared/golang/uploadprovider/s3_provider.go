@@ -9,8 +9,8 @@ import (
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
-	"github.com/caovanhoang63/hiholive/shared/go/core"
-	"github.com/caovanhoang63/hiholive/shared/go/srvctx"
+	"github.com/caovanhoang63/hiholive/shared/golang/core"
+	"github.com/caovanhoang63/hiholive/shared/golang/srvctx"
 	"log"
 	"net/http"
 )

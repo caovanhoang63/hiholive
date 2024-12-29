@@ -3,7 +3,7 @@ package channelmysql
 import (
 	"errors"
 	"github.com/caovanhoang63/hiholive/services/video/module/channel/channelmodel"
-	"github.com/caovanhoang63/hiholive/shared/go/core"
+	"github.com/caovanhoang63/hiholive/shared/golang/core"
 	"golang.org/x/net/context"
 	"gorm.io/gorm"
 )

@@ -2,8 +2,8 @@ package strmgrpc
 
 import (
 	"github.com/caovanhoang63/hiholive/services/video/module/stream/streambiz"
-	"github.com/caovanhoang63/hiholive/shared/go/proto/pb"
-	"github.com/caovanhoang63/hiholive/shared/go/srvctx"
+	"github.com/caovanhoang63/hiholive/shared/golang/proto/pb"
+	"github.com/caovanhoang63/hiholive/shared/golang/srvctx"
 	"golang.org/x/net/context"
 )
 

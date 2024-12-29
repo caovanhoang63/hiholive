@@ -2,8 +2,8 @@ package uploadgin
 
 import (
 	"github.com/caovanhoang63/hiholive/services/video/module/upload/uploadbiz"
-	"github.com/caovanhoang63/hiholive/shared/go/core"
-	"github.com/caovanhoang63/hiholive/shared/go/srvctx"
+	"github.com/caovanhoang63/hiholive/shared/golang/core"
+	"github.com/caovanhoang63/hiholive/shared/golang/srvctx"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )

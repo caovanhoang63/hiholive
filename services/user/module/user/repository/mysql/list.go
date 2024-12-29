@@ -2,7 +2,7 @@ package mysql
 
 import (
 	"github.com/caovanhoang63/hiholive/services/user/module/user/usermodel"
-	"github.com/caovanhoang63/hiholive/shared/go/core"
+	"github.com/caovanhoang63/hiholive/shared/golang/core"
 	"golang.org/x/net/context"
 )
 

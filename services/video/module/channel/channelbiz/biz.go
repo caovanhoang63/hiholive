@@ -3,8 +3,8 @@ package channelbiz
 import (
 	"errors"
 	"github.com/caovanhoang63/hiholive/services/video/module/channel/channelmodel"
-	"github.com/caovanhoang63/hiholive/shared/go/core"
-	"github.com/caovanhoang63/hiholive/shared/go/srvctx/components/pubsub"
+	"github.com/caovanhoang63/hiholive/shared/golang/core"
+	"github.com/caovanhoang63/hiholive/shared/golang/srvctx/components/pubsub"
 	"golang.org/x/net/context"
 )
 

@@ -16,11 +16,11 @@ import (
 	"github.com/caovanhoang63/hiholive/services/video/module/stream/transport/strmgrpc"
 	"github.com/caovanhoang63/hiholive/services/video/module/upload/transport/uploadgin"
 	"github.com/caovanhoang63/hiholive/services/video/module/upload/uploadbiz"
-	"github.com/caovanhoang63/hiholive/shared/go/core"
-	"github.com/caovanhoang63/hiholive/shared/go/proto/pb"
-	"github.com/caovanhoang63/hiholive/shared/go/srvctx"
-	"github.com/caovanhoang63/hiholive/shared/go/srvctx/components/pubsub"
-	"github.com/caovanhoang63/hiholive/shared/go/uploadprovider"
+	"github.com/caovanhoang63/hiholive/shared/golang/core"
+	"github.com/caovanhoang63/hiholive/shared/golang/proto/pb"
+	"github.com/caovanhoang63/hiholive/shared/golang/srvctx"
+	"github.com/caovanhoang63/hiholive/shared/golang/srvctx/components/pubsub"
+	"github.com/caovanhoang63/hiholive/shared/golang/uploadprovider"
 
 	"github.com/gin-gonic/gin"
 )

@@ -3,7 +3,7 @@ package stbiz
 import (
 	"errors"
 	"github.com/caovanhoang63/hiholive/services/video/module/setting/stmodel"
-	"github.com/caovanhoang63/hiholive/shared/go/core"
+	"github.com/caovanhoang63/hiholive/shared/golang/core"
 	"golang.org/x/net/context"
 )
 

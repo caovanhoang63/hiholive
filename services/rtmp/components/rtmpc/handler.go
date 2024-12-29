@@ -4,10 +4,10 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/caovanhoang63/hiholive/shared/go/asyncjob"
-	"github.com/caovanhoang63/hiholive/shared/go/core"
-	"github.com/caovanhoang63/hiholive/shared/go/srvctx"
-	"github.com/caovanhoang63/hiholive/shared/go/srvctx/components/pubsub"
+	"github.com/caovanhoang63/hiholive/shared/golang/asyncjob"
+	"github.com/caovanhoang63/hiholive/shared/golang/core"
+	"github.com/caovanhoang63/hiholive/shared/golang/srvctx"
+	"github.com/caovanhoang63/hiholive/shared/golang/srvctx/components/pubsub"
 	"github.com/pkg/errors"
 	"github.com/redis/go-redis/v9"
 	log "github.com/sirupsen/logrus"
@@ -134,7 +134,6 @@ func (h *Handler) OnPlay(ctx *rtmp.StreamContext, timestamp uint32, cmd *rtmpmsg
 	con := context.Background()
 
 	sub.eventCallback = onEventCallback(con, h.conn, ctx.StreamID)
-
 	h.sub = sub
 
 	return nil
@@ -191,13 +190,15 @@ func (h *Handler) OnSetDataFrame(timestamp uint32, data *rtmpmsg.NetStreamSetDat
 	}
 	if h.streamState == "error" {
 		h.cancelErrorFunc()
+	} else {
+		_ = h.pub.Publish(&flvtag.FlvTag{
+			TagType:   flvtag.TagTypeScriptData,
+			Timestamp: timestamp,
+			Data:      &script,
+		})
 	}
+
 	h.streamState = "started"
-	_ = h.pub.Publish(&flvtag.FlvTag{
-		TagType:   flvtag.TagTypeScriptData,
-		Timestamp: timestamp,
-		Data:      &script,
-	})
 
 	return nil
 }
@@ -291,6 +292,9 @@ func (h *Handler) OnStop() {
 func (h *Handler) handleEndStream() {
 	go func() {
 		defer core.AppRecover()
+		if h.streamState == "" {
+			return
+		}
 		id, _ := core.FromBase58(h.Stream.Uid)
 		_ = h.ps.Publish(context.Background(), core.TopicStreamEnded, pubsub.NewMessage(map[string]interface{}{
 			"stream_id": id,

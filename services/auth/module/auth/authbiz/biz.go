@@ -3,8 +3,8 @@ package authbiz
 import (
 	"errors"
 	"github.com/caovanhoang63/hiholive/services/auth/module/auth/authmodel"
-	"github.com/caovanhoang63/hiholive/shared/go/core"
-	"github.com/caovanhoang63/hiholive/shared/go/srvctx"
+	"github.com/caovanhoang63/hiholive/shared/golang/core"
+	"github.com/caovanhoang63/hiholive/shared/golang/srvctx"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 	"golang.org/x/net/context"

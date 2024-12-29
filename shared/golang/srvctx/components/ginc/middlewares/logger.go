@@ -1,7 +1,7 @@
 package middlewares
 
 import (
-	"github.com/caovanhoang63/hiholive/shared/go/srvctx"
+	"github.com/caovanhoang63/hiholive/shared/golang/srvctx"
 	"github.com/gin-gonic/gin"
 	"time"
 )

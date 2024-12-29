@@ -3,7 +3,7 @@ package ctggin
 import (
 	"github.com/caovanhoang63/hiholive/services/video/module/category/ctgbiz"
 	"github.com/caovanhoang63/hiholive/services/video/module/category/ctgmodel"
-	"github.com/caovanhoang63/hiholive/shared/go/core"
+	"github.com/caovanhoang63/hiholive/shared/golang/core"
 	"github.com/gin-gonic/gin"
 )
 

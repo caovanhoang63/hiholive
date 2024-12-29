@@ -1,6 +1,6 @@
 package channelmodel
 
-import "github.com/caovanhoang63/hiholive/shared/go/core"
+import "github.com/caovanhoang63/hiholive/shared/golang/core"
 
 type ChannelCreate struct {
 	core.BaseModel `bson:",inline"`

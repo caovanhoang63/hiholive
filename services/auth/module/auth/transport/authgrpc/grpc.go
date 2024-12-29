@@ -1,7 +1,7 @@
 package authgrpc
 
 import (
-	"github.com/caovanhoang63/hiholive/shared/go/proto/pb"
+	"github.com/caovanhoang63/hiholive/shared/golang/proto/pb"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/pkg/errors"
 	"golang.org/x/net/context"

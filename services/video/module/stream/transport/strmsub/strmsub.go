@@ -2,10 +2,10 @@ package strmsub
 
 import (
 	"github.com/caovanhoang63/hiholive/services/video/module/stream/streambiz"
-	"github.com/caovanhoang63/hiholive/shared/go/core"
-	"github.com/caovanhoang63/hiholive/shared/go/srvctx"
-	"github.com/caovanhoang63/hiholive/shared/go/srvctx/components/pubsub"
-	"github.com/caovanhoang63/hiholive/shared/go/subengine"
+	"github.com/caovanhoang63/hiholive/shared/golang/core"
+	"github.com/caovanhoang63/hiholive/shared/golang/srvctx"
+	"github.com/caovanhoang63/hiholive/shared/golang/srvctx/components/pubsub"
+	"github.com/caovanhoang63/hiholive/shared/golang/subengine"
 	"golang.org/x/net/context"
 )
 

@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"github.com/caovanhoang63/hiholive/services/video/module/channel/channelbiz"
 	"github.com/caovanhoang63/hiholive/services/video/module/channel/channelmodel"
-	"github.com/caovanhoang63/hiholive/shared/go/core"
-	"github.com/caovanhoang63/hiholive/shared/go/srvctx"
+	"github.com/caovanhoang63/hiholive/shared/golang/core"
+	"github.com/caovanhoang63/hiholive/shared/golang/srvctx"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )

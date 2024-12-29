@@ -1,10 +1,10 @@
 package subengine
 
 import (
-	"github.com/caovanhoang63/hiholive/shared/go/asyncjob"
-	"github.com/caovanhoang63/hiholive/shared/go/core"
-	"github.com/caovanhoang63/hiholive/shared/go/srvctx"
-	"github.com/caovanhoang63/hiholive/shared/go/srvctx/components/pubsub"
+	"github.com/caovanhoang63/hiholive/shared/golang/asyncjob"
+	"github.com/caovanhoang63/hiholive/shared/golang/core"
+	"github.com/caovanhoang63/hiholive/shared/golang/srvctx"
+	"github.com/caovanhoang63/hiholive/shared/golang/srvctx/components/pubsub"
 	"golang.org/x/net/context"
 )
 

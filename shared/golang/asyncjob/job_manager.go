@@ -2,7 +2,7 @@ package asyncjob
 
 import (
 	"context"
-	"github.com/caovanhoang63/hiholive/shared/go/core"
+	"github.com/caovanhoang63/hiholive/shared/golang/core"
 	"log"
 	"sync"
 )

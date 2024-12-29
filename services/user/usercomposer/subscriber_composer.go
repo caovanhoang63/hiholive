@@ -4,8 +4,8 @@ import (
 	"github.com/caovanhoang63/hiholive/services/user/module/user/biz"
 	"github.com/caovanhoang63/hiholive/services/user/module/user/repository/mysql"
 	"github.com/caovanhoang63/hiholive/services/user/module/user/transport/usersub"
-	"github.com/caovanhoang63/hiholive/shared/go/core"
-	"github.com/caovanhoang63/hiholive/shared/go/srvctx"
+	"github.com/caovanhoang63/hiholive/shared/golang/core"
+	"github.com/caovanhoang63/hiholive/shared/golang/srvctx"
 )
 
 func ComposeUserSubscriber(serviceCtx srvctx.ServiceContext) *usersub.UserSub {

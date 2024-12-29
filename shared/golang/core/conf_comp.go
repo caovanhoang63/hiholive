@@ -2,7 +2,7 @@ package core
 
 import (
 	"flag"
-	"github.com/caovanhoang63/hiholive/shared/go/srvctx"
+	"github.com/caovanhoang63/hiholive/shared/golang/srvctx"
 )
 
 type config struct {

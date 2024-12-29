@@ -2,8 +2,8 @@ package hlssub
 
 import (
 	"github.com/caovanhoang63/hiholive/services/hls_mux/component/ffmpegc"
-	"github.com/caovanhoang63/hiholive/shared/go/srvctx/components/pubsub"
-	"github.com/caovanhoang63/hiholive/shared/go/subengine"
+	"github.com/caovanhoang63/hiholive/shared/golang/srvctx/components/pubsub"
+	"github.com/caovanhoang63/hiholive/shared/golang/subengine"
 	"github.com/pkg/errors"
 	"golang.org/x/net/context"
 )

@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/caovanhoang63/hiholive/services/video/module/setting/stmodel"
-	"github.com/caovanhoang63/hiholive/shared/go/core"
+	"github.com/caovanhoang63/hiholive/shared/golang/core"
 	"github.com/redis/go-redis/v9"
 	"golang.org/x/net/context"
 	"gorm.io/gorm"

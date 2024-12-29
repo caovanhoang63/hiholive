@@ -1,6 +1,6 @@
 package ctgmodel
 
-import "github.com/caovanhoang63/hiholive/shared/go/core"
+import "github.com/caovanhoang63/hiholive/shared/golang/core"
 
 type CategoryFilter struct {
 	core.BaseFilter `json:",inline"`

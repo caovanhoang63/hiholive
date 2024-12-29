@@ -1,6 +1,6 @@
 package authmodel
 
-import "github.com/caovanhoang63/hiholive/shared/go/core"
+import "github.com/caovanhoang63/hiholive/shared/golang/core"
 
 type Auth struct {
 	core.BaseModel

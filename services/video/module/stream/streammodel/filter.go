@@ -2,7 +2,7 @@ package streammodel
 
 import (
 	"errors"
-	"github.com/caovanhoang63/hiholive/shared/go/core"
+	"github.com/caovanhoang63/hiholive/shared/golang/core"
 )
 
 type StreamFilter struct {

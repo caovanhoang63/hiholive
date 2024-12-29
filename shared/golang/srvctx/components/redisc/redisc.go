@@ -3,7 +3,7 @@ package redisc
 import (
 	"flag"
 	"fmt"
-	"github.com/caovanhoang63/hiholive/shared/go/srvctx"
+	"github.com/caovanhoang63/hiholive/shared/golang/srvctx"
 	"github.com/redis/go-redis/v9"
 	"golang.org/x/net/context"
 )

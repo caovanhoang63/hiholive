@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/caovanhoang63/hiholive/services/video/module/setting/stbiz"
 	"github.com/caovanhoang63/hiholive/services/video/module/setting/stmodel"
-	"github.com/caovanhoang63/hiholive/shared/go/core"
+	"github.com/caovanhoang63/hiholive/shared/golang/core"
 	"github.com/gin-gonic/gin"
 )
 

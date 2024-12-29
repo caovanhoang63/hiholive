@@ -3,8 +3,8 @@ package uploadbiz
 import (
 	"bytes"
 	"fmt"
-	"github.com/caovanhoang63/hiholive/shared/go/core"
-	"github.com/caovanhoang63/hiholive/shared/go/uploadprovider"
+	"github.com/caovanhoang63/hiholive/shared/golang/core"
+	"github.com/caovanhoang63/hiholive/shared/golang/uploadprovider"
 	"golang.org/x/net/context"
 	"image"
 	"io"

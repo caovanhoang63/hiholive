@@ -2,8 +2,8 @@ package cmd
 
 import (
 	"github.com/caovanhoang63/hiholive/services/user/usercomposer"
-	"github.com/caovanhoang63/hiholive/shared/go/srvctx"
-	"github.com/caovanhoang63/hiholive/shared/go/srvctx/components/ginc/middlewares"
+	"github.com/caovanhoang63/hiholive/shared/golang/srvctx"
+	"github.com/caovanhoang63/hiholive/shared/golang/srvctx/components/ginc/middlewares"
 	"github.com/gin-gonic/gin"
 )
 
