@@ -267,7 +267,7 @@ func (h *Handler) OnError(e error) {
 	ctx, cancel := context.WithCancel(context.Background())
 	h.cancelErrorFunc = cancel
 	go func() {
-		core.AppRecover()
+		defer core.AppRecover()
 		h.streamState = "error"
 
 		select {
@@ -275,11 +275,10 @@ func (h *Handler) OnError(e error) {
 		case <-time.After(time.Minute * 3):
 			h.handleEndStream()
 			fmt.Println("OnError")
-		case <-ctx.Done(): // Nếu context bị hủy
+		case <-ctx.Done(): // Context cancelled ( Streamer reconnect to server)
 			fmt.Println("Error handling was canceled.")
 		}
 	}()
-	fmt.Println(e)
 }
 
 func (h *Handler) OnStop() {
