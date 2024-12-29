@@ -5,6 +5,8 @@ import {errAsync, fromPromise, okAsync, ResultAsync} from "neverthrow";
 import {createInternalError} from "../../../libs/errors";
 import {ConsumerJob, Message} from "../../../component/pubsub/IPubsub";
 import {UID} from "../../../libs/uid";
+import {io} from "../../../index";
+import {AppResponse} from "../../../libs/response";
 
 export class StreamSubscriber   {
     constructor(@inject(TYPES.RedisClient) private redisClient : RedisClientType) {
@@ -32,7 +34,17 @@ export class StreamSubscriber   {
     endStream ():  ConsumerJob  {
         const handler =(message: Message): ResultAsync<void, Error> => {
             return fromPromise((async ()  => {
-                    await this.redisClient.sRem("active_stream",id.toString())
+                    UID.FromBase58(message?.data?.stream_id).match(
+                        async r => {
+                            io.to(r.localID.toString()).emit("stream:end",AppResponse.SimpleResponse(true))
+                            await this.redisClient.sRem("active_stream",r.localID.toString())
+                        },
+                        e => {
+                            console.log(e)
+                        }
+                    )
+
+
                 })(),
                 e => createInternalError(e) as Error)
         }

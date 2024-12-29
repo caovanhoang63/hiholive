@@ -3,7 +3,7 @@ import {IPubSub} from "./component/pubsub/IPubsub";
 import TYPES from "./types";
 import {RedisClientType} from "redis";
 import {StreamSubscriber} from "./module/stream/transport/streamSubscriber";
-import {TopicStreamStart} from "./libs/topic";
+import {TopicStreamEnded, TopicStreamStart} from "./libs/topic";
 
 export const SubscriberSetup = async () => {
     const ps = await container.getAsync<IPubSub>(TYPES.PubSub);
@@ -12,4 +12,5 @@ export const SubscriberSetup = async () => {
     const rdClient  =  container.get<RedisClientType>(TYPES.RedisClient);
     const streamService = new StreamSubscriber(rdClient)
     ps.subscribe(TopicStreamStart,[streamService.activeStream()])
+    ps.subscribe(TopicStreamEnded,[streamService.endStream()])
 }
