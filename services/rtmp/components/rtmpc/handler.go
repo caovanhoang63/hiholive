@@ -10,7 +10,6 @@ import (
 	"github.com/caovanhoang63/hiholive/shared/golang/srvctx/components/pubsub"
 	"github.com/pkg/errors"
 	"github.com/redis/go-redis/v9"
-	log "github.com/sirupsen/logrus"
 	flvtag "github.com/yutopp/go-flv/tag"
 	"github.com/yutopp/go-rtmp"
 	rtmpmsg "github.com/yutopp/go-rtmp/message"
@@ -44,9 +43,7 @@ type Handler struct {
 	hlsClient HlsClient
 	Stream    *core.StreamState
 	// pub represents the publishing entity, handling media streams such as audio, video, and metadata for RTMP connections.
-	pub             *Pub
-	streamState     string
-	cancelErrorFunc context.CancelFunc
+	pub *Pub
 	// sub represents a subscriber for handling events or media streams during RTMP playback sessions.
 	sub *Sub
 
@@ -94,24 +91,28 @@ func (h *Handler) OnPublish(ctx *rtmp.StreamContext, timestamp uint32, cmd *rtmp
 	if cmd.PublishingName == "" {
 		return errors.New("PublishingName is empty")
 	}
+
+	var streamInfo *core.StreamState
+
+	streamInfo, err := h.relayService.GetStream(cmd.PublishingName)
+
+	if err != nil {
+		if byteData, err := h.rdClient.Get(context.Background(), fmt.Sprintf("streamKey:%s", cmd.PublishingName)).Result(); err != nil {
+			return errors.Wrap(err, "Failed to get streamInfo")
+		} else {
+			_ = json.Unmarshal([]byte(byteData), &streamInfo)
+		}
+
+	}
 	pubsub, err := h.relayService.NewPubsub(cmd.PublishingName)
 	if err != nil {
-		if !errors.Is(err, ErrAlreadyPublished) && h.streamState != "error" {
+		if !errors.Is(err, ErrAlreadyPublished) && h.Stream.State != "error" {
 			return errors.Wrap(err, "Failed to create pubsub")
 		}
 	}
-	byteData, err := h.rdClient.Get(context.Background(), fmt.Sprintf("streamKey:%s", cmd.PublishingName)).Result()
-
-	var streamInfo core.StreamState
-	_ = json.Unmarshal([]byte(byteData), &streamInfo)
-
 	streamInfo.StreamKey = cmd.PublishingName
-	if errors.Is(err, redis.Nil) || err != nil {
-		log.Print(err)
-		return errors.New("PublishingName does not exist")
-	}
 
-	h.Stream = &streamInfo
+	h.Stream = streamInfo
 
 	pub := pubsub.Pub()
 
@@ -190,8 +191,8 @@ func (h *Handler) OnSetDataFrame(timestamp uint32, data *rtmpmsg.NetStreamSetDat
 	if err = h.ps.Publish(context.Background(), core.TopicStreamStart, pubsub.NewMessage(id)); err != nil {
 		h.logger.Error(err)
 	}
-	if h.streamState == "error" {
-		h.cancelErrorFunc()
+	if h.Stream.State == "error" {
+		h.relayService.CancelError(h.Stream.StreamKey)
 	} else {
 		_ = h.pub.Publish(&flvtag.FlvTag{
 			TagType:   flvtag.TagTypeScriptData,
@@ -200,7 +201,7 @@ func (h *Handler) OnSetDataFrame(timestamp uint32, data *rtmpmsg.NetStreamSetDat
 		})
 	}
 
-	h.streamState = "started"
+	h.Stream.State = "running"
 
 	return nil
 }
@@ -266,10 +267,10 @@ func (h *Handler) OnClose() {
 func (h *Handler) OnError(e error) {
 	fmt.Println("OnError:", e)
 	ctx, cancel := context.WithCancel(context.Background())
-	h.cancelErrorFunc = cancel
+	h.relayService.cancel[h.Stream.StreamKey] = &cancel
 	go func(ctx context.Context) {
 		defer core.AppRecover()
-		h.streamState = "error"
+		h.Stream.State = "error"
 
 		select {
 		// Wait 3 minute after stop stream
@@ -292,7 +293,7 @@ func (h *Handler) OnStop() {
 func (h *Handler) handleEndStream() {
 	go func() {
 		defer core.AppRecover()
-		if h.streamState == "" {
+		if h.Stream.State == "" {
 			return
 		}
 		id, _ := core.FromBase58(h.Stream.Uid)

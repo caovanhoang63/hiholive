@@ -56,7 +56,6 @@ var rootCmd = &cobra.Command{
 		relayService := rtmpc.NewRelayService()
 		srv := rtmp.NewServer(&rtmp.ServerConfig{
 			OnConnect: func(conn net.Conn) (io.ReadWriteCloser, *rtmp.ConnConfig) {
-
 				return conn, &rtmp.ConnConfig{
 					Handler: rtmpc.NewHandler(relayService, rd.GetClient(), composer.ComposeHlsRPCClient(serviceCtx), ps),
 					ControlState: rtmp.StreamControlStateConfig{
