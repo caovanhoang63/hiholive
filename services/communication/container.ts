@@ -44,8 +44,14 @@ container.bind<IStreamRepo>(TYPES.IStreamRepository).to(StreamRepo).inRequestSco
 container.bind<IChatBusiness>(TYPES.IChatBusiness).to(ChatBusiness).inRequestScope();
 container.bind<IStreamBusiness>(TYPES.IStreamBusiness).to(StreamBusiness).inRequestScope();
 container.bind<RedisClientType<RedisDefaultModules & RedisModules, RedisFunctions, RedisScripts>>(TYPES.RedisClient).toDynamicValue( () => {
-    const client = createClient({ url: redisConnStr });
-    client.connect().then().catch().finally();
+    const client = createClient({ url: redisConnStr ,database: 0});
+    client.connect(
+
+    ).then(
+
+    ).catch(
+
+    ).finally();
     return client;
 }).inSingletonScope();
 
@@ -71,7 +77,7 @@ container.bind<AWS.DynamoDB>(TYPES.DynamoDBClient).toDynamicValue(() => {
     },);
 }).inSingletonScope();
 
-container.bind<IPubSub>(TYPES.PubSub).to(RabbitPubSub)
+container.bind<IPubSub>(TYPES.PubSub).to(RabbitPubSub).inSingletonScope()
 
 container.bind<Promise<Connection>>(TYPES.RabbitMQClient).toDynamicValue(() => {
     const conn =amqplib.connect(rabbitDSN);

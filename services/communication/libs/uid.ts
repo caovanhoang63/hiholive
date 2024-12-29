@@ -21,10 +21,14 @@ export class UID   {
         return this._localID;
     }
     static FromBase58(s : string)  {
-        const decodedBuffer = base58.decode(s);
-
-        const decodedStr = String.fromCharCode(...decodedBuffer);
+        try {
+            const decodedBuffer = base58.decode(s);
+            const decodedStr = String.fromCharCode(...decodedBuffer);
             return UID.DecomposeUID(decodedStr);
+        } catch (e ) {
+            return err(new Error("Invalid UID "))
+        }
+
     }
     static DecomposeUID(s:  string) : Result<UID,Error>  {
         const uid = safeToBigInt(s)

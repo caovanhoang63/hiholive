@@ -19,6 +19,7 @@ func StartSubscriber(serviceCtx srvctx.ServiceContext) {
 
 	engine.Subscribe(core.TopicStreamStart, streamService.StartStream())
 	engine.Subscribe(core.TopicStreamCreate, categoryService.IncreaseTotalContent())
+	engine.Subscribe(core.TopicUpdateStreamViewCount, streamService.UpdateStreamViewCount())
 
 	go func() {
 		err := engine.Start()

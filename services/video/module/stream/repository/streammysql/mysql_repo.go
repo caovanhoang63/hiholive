@@ -9,12 +9,20 @@ import (
 	"github.com/redis/go-redis/v9"
 	"golang.org/x/net/context"
 	"gorm.io/gorm"
+	"strconv"
 	"time"
 )
 
 type streamRepo struct {
 	db       *gorm.DB
 	rdClient *redis.Client
+}
+
+func (s *streamRepo) UpdateStreamView(ctx context.Context, id, view int) error {
+	if err := s.rdClient.Set(ctx, fmt.Sprintf("streamView:%d", id), view, 0).Err(); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (s *streamRepo) UpdateStream(ctx context.Context, id int, update *streammodel.StreamUpdate) error {
@@ -121,6 +129,35 @@ func (s *streamRepo) FindStreams(ctx context.Context, filter *streammodel.Stream
 
 	if err := db.Limit(paging.Limit).Order("id desc").Find(&result).Error; err != nil {
 		return nil, err
+	}
+
+	ids := make([]string, len(result))
+	count := 0
+	for i := range result {
+		if result[i].State == streammodel.StreamStateRunning {
+			ids[i] = fmt.Sprintf("streamView:%d", result[i].Id)
+			count++
+		}
+	}
+	ids = ids[:count]
+
+	if data, err := s.rdClient.MGet(ctx, ids...).Result(); err == nil {
+		count = 0
+		for i := range result {
+			if result[i].State == streammodel.StreamStateRunning {
+				count++
+				if data[i] == nil {
+					continue
+				}
+				if v, ok := strconv.Atoi(data[i].(string)); ok == nil {
+					result[i].CurrentView = v
+				}
+
+			}
+			if count == len(data) {
+				break
+			}
+		}
 	}
 
 	if len(result) > 0 {

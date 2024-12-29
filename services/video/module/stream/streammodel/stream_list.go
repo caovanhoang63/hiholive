@@ -14,6 +14,7 @@ type StreamList struct {
 	CategoryId     int       `json:"-" gorm:"column:category_id"`
 	Category       *Category `json:"category" gorm:"foreignkey:CategoryId;preload=false"`
 	CategoryFakeId *core.UID `json:"-" gorm:"-"`
+	CurrentView    int       `json:"currentView" gorm:"-"`
 	IsRerun        bool      `json:"isRerun" gorm:"column:is_rerun"`
 	State          string    `json:"state" gorm:"column:state"`
 }
