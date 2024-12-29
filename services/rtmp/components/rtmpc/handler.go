@@ -287,10 +287,14 @@ func (h *Handler) OnStop() {
 }
 
 func (h *Handler) handleEndStream() {
-	id, _ := core.FromBase58(h.Stream.Uid)
-	_ = h.ps.Publish(context.Background(), core.TopicStreamEnded, pubsub.NewMessage(map[string]interface{}{
-		"stream_id": id,
-		"timestamp": time.Now(),
-	}))
-	h.rdClient.Del(context.Background(), fmt.Sprintf("streamKey:%s", h.Stream.StreamKey)).Result()
+	go func() {
+		core.AppRecover()
+		id, _ := core.FromBase58(h.Stream.Uid)
+		_ = h.ps.Publish(context.Background(), core.TopicStreamEnded, pubsub.NewMessage(map[string]interface{}{
+			"stream_id": id,
+			"timestamp": time.Now(),
+		}))
+		h.rdClient.Del(context.Background(), fmt.Sprintf("streamKey:%s", h.Stream.StreamKey)).Result()
+	}()
+
 }
