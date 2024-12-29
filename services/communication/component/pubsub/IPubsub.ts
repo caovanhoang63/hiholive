@@ -7,7 +7,10 @@ export interface Message {
     channel : string,
     createdAt : Date
 }
-export type ConsumerJob = (message:Message) => void
+export interface ConsumerJob {
+    Handler : (message:Message) => ResultAsync<void, Error>
+    Title : string
+}
 export function createMessage(data: any) : Message {
     return {
         channel: "",

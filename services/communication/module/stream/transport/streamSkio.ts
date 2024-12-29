@@ -18,15 +18,14 @@ export const streamSkio = (
                     console.log(stream.error)
                     callBack?.(stream.error);
                 }
-                socket.data.streamId = streamId
-                socket.join(streamId)
+                socket.data.streamId = r.localID
+                socket.join(r.localID.toString())
                 callBack?.(AppResponse.SimpleResponse(true))
             },
             e => {
                 callBack?.(AppResponse.ErrorResponse(createInvalidRequestError(e)))
             }
         )
-
     }
     const onLeaveStream = async (message : any, callBack? : (data: any) => void ) => {
         const streamId = socket.data.streamId
@@ -34,17 +33,23 @@ export const streamSkio = (
         if (socket.rooms.has(streamId)) {
             socket.data.streamId = undefined
             socket.leave(streamId)
-
         }
     }
     const onGetView = async (streamId : string,callBack? : (data: any) => void) => {
         if (!streamId) return
-        if (io.sockets.adapter.rooms.has(streamId)) {
-            callBack?.(AppResponse.SimpleResponse(io.sockets.adapter.rooms.get(streamId)?.size))
-            return
-        } else {
-            callBack?.(AppResponse.ErrorResponse(createInvalidRequestError(new Error("stream not found or not have any viewer"))))
-        }
+        UID.FromBase58(streamId).match(
+            r => {
+                const id = r.localID.toString()
+                if (io.sockets.adapter.rooms.has(id)) {
+                    callBack?.(AppResponse.SimpleResponse(io.sockets.adapter.rooms.get(id)?.size))
+                    return
+                }
+                callBack?.(AppResponse.ErrorResponse(createInvalidRequestError(new Error("stream not found or not have any viewer"))))
+            },
+            e => {
+                callBack?.(AppResponse.ErrorResponse(createInvalidRequestError(e)))
+            }
+        )
     }
     socket.on("stream:view",onViewStream)
     socket.on("stream:leave",onLeaveStream)

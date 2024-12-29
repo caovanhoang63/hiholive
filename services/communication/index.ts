@@ -16,6 +16,7 @@ import {IPubSub} from "./component/pubsub/IPubsub";
 import {SubscriberSetup} from "./subcriber";
 import {RedisClientType, RedisDefaultModules, RedisFunctions, RedisModules, RedisScripts} from "redis";
 import {createAdapter} from "@socket.io/redis-adapter";
+import {setupCronJobs} from "./cron";
 dotenv.config();
 const app: Express = express();
 const port = process.env.EXPRESS_PORT || 3000;
@@ -35,7 +36,7 @@ const sub = pub.duplicate();
 
 
 
-const io = new Server(httpServer,{
+export const io = new Server(httpServer,{
     connectionStateRecovery: {},
     adapter: createAdapter(pub, sub)
 });
@@ -48,7 +49,7 @@ const io = new Server(httpServer,{
 })()
 
 
-
+setupCronJobs()
 app.use(logger('dev'));
 app.use(cors());
 app.use(helmet());

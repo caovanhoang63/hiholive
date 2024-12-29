@@ -52,7 +52,7 @@ export class RabbitPubSub implements IPubSub {
             await this.channel?.consume(queue.queue, msg => {
                 const data =JSON.parse(msg?.content.toString() ?? "") as Message
                 for (let i = 0; i < fn.length; i++) {
-                    fn[i]?.(data)
+                    fn[i].Handler?.(data)
                 }
             },{
                 noAck : true,

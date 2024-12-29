@@ -26,19 +26,17 @@ export const chatSkio = (socket : Socket<DefaultEventsMap, DefaultEventsMap, Def
             callback?.(AppResponse.ErrorResponse(createInvalidRequestError(new Error("You are not viewing any stream"))))
             return
         }
-        const id = UID.FromBase58(streamId)
-        if (id.isErr()) {
-            console.log(id.error)
-            callback?.(createInternalError(id.isErr));
-            return
-        }
-        const create = {message : message,streamId: id.value.localID}  as ChatMessageCreate
+
+        const id = parseInt(streamId)
+        const create = {message : message,streamId:id}  as ChatMessageCreate
 
         const r = await chatBiz.create({userId : user.id, userRole: user.systemRole}, create)
+
+        const uid = new UID(id,DbTypeStream,1)
         r.match(
             r => {
                 const mesRes : ChatMessageResponse= {
-                    streamId: streamId,
+                    streamId: uid.toString(),
                     messageId: create.messageId,
                     user: {
                         id: user.uid.toString(),
@@ -50,6 +48,7 @@ export const chatSkio = (socket : Socket<DefaultEventsMap, DefaultEventsMap, Def
                     createdAt: create.createdAt,
                     updatedAt: create.updatedAt,
                 }
+                console.log(mesRes)
                 socket.to(streamId).emit("newMessage",mesRes )
                 callback?.(AppResponse.SimpleResponse(true))
             },
