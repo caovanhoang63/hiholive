@@ -252,7 +252,7 @@ func (h *Handler) OnVideo(timestamp uint32, payload io.Reader) error {
 func (h *Handler) OnClose() {
 	h.logger.Infof("OnClose")
 	if h.pub != nil {
-		fmt.Println("Pub close ")
+		h.handleEndStream()
 		_ = h.pub.Close()
 	}
 
@@ -283,8 +283,7 @@ func (h *Handler) OnError(e error) {
 }
 
 func (h *Handler) OnStop() {
-	h.handleEndStream()
-	fmt.Println("streamer stop correctly")
+
 }
 
 func (h *Handler) handleEndStream() {

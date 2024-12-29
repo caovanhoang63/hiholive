@@ -29,7 +29,7 @@ func StartGRPCServices(ffmpeg *ffmpegc.Ffmpeg, serviceCtx srvctx.ServiceContext)
 
 	pb.RegisterHlsServiceServer(s, composer.ComposeHlsGRPCService(ffmpeg, serviceCtx))
 
-	if err := s.Serve(lis); err != nil {
+	if err = s.Serve(lis); err != nil {
 		log.Fatalln(err)
 	}
 }

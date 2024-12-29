@@ -25,7 +25,7 @@ func (h *HLSSub) OnStopStream() subengine.ConsumerJob {
 				return errors.New("invalid data")
 			}
 
-			id, ok := data["id"].(string)
+			id, ok := data["stream_id"].(string)
 
 			if !ok {
 				return errors.New("invalid id")

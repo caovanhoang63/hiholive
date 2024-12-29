@@ -53,8 +53,15 @@ var rootCmd = &cobra.Command{
 
 		ffmpeg := ffmpegc.NewFfmpeg(serviceCtx).WithConfig(ffmpegc.NewFfmpegConfig("./hls_output", rd.GetClient()))
 
-		go StartGRPCServices(ffmpeg, serviceCtx)
+		go func() {
+			core.AppRecover()
+			StartGRPCServices(ffmpeg, serviceCtx)
+		}()
 
+		go func() {
+			core.AppRecover()
+			StartSubscriberServices(ffmpeg, serviceCtx)
+		}()
 		if err := router.Run(fmt.Sprintf(":%d", ginComp.GetPort())); err != nil {
 			logger.Fatal(err)
 		}
