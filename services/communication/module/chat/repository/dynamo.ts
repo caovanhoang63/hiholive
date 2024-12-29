@@ -71,7 +71,8 @@ export class ChatDynamoRepo implements IChatRepo {
                                 uid: new UID(user.id, DbTypeUser, 1),
                                 firstName: user.firstName,
                                 lastName: user.lastName,
-                                avatar: user.avatar
+                                avatar: user.avatar,
+                                systemRole: ""
                             };
                         }
                         return item;
