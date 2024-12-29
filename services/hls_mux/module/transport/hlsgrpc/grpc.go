@@ -22,17 +22,12 @@ func (h *hlsGRPC) NewHlsStream(ctx context.Context, req *pb.NewHlsStreamReq) (*p
 	streamId := req.StreamId
 
 	go func() {
-		h.Ffmpeg.
-			_ = h.Ffmpeg.NewStream(streamId, link, key, int(fps), int(resolution))
+		defer func() {
+			if r := recover(); r != nil {
 
-		//go func() {
-		//	time.Sleep(50 * time.Second)
-		//
-		//	for i := 0; i < 10; i++ {
-		//		fmt.Println(i)
-		//	}
-		//	fn()
-		//}()
+			}
+		}()
+		_ = h.Ffmpeg.NewStream(streamId, link, key, int(fps), int(resolution))
 
 	}()
 
