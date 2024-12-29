@@ -2,6 +2,7 @@ package ffmpegc
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/caovanhoang63/hiholive/shared/go/srvctx"
 	"github.com/redis/go-redis/v9"
@@ -32,10 +33,13 @@ func NewFfmpegConfig(mountFolder string, rd *redis.Client) *FfmpegConfig {
 type Ffmpeg struct {
 	serviceContext srvctx.ServiceContext
 	ffmpegConfig   *FfmpegConfig
+	closeFuncs     map[string]func() error
 }
 
 func NewFfmpeg(serviceContext srvctx.ServiceContext) *Ffmpeg {
-	return &Ffmpeg{}
+	return &Ffmpeg{
+		closeFuncs: make(map[string]func() error),
+	}
 }
 
 func (f *Ffmpeg) WithConfig(config *FfmpegConfig) *Ffmpeg {
@@ -55,6 +59,13 @@ type ResolutionInfo struct {
 type FpsBitRate struct {
 	ABitRate int `json:"aBitRate"`
 	VBitRate int `json:"vBitRate"`
+}
+
+func (f *Ffmpeg) StopStream(streamId string) error {
+	if fn, ok := f.closeFuncs[streamId]; ok {
+		return fn()
+	}
+	return errors.New("stream not found")
 }
 
 // NewStream initializes and runs a Ffmpeg process to create an HLS stream with the specified parameters.
@@ -115,7 +126,7 @@ func (f *Ffmpeg) NewStream(streamId, serverUrl, streamKey string, fps, resolutio
 		"-ar", "32000",
 
 		// Flag specifying the interpolation method for resizing images. "bilinear" is a basic interpolation method, providing fast processing but not very sharp results.
-		// other option
+		// other optionA
 
 		//            Speed            Quality
 		// bilinear	  Fastest	       Lowest (smooth but not sharp)	        Real-time applications where speed matters more than quality
@@ -168,10 +179,12 @@ func (f *Ffmpeg) NewStream(streamId, serverUrl, streamKey string, fps, resolutio
 		}
 	}()
 
-	return func() error {
+	fn := func() error {
 		cancel()
 		return nil
 	}
+	f.closeFuncs[streamId] = fn
+	return fn
 }
 
 func (f *Ffmpeg) Start() {}

@@ -3,7 +3,12 @@
   <component name="Go" enabled="true" />
   <component name="NewModuleRootManager">
     <content url="file://$MODULE_DIR$">
+      <excludeFolder url="file://$MODULE_DIR$/services/auth/.log" />
+      <excludeFolder url="file://$MODULE_DIR$/services/hls_mux/.log" />
       <excludeFolder url="file://$MODULE_DIR$/services/hls_mux/hls_output" />
+      <excludeFolder url="file://$MODULE_DIR$/services/rtmp/.log" />
+      <excludeFolder url="file://$MODULE_DIR$/services/user/.log" />
+      <excludeFolder url="file://$MODULE_DIR$/services/video/.log" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

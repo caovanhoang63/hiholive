@@ -175,11 +175,11 @@ func (h *Handler) OnSetDataFrame(timestamp uint32, data *rtmpmsg.NetStreamSetDat
 			time.Second * 1,
 			time.Second * 2,
 			time.Second * 4,
+			time.Second * 8,
 		})
 		if err = job.RunWithRetry(context.Background()); err != nil {
 			h.logger.Error(err)
 		}
-
 	}()
 	if err = h.ps.Publish(context.Background(), core.TopicStreamStart, pubsub.NewMessage(id)); err != nil {
 		h.logger.Error(err)
@@ -245,12 +245,13 @@ func (h *Handler) OnVideo(timestamp uint32, payload io.Reader) error {
 // OnClose cleans up resources associated with the handler by closing the publisher and subscriber, if they are initialized.
 func (h *Handler) OnClose() {
 	h.logger.Infof("OnClose")
-
 	if h.pub != nil {
+		fmt.Println("Pub close ")
 		_ = h.pub.Close()
 	}
 
 	if h.sub != nil {
+		fmt.Println("Sub close ")
 		_ = h.sub.Close()
 	}
 }
