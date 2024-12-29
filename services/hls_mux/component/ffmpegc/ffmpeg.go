@@ -67,11 +67,11 @@ func (f *Ffmpeg) NewStream(streamId, serverUrl, streamKey string, fps, resolutio
 	}
 	result1, ok1 := results[0].(string) // Casting the first result
 	result2, ok2 := results[1].(string) // Casting the second result
+
 	if !ok1 || !ok2 {
+		fmt.Println(ok1, ok2)
 		return
 	}
-
-	fmt.Println(streamId, serverUrl, streamKey, fps, resolution)
 
 	supportedMap := map[string][]int{}
 	resolutionInfo := map[string]ResolutionInfo{}
@@ -81,6 +81,7 @@ func (f *Ffmpeg) NewStream(streamId, serverUrl, streamKey string, fps, resolutio
 	if err != nil {
 		return
 	}
+	fmt.Println(resolutionInfo["720"])
 
 	supported := supportedMap["supported"]
 
@@ -97,6 +98,7 @@ func (f *Ffmpeg) NewStream(streamId, serverUrl, streamKey string, fps, resolutio
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
 	param, err := ResolutionCmd(resolution, fps, supported, resolutionInfo)
+	fmt.Println("param:", param)
 	if err != nil {
 		return
 	}

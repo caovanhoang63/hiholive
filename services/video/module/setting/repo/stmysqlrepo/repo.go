@@ -48,7 +48,7 @@ func (r *repo) Update(ctx context.Context, name string, update *stmodel.SettingU
 	}
 	b, _ := json.Marshal(update.Value)
 
-	if err := r.rdClient.SetNX(ctx, fmt.Sprintf("system_setting:%s", name), b, 0).Err(); err != nil {
+	if err := r.rdClient.Set(ctx, fmt.Sprintf("system_setting:%s", name), b, 0).Err(); err != nil {
 		tx.Rollback()
 		return err
 	}
