@@ -273,11 +273,7 @@ func (h *Handler) OnError(e error) {
 		select {
 		// Wait 3 minute after stop stream
 		case <-time.After(time.Minute * 3):
-			id, _ := core.FromBase58(h.Stream.Uid)
-			_ = h.ps.Publish(context.Background(), core.TopicStreamEnded, pubsub.NewMessage(map[string]interface{}{
-				"stream_id": id,
-				"timestamp": time.Now(),
-			}))
+			h.handleEndStream()
 			fmt.Println("OnError")
 		case <-ctx.Done(): // Nếu context bị hủy
 			fmt.Println("Error handling was canceled.")
@@ -287,10 +283,15 @@ func (h *Handler) OnError(e error) {
 }
 
 func (h *Handler) OnStop() {
+	h.handleEndStream()
+	fmt.Println("streamer stop correctly")
+}
+
+func (h *Handler) handleEndStream() {
 	id, _ := core.FromBase58(h.Stream.Uid)
 	_ = h.ps.Publish(context.Background(), core.TopicStreamEnded, pubsub.NewMessage(map[string]interface{}{
 		"stream_id": id,
 		"timestamp": time.Now(),
 	}))
-	fmt.Println("streamer stop correctly")
+	h.rdClient.Del(context.Background(), fmt.Sprintf("streamKey:%s", h.Stream.StreamKey)).Result()
 }
