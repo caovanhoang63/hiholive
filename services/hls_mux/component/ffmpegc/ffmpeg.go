@@ -140,7 +140,6 @@ func (f *Ffmpeg) NewStream(streamId, serverUrl, streamKey string, fps, resolutio
 		"-hls_flags", "independent_segments", // Use independent segments, allowing segments to be played individually without depending on previous ones
 		"-http_persistent", "0", // Disable HTTP persistent connections (each segment is requested in a new connection)
 		"-f", "hls", // Set the output format to HLS (HTTP Live Streaming)
-		"-hls_playlist_type", "event", // Set the playlist type to "event", meaning the playlist is not dynamic and has no end (used for live events)
 		"-hls_segment_type", "fmp4", // Use fragmented MP4 (fMP4) instead of MPEG-TS for HLS segments
 		"-hls_segment_filename", outputDir+"/%v_%03d.m4s", // Define the output filename pattern for HLS segments (e.g., segment1_001.m4s)
 		"-master_pl_name", "master.m3u8", // Set the name for the master playlist file
