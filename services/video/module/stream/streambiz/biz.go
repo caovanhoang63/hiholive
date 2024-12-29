@@ -15,6 +15,7 @@ type StreamRepo interface {
 	FindStreamByID(ctx context.Context, id int) (*streammodel.Stream, error)
 	UpdateStream(ctx context.Context, id int, update *streammodel.StreamUpdate) error
 	FindStreams(ctx context.Context, filter *streammodel.StreamFilter, paging *core.Paging) ([]streammodel.StreamList, error)
+	UpdateStreamView(ctx context.Context, id, view int) error
 }
 
 type StreamBiz interface {
@@ -22,6 +23,7 @@ type StreamBiz interface {
 	FindStreamById(ctx context.Context, id int) (*streammodel.Stream, error)
 	UpdateStreamState(ctx context.Context, requester core.Requester, id int, state string) error
 	FindStreams(ctx context.Context, filter *streammodel.StreamFilter, paging *core.Paging) ([]streammodel.StreamList, error)
+	UpdateStreamView(ctx context.Context, id, view int) error
 }
 
 type ChannelRepo interface {
@@ -42,6 +44,12 @@ func NewStreamBiz(streamRepo StreamRepo, channelRepo ChannelRepo, ps pubsub.Pubs
 	}
 }
 
+func (s *streamBiz) UpdateStreamView(ctx context.Context, id, view int) error {
+	if err := s.streamRepo.UpdateStreamView(ctx, id, view); err != nil {
+		return core.ErrInternalServerError.WithWrap(err)
+	}
+	return nil
+}
 func (s *streamBiz) FindStreams(ctx context.Context, filter *streammodel.StreamFilter, paging *core.Paging) ([]streammodel.StreamList, error) {
 	if err := filter.Process(); err != nil {
 		return nil, core.ErrBadRequest.WithError(err.Error())
