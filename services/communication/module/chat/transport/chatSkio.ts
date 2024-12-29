@@ -63,7 +63,7 @@ export const chatSkio = (socket : Socket<DefaultEventsMap, DefaultEventsMap, Def
             callback?.(AppResponse.ErrorResponse(createInvalidRequestError(new Error("streamId is required"))))
             return
         }
-        let oldCursor = paging.cursor
+        let oldCursor = paging?.cursor
         paging = new Paging(paging?.limit || 0,paging?.page || 0)
         paging.default()
         paging.cursor = oldCursor
@@ -83,6 +83,7 @@ export const chatSkio = (socket : Socket<DefaultEventsMap, DefaultEventsMap, Def
         }
 
         filter.streamId= streamId.value.localID
+        console.log(filter.streamId)
         const r = await chatBiz.list(filter,paging)
         r.match(
             list => {
@@ -91,10 +92,10 @@ export const chatSkio = (socket : Socket<DefaultEventsMap, DefaultEventsMap, Def
                         streamId: streamId.value.toString(),
                         messageId: v.messageId.toString(),
                         user: {
-                            id: v.user.uid.toString(),
-                            firstName: v.user.firstName,
-                            lastName:v.user.lastName,
-                            avatar: v.user.avatar
+                            id: v?.user?.uid.toString(),
+                            firstName: v?.user?.firstName,
+                            lastName:v?.user?.lastName,
+                            avatar: v?.user?.avatar
                         },
                         message: v.message,
                         createdAt: v.createdAt,
