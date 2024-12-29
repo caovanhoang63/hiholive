@@ -53,7 +53,7 @@ var rootCmd = &cobra.Command{
 		}
 
 		// Setup TCP connection
-		relayService := rtmpc.NewRelayService()
+		relayService := rtmpc.NewRelayService(ps, rd.GetClient())
 		srv := rtmp.NewServer(&rtmp.ServerConfig{
 			OnConnect: func(conn net.Conn) (io.ReadWriteCloser, *rtmp.ConnConfig) {
 				return conn, &rtmp.ConnConfig{

@@ -265,22 +265,7 @@ func (h *Handler) OnClose() {
 }
 
 func (h *Handler) OnError(e error) {
-	fmt.Println("OnError:", e)
-	ctx, cancel := context.WithCancel(context.Background())
-	h.relayService.cancel[h.Stream.StreamKey] = &cancel
-	go func(ctx context.Context) {
-		defer core.AppRecover()
-		h.Stream.State = "error"
-
-		select {
-		// Wait 3 minute after stop stream
-		case <-time.After(time.Minute * 3):
-			h.handleEndStream()
-			fmt.Println("OnError")
-		case <-ctx.Done(): // Context cancelled ( Streamer reconnect to server)
-			fmt.Println("Error handling was canceled.")
-		}
-	}(ctx)
+	h.relayService.OnError(h.Stream.StreamKey, e)
 }
 
 func (h *Handler) OnStop() {
