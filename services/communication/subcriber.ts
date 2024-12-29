@@ -11,8 +11,5 @@ export const SubscriberSetup = async () => {
 
     const rdClient  =  container.get<RedisClientType>(TYPES.RedisClient);
     const streamService = new StreamSubscriber(rdClient)
-
-
     ps.subscribe(TopicStreamStart,[streamService.activeStream()])
-
 }

@@ -12,13 +12,34 @@ export const jobUpdateStreamViewCount = new CronJob(
         const rdClient = container.get<RedisClientType>(TYPES.RedisClient)
         const ps = container.get<IPubSub>(TYPES.PubSub)
         rdClient.SMEMBERS("active_stream").then(
-            r => {
+            async r => {
                 for (let i = 0; i < r.length; i++ ){
                     if (io.sockets.adapter.rooms.has(r[i])) {
-                        // ps.publish(TopicUpdateStreamViewCount,createMessage({
-                        //
-                        // }))
-                        console.log(io.sockets.adapter.rooms.get(r[i])?.size)
+                        await ps.publish(TopicUpdateStreamViewCount,createMessage({
+                            id : r[i],
+                            view:  io.sockets.adapter.rooms.get(r[i])?.size,
+                            timeStamp: new Date()
+                        })).match(
+                            a => {
+                            },
+                            b => {
+                                console.log(b)
+                            }
+                        )
+                    } else {
+                        await ps.publish(TopicUpdateStreamViewCount,createMessage({
+                            id : r[i],
+                            view:  0,
+                            timeStamp: new Date()
+                        }))
+                            .match(
+                                a => {
+
+                                },
+                                b => {
+                                    console.log(b)
+                                }
+                            )
                     }
                 }
             }

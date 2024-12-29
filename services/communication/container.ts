@@ -77,7 +77,7 @@ container.bind<AWS.DynamoDB>(TYPES.DynamoDBClient).toDynamicValue(() => {
     },);
 }).inSingletonScope();
 
-container.bind<IPubSub>(TYPES.PubSub).to(RabbitPubSub)
+container.bind<IPubSub>(TYPES.PubSub).to(RabbitPubSub).inSingletonScope()
 
 container.bind<Promise<Connection>>(TYPES.RabbitMQClient).toDynamicValue(() => {
     const conn =amqplib.connect(rabbitDSN);

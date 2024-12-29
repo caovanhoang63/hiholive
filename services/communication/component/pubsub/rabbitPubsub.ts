@@ -19,17 +19,16 @@ export class RabbitPubSub implements IPubSub {
     constructor(@inject(TYPES.RabbitMQClient) private client : Promise<Connection>) {
 
     }
-    async init()  {
-        const conn = await this.client
-        this.channel = await conn.createChannel()
-    }
 
     async start() {
-        await this.init()
+        const conn = await this.client
+        this.channel = await conn.createChannel()
         console.log("Rabbit PubSub Started")
     }
 
-    publish(topic: string, message: Message): ResultAsync<void, Error> {
+    publish(topic: string, message: Message): ResultAsync<void, Error>
+    {
+        if (this.channel == null) return errAsync(new Error("Channel wasn't created"))
         message.channel = topic
         return fromPromise(
             this.channel!.assertExchange(topic,"fanout",{
@@ -42,10 +41,12 @@ export class RabbitPubSub implements IPubSub {
             if (!r) {
                 return errAsync(createInternalError(new Error(`Fail to publish event ${topic}`)))
             }
+            console.log(`Publish event ${topic} with data ${JSON.stringify(message.data)}`)
             return okAsync(undefined)
         })
     }
     subscribe(topic: string,fn : ConsumerJob[] ): ResultAsync<void, Error> {
+        if (this.channel == null) return errAsync(new Error("Channel wasn't created"))
         return fromPromise((async () => {
             const queue = await this.channel!.assertQueue(topic)
             await this.channel?.bindQueue(queue.queue,topic,"")
