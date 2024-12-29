@@ -23,11 +23,12 @@ type RelayService struct {
 	rd          *redis.Client
 }
 
-func NewRelayService(ps pubsub.Pubsub) *RelayService {
+func NewRelayService(ps pubsub.Pubsub, rd *redis.Client) *RelayService {
 	return &RelayService{
 		streams:     make(map[string]*Pubsub),
 		streamState: make(map[string]*core.StreamState),
 		ps:          ps,
+		rd:          rd,
 	}
 }
 
