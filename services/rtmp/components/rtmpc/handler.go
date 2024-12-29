@@ -167,7 +167,7 @@ func (h *Handler) OnSetDataFrame(timestamp uint32, data *rtmpmsg.NetStreamSetDat
 	}
 
 	go func() {
-		core.AppRecover()
+		defer core.AppRecover()
 		job := asyncjob.NewJob(func(ctx context.Context) error {
 			return h.hlsClient.NewHlsStream(ctx, h.Stream.Uid, serverUrl, h.Stream.StreamKey, int(fps), int(height))
 		})
@@ -288,7 +288,7 @@ func (h *Handler) OnStop() {
 
 func (h *Handler) handleEndStream() {
 	go func() {
-		core.AppRecover()
+		defer core.AppRecover()
 		id, _ := core.FromBase58(h.Stream.Uid)
 		_ = h.ps.Publish(context.Background(), core.TopicStreamEnded, pubsub.NewMessage(map[string]interface{}{
 			"stream_id": id,

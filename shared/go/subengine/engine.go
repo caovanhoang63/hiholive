@@ -66,7 +66,7 @@ func (engine *consumerEngine) startSubTopic(topic string, isConcurrent bool, con
 	}
 
 	go func() {
-		core.AppRecover()
+		defer core.AppRecover()
 		for {
 			msg := <-c
 			engine.logger.Infof("Message: ", msg.Data)
