@@ -44,8 +44,9 @@ type Handler struct {
 	hlsClient HlsClient
 	Stream    *core.StreamState
 	// pub represents the publishing entity, handling media streams such as audio, video, and metadata for RTMP connections.
-	pub *Pub
-
+	pub             *Pub
+	streamState     string
+	cancelErrorFunc context.CancelFunc
 	// sub represents a subscriber for handling events or media streams during RTMP playback sessions.
 	sub *Sub
 
@@ -67,10 +68,6 @@ func NewHandler(relayService *RelayService, rd *redis.Client, hlsClient HlsClien
 // OnServe initializes the RTMP connection for the handler and assigns it to the handler's 'conn' field.
 func (h *Handler) OnServe(conn *rtmp.Conn) {
 	h.conn = conn
-}
-
-func (h *Handler) OnStop() {
-
 }
 
 // OnConnect validates the application name during an RTMP connection request and initializes the connection process.
@@ -170,6 +167,7 @@ func (h *Handler) OnSetDataFrame(timestamp uint32, data *rtmpmsg.NetStreamSetDat
 	}
 
 	go func() {
+		core.AppRecover()
 		job := asyncjob.NewJob(func(ctx context.Context) error {
 			return h.hlsClient.NewHlsStream(ctx, h.Stream.Uid, serverUrl, h.Stream.StreamKey, int(fps), int(height))
 		})
@@ -188,6 +186,10 @@ func (h *Handler) OnSetDataFrame(timestamp uint32, data *rtmpmsg.NetStreamSetDat
 	if err = h.ps.Publish(context.Background(), core.TopicStreamStart, pubsub.NewMessage(id)); err != nil {
 		h.logger.Error(err)
 	}
+	if h.streamState == "error" {
+		h.cancelErrorFunc()
+	}
+	h.streamState = "started"
 	_ = h.pub.Publish(&flvtag.FlvTag{
 		TagType:   flvtag.TagTypeScriptData,
 		Timestamp: timestamp,
@@ -261,5 +263,34 @@ func (h *Handler) OnClose() {
 }
 
 func (h *Handler) OnError(e error) {
+	fmt.Println("OnError:", e)
+	ctx, cancel := context.WithCancel(context.Background())
+	h.cancelErrorFunc = cancel
+	go func() {
+		core.AppRecover()
+		h.streamState = "error"
+
+		select {
+		// Wait 3 minute after stop stream
+		case <-time.After(time.Minute * 3):
+			id, _ := core.FromBase58(h.Stream.Uid)
+			_ = h.ps.Publish(context.Background(), core.TopicStreamEnded, pubsub.NewMessage(map[string]interface{}{
+				"stream_id": id,
+				"timestamp": time.Now(),
+			}))
+			fmt.Println("OnError")
+		case <-ctx.Done(): // Nếu context bị hủy
+			fmt.Println("Error handling was canceled.")
+		}
+	}()
 	fmt.Println(e)
+}
+
+func (h *Handler) OnStop() {
+	id, _ := core.FromBase58(h.Stream.Uid)
+	_ = h.ps.Publish(context.Background(), core.TopicStreamEnded, pubsub.NewMessage(map[string]interface{}{
+		"stream_id": id,
+		"timestamp": time.Now(),
+	}))
+	fmt.Println("streamer stop correctly")
 }
