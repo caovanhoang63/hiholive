@@ -7,7 +7,6 @@ import (
 	"github.com/caovanhoang63/hiholive/shared/golang/core"
 	"github.com/caovanhoang63/hiholive/shared/golang/srvctx/components/pubsub"
 	"golang.org/x/net/context"
-	"strings"
 )
 
 type ChannelRepo interface {
@@ -81,17 +80,8 @@ func (c *channelBiz) Create(ctx context.Context, requester core.Requester, creat
 		return core.ErrInternalServerError.WithWrap(err)
 	}
 
-	if strings.ToLower(create.UserName) != create.UserName {
-		return core.ErrInvalidInput("userName")
-	}
-
-	if strings.ToLower(create.UserName) != strings.ToLower(create.DisplayName) {
-		return core.ErrInvalidInput("displayName")
-	}
-
-	if user.DisplayName != create.DisplayName || user.UserName != create.UserName {
-		// TODO : UPDATE userName and DisplayName
-	}
+	create.DisplayName = user.DisplayName
+	create.UserName = user.UserName
 
 	create.UserId = requester.GetUserId()
 
