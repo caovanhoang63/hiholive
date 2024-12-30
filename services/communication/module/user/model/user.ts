@@ -8,6 +8,8 @@ export interface User {
     firstName : string,
     lastName: string,
     avatar : Image
+    userName : string,
+    displayName :string,
     systemRole : string
 }
 

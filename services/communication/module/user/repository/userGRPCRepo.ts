@@ -31,7 +31,9 @@ export class UserGRPCRepo implements IUserRepo {
                            avatar : r.user.avatar,
                            firstName : r.user.first_name,
                            lastName : r.user.last_name,
-                            systemRole : ""
+                            systemRole : r.user.system_role,
+                            displayName : r.user.display_name,
+                            userName :r.user.user_name
                        } as User))
                    }
                })
@@ -55,7 +57,9 @@ export class UserGRPCRepo implements IUserRepo {
                             avatar : user.avatar,
                             firstName : user.first_name,
                             lastName : user.last_name,
-                            systemRole : ""
+                            systemRole : user.system_role,
+                            displayName : user.display_name,
+                            userName : user.user_name
                         } as User
                     })
                 }

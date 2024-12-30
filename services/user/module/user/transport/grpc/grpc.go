@@ -48,9 +48,12 @@ func (s *grpcService) GetUserById(ctx context.Context, req *pb.GetUserByIdReq) (
 
 	data := &pb.PublicUserInfoResp{
 		User: &pb.PublicUserInfo{
-			Id:        int32(user.Id),
-			FirstName: user.FirstName,
-			LastName:  user.LastName,
+			Id:          int32(user.Id),
+			FirstName:   user.FirstName,
+			LastName:    user.LastName,
+			DisplayName: user.DisplayName,
+			UserName:    user.UserName,
+			SystemRole:  user.SystemRole,
 		},
 	}
 
@@ -82,9 +85,12 @@ func (s *grpcService) GetUsersByIds(ctx context.Context, req *pb.GetUsersByIdsRe
 
 	for i := range users {
 		publicUserInfo[i] = &pb.PublicUserInfo{
-			Id:        int32(users[i].Id),
-			FirstName: users[i].FirstName,
-			LastName:  users[i].LastName,
+			Id:          int32(users[i].Id),
+			FirstName:   users[i].FirstName,
+			LastName:    users[i].LastName,
+			DisplayName: users[i].DisplayName,
+			UserName:    users[i].UserName,
+			SystemRole:  users[i].SystemRole,
 		}
 		if users[i].Avatar != nil {
 			publicUserInfo[i].Avatar = &pb.Image{
