@@ -27,7 +27,9 @@ export const userSkio = (socket:  Socket<DefaultEventsMap, DefaultEventsMap, Def
                                 lastName : r.lastName,
                                 firstName : r.firstName,
                                 systemRole : ok.userRole,
-                                avatar : r.avatar
+                                avatar : r.avatar,
+                                userName :r.userName,
+                                displayName :r.displayName
                             } as User
                         }
                         callBack?.(AppResponse.SimpleResponse(true))
