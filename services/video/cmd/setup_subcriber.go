@@ -12,7 +12,7 @@ import (
 func StartSubscriber(serviceCtx srvctx.ServiceContext) {
 	streamService := videocomposer.ComposeStreamSubscriber(serviceCtx)
 	categoryService := videocomposer.ComposeCategorySubscriber(serviceCtx)
-
+	channelService := videocomposer.ComposeChannelSubscriber(serviceCtx)
 	pb := serviceCtx.MustGet(core.KeyCompRabbitMQ).(pubsub.Pubsub)
 
 	engine := subengine.NewEngine(serviceCtx, pb)
@@ -21,6 +21,7 @@ func StartSubscriber(serviceCtx srvctx.ServiceContext) {
 	engine.Subscribe(core.TopicStreamCreate, categoryService.IncreaseTotalContent())
 	engine.Subscribe(core.TopicUpdateStreamViewCount, streamService.UpdateStreamViewCount())
 	engine.Subscribe(core.TopicStreamEnded, streamService.EndStream())
+	engine.Subscribe(core.TopicUpdateUserName, channelService.UpdateChannelName())
 	go func() {
 		err := engine.Start()
 		if err != nil {

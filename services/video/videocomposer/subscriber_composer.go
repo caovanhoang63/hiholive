@@ -26,7 +26,7 @@ func ComposeStreamSubscriber(serviceCtx srvctx.ServiceContext) *strmsub.StreamSu
 	return streamSub
 }
 
-func ComposeChannelSubcriber(serviceCtx srvctx.ServiceContext) *channelsub.ChannelSub {
+func ComposeChannelSubscriber(serviceCtx srvctx.ServiceContext) *channelsub.ChannelSub {
 	db := serviceCtx.MustGet(core.KeyCompMySQL).(core.GormComponent)
 	ps := serviceCtx.MustGet(core.KeyCompRabbitMQ).(pubsub.Pubsub)
 	channelRepo := channelmysql.NewChannelMysqlRepo(db.GetDB())

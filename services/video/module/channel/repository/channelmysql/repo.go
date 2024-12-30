@@ -13,8 +13,10 @@ type channelMysqlRepo struct {
 }
 
 func (c *channelMysqlRepo) UpdateChannelName(ctx context.Context, userId int, userName, displayName string) error {
-	//TODO implement me
-	panic("implement me")
+	if err := c.db.WithContext(ctx).Table(channelmodel.Channel{}.TableName()).Where("user_id = ?", userId).Updates(map[string]interface{}{"display_name": displayName, "user_name": userName}).Error; err != nil {
+		return err
+	}
+	return nil
 }
 
 func (c *channelMysqlRepo) FindChannelByUserName(ctx context.Context, userName string) (*channelmodel.Channel, error) {
