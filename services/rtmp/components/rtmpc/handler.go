@@ -10,7 +10,6 @@ import (
 	"github.com/caovanhoang63/hiholive/shared/golang/srvctx/components/pubsub"
 	"github.com/pkg/errors"
 	"github.com/redis/go-redis/v9"
-	log "github.com/sirupsen/logrus"
 	flvtag "github.com/yutopp/go-flv/tag"
 	"github.com/yutopp/go-rtmp"
 	rtmpmsg "github.com/yutopp/go-rtmp/message"
@@ -29,8 +28,6 @@ type HlsClient interface {
 	NewHlsStream(ctx context.Context, streamId, serverUrl, streamKey string, fps, resolution int) (err error)
 }
 
-var curStream = map[string]core.StreamState{}
-
 var _ rtmp.Handler = (*Handler)(nil)
 
 // Handler An RTMP connection handler
@@ -44,9 +41,7 @@ type Handler struct {
 	hlsClient HlsClient
 	Stream    *core.StreamState
 	// pub represents the publishing entity, handling media streams such as audio, video, and metadata for RTMP connections.
-	pub             *Pub
-	streamState     string
-	cancelErrorFunc context.CancelFunc
+	pub *Pub
 	// sub represents a subscriber for handling events or media streams during RTMP playback sessions.
 	sub *Sub
 
@@ -94,24 +89,32 @@ func (h *Handler) OnPublish(ctx *rtmp.StreamContext, timestamp uint32, cmd *rtmp
 	if cmd.PublishingName == "" {
 		return errors.New("PublishingName is empty")
 	}
+
 	pubsub, err := h.relayService.NewPubsub(cmd.PublishingName)
 	if err != nil {
-		if !errors.Is(err, ErrAlreadyPublished) && h.streamState != "error" {
-			return errors.Wrap(err, "Failed to create pubsub")
-		}
+		return err
 	}
+
+	var streamInfo *core.StreamState
+
 	byteData, err := h.rdClient.Get(context.Background(), fmt.Sprintf("streamKey:%s", cmd.PublishingName)).Result()
 
-	var streamInfo core.StreamState
-	_ = json.Unmarshal([]byte(byteData), &streamInfo)
-
-	streamInfo.StreamKey = cmd.PublishingName
-	if errors.Is(err, redis.Nil) || err != nil {
-		log.Print(err)
-		return errors.New("PublishingName does not exist")
+	if err != nil {
+		return err
 	}
 
-	h.Stream = &streamInfo
+	err = json.Unmarshal([]byte(byteData), &streamInfo)
+	if err != nil {
+		return errors.Wrap(err, "Failed to unmarshal streamInfo")
+	}
+
+	if streamInfo.State == "running" {
+		return errors.New("Stream is running")
+	}
+
+	streamInfo.StreamKey = cmd.PublishingName
+
+	h.Stream = streamInfo
 
 	pub := pubsub.Pub()
 
@@ -176,7 +179,7 @@ func (h *Handler) OnSetDataFrame(timestamp uint32, data *rtmpmsg.NetStreamSetDat
 			return h.hlsClient.NewHlsStream(ctx, h.Stream.Uid, serverUrl, h.Stream.StreamKey, int(fps), int(height))
 		})
 
-		// Retry 3 time to call to hls server
+		// Retry 4 time to call to hls server
 		job.SetRetryDurations([]time.Duration{
 			time.Second * 1,
 			time.Second * 2,
@@ -187,11 +190,13 @@ func (h *Handler) OnSetDataFrame(timestamp uint32, data *rtmpmsg.NetStreamSetDat
 			h.logger.Error(err)
 		}
 	}()
+
 	if err = h.ps.Publish(context.Background(), core.TopicStreamStart, pubsub.NewMessage(id)); err != nil {
 		h.logger.Error(err)
 	}
-	if h.streamState == "error" {
-		h.cancelErrorFunc()
+
+	if h.Stream.State == "error" {
+
 	} else {
 		_ = h.pub.Publish(&flvtag.FlvTag{
 			TagType:   flvtag.TagTypeScriptData,
@@ -200,7 +205,7 @@ func (h *Handler) OnSetDataFrame(timestamp uint32, data *rtmpmsg.NetStreamSetDat
 		})
 	}
 
-	h.streamState = "started"
+	h.Stream.State = "running"
 
 	return nil
 }
@@ -257,44 +262,54 @@ func (h *Handler) OnVideo(timestamp uint32, payload io.Reader) error {
 // OnClose cleans up resources associated with the handler by closing the publisher and subscriber, if they are initialized.
 func (h *Handler) OnClose() {
 	h.logger.Infof("OnClose")
-	if h.pub != nil {
-		_ = h.pub.Close()
-		h.handleEndStream()
-	}
-
 	if h.sub != nil {
 		fmt.Println("Sub close ")
 		_ = h.sub.Close()
 	}
+	if h.pub != nil {
+		_ = h.pub.Close()
+		h.handleEndStream()
+	}
 }
 
 func (h *Handler) OnError(e error) {
-	fmt.Println("OnError:", e)
-	ctx, cancel := context.WithCancel(context.Background())
-	h.cancelErrorFunc = cancel
-	go func() {
-		defer core.AppRecover()
-		h.streamState = "error"
-
-		select {
-		// Wait 3 minute after stop stream
-		case <-time.After(time.Minute * 3):
-			h.handleEndStream()
-			fmt.Println("OnError")
-		case <-ctx.Done(): // Context cancelled ( Streamer reconnect to server)
-			fmt.Println("Error handling was canceled.")
-		}
-	}()
+	fmt.Println("OnError", e)
+	//if err := h.rdClient.Set(context.Background(), fmt.Sprintf("streamKey:%s", h.Stream), h.Stream.StreamKey, 0).Err(); err != nil {
+	//	h.logger.Error(err)
+	//}
+	//go func() {
+	//	defer core.AppRecover()
+	//	time.Sleep(time.Second * 30)
+	//	var streamInfo core.StreamState
+	//
+	//	byteData, err := h.rdClient.Get(context.Background(), fmt.Sprintf("streamKey:%s", h.Stream.StreamKey)).Result()
+	//	err = json.Unmarshal([]byte(byteData), &streamInfo)
+	//	if err != nil {
+	//		if errors.Is(err, redis.Nil) {
+	//			h.logger.Info("Stream not found")
+	//		} else {
+	//			h.logger.Error(err)
+	//		}
+	//		return
+	//	}
+	//	if streamInfo.State == "error" {
+	//		fmt.Println("Stream state error")
+	//		h.handleEndStream()
+	//	}
+	//}()
 }
 
 func (h *Handler) OnStop() {
-
+	if h.pub != nil {
+		_ = h.pub.Close()
+		h.handleEndStream()
+	}
 }
 
 func (h *Handler) handleEndStream() {
 	go func() {
 		defer core.AppRecover()
-		if h.streamState == "" {
+		if h.Stream.State == "" {
 			return
 		}
 		id, _ := core.FromBase58(h.Stream.Uid)

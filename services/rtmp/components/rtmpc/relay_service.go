@@ -25,8 +25,8 @@ func (s *RelayService) NewPubsub(key string) (*Pubsub, error) {
 	s.m.Lock()
 	defer s.m.Unlock()
 
-	if pubsub, ok := s.streams[key]; ok {
-		return pubsub, ErrAlreadyPublished
+	if _, ok := s.streams[key]; ok {
+		return nil, ErrAlreadyPublished
 	}
 
 	pubsub := NewPubsub(s, key)
