@@ -12,6 +12,11 @@ type channelMysqlRepo struct {
 	db *gorm.DB
 }
 
+func (c *channelMysqlRepo) UpdateChannelName(ctx context.Context, userId int, userName, displayName string) error {
+	//TODO implement me
+	panic("implement me")
+}
+
 func (c *channelMysqlRepo) FindChannelByUserName(ctx context.Context, userName string) (*channelmodel.Channel, error) {
 	var data channelmodel.Channel
 	if err := c.db.Where("user_name = ?", userName).First(&data).Error; err != nil {

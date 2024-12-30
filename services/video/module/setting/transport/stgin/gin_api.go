@@ -86,7 +86,7 @@ func (api *ginApi) FindSystemSetting() gin.HandlerFunc {
 			core.WriteErrorResponse(c, core.ErrBadRequest.WithWrap(err))
 			return
 		}
-		if err := c.ShouldBindQuery(paging); err != nil {
+		if err := c.ShouldBindQuery(&paging); err != nil {
 			core.WriteErrorResponse(c, core.ErrBadRequest.WithWrap(err))
 			return
 		}

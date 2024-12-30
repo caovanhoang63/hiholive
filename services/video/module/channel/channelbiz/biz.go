@@ -16,6 +16,7 @@ type ChannelRepo interface {
 	FindChannelById(ctx context.Context, channelId int) (*channelmodel.Channel, error)
 	FindChannelByUserName(ctx context.Context, userName string) (*channelmodel.Channel, error)
 	FindChannels(ctx context.Context, filter *channelmodel.ChannelFilter, paging *core.Paging) ([]channelmodel.Channel, error)
+	UpdateChannelName(ctx context.Context, userId int, userName, displayName string) error
 }
 
 type ChannelBiz interface {
@@ -24,6 +25,7 @@ type ChannelBiz interface {
 	FindChannelById(ctx context.Context, channelId int) (*channelmodel.Channel, error)
 	FindChannelByUserName(ctx context.Context, userName string) (*channelmodel.Channel, error)
 	FindChannels(ctx context.Context, filter *channelmodel.ChannelFilter, paging *core.Paging) ([]channelmodel.Channel, error)
+	UpdateChannelName(ctx context.Context, userId int, userName, displayName string) error
 }
 
 type UserRepo interface {
@@ -34,6 +36,13 @@ type channelBiz struct {
 	channelRepo ChannelRepo
 	userRepo    UserRepo
 	ps          pubsub.Pubsub
+}
+
+func (c *channelBiz) UpdateChannelName(ctx context.Context, userId int, userName, displayName string) error {
+	if err := c.channelRepo.UpdateChannelName(ctx, userId, userName, displayName); err != nil {
+		return core.ErrInternalServerError.WithWrap(err)
+	}
+	return nil
 }
 
 func NewChannelBiz(channelRepo ChannelRepo, userRepo UserRepo, ps pubsub.Pubsub) *channelBiz {

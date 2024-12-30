@@ -4,7 +4,9 @@ import (
 	"github.com/caovanhoang63/hiholive/services/video/module/category/ctgbiz"
 	"github.com/caovanhoang63/hiholive/services/video/module/category/repository/ctgmysqlrepo"
 	"github.com/caovanhoang63/hiholive/services/video/module/category/transport/ctgsub"
+	"github.com/caovanhoang63/hiholive/services/video/module/channel/channelbiz"
 	"github.com/caovanhoang63/hiholive/services/video/module/channel/repository/channelmysql"
+	"github.com/caovanhoang63/hiholive/services/video/module/channel/transport/channelsub"
 	"github.com/caovanhoang63/hiholive/services/video/module/stream/repository/streammysql"
 	"github.com/caovanhoang63/hiholive/services/video/module/stream/streambiz"
 	"github.com/caovanhoang63/hiholive/services/video/module/stream/transport/strmsub"
@@ -22,6 +24,15 @@ func ComposeStreamSubscriber(serviceCtx srvctx.ServiceContext) *strmsub.StreamSu
 	biz := streambiz.NewStreamBiz(streamRepo, channelRepo, ps)
 	streamSub := strmsub.NewStreamSub(biz, serviceCtx)
 	return streamSub
+}
+
+func ComposeChannelSubcriber(serviceCtx srvctx.ServiceContext) *channelsub.ChannelSub {
+	db := serviceCtx.MustGet(core.KeyCompMySQL).(core.GormComponent)
+	ps := serviceCtx.MustGet(core.KeyCompRabbitMQ).(pubsub.Pubsub)
+	channelRepo := channelmysql.NewChannelMysqlRepo(db.GetDB())
+	biz := channelbiz.NewChannelBiz(channelRepo, nil, ps)
+	channelService := channelsub.NewChannelSub(biz, serviceCtx)
+	return channelService
 }
 
 func ComposeCategorySubscriber(serviceCtx srvctx.ServiceContext) *ctgsub.CategorySub {

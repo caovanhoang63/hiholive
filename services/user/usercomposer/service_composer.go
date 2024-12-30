@@ -8,6 +8,7 @@ import (
 	"github.com/caovanhoang63/hiholive/shared/golang/core"
 	"github.com/caovanhoang63/hiholive/shared/golang/proto/pb"
 	"github.com/caovanhoang63/hiholive/shared/golang/srvctx"
+	"github.com/caovanhoang63/hiholive/shared/golang/srvctx/components/pubsub"
 	"github.com/gin-gonic/gin"
 )
 
@@ -20,9 +21,9 @@ type UserService interface {
 
 func ComposeUserAPIService(serviceCtx srvctx.ServiceContext) UserService {
 	db := serviceCtx.MustGet(core.KeyCompMySQL).(core.GormComponent)
-
+	ps := serviceCtx.MustGet(core.KeyCompRabbitMQ).(pubsub.Pubsub)
 	userRepo := mysql.NewMySQLRepository(db.GetDB())
-	userBiz := biz.NewBiz(userRepo)
+	userBiz := biz.NewBiz(userRepo, ps)
 
 	userService := ginapi.NewGinAPI(serviceCtx, userBiz)
 	return userService
@@ -30,9 +31,9 @@ func ComposeUserAPIService(serviceCtx srvctx.ServiceContext) UserService {
 
 func ComposeUserGRPCService(serviceCtx srvctx.ServiceContext) pb.UserServiceServer {
 	db := serviceCtx.MustGet(core.KeyCompMySQL).(core.GormComponent)
-
+	ps := serviceCtx.MustGet(core.KeyCompRabbitMQ).(pubsub.Pubsub)
 	userRepo := mysql.NewMySQLRepository(db.GetDB())
-	userBiz := biz.NewBiz(userRepo)
+	userBiz := biz.NewBiz(userRepo, ps)
 	userService := grpc.NewService(userBiz)
 
 	return userService

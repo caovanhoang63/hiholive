@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/caovanhoang63/hiholive/services/user/module/user/usermodel"
 	"github.com/caovanhoang63/hiholive/shared/golang/core"
+	"github.com/caovanhoang63/hiholive/shared/golang/srvctx/components/pubsub"
 	"strings"
 )
 
@@ -34,10 +35,14 @@ type UserRepo interface {
 
 type userBiz struct {
 	repo UserRepo
+	ps   pubsub.Pubsub
 }
 
-func NewBiz(repository UserRepo) *userBiz {
-	return &userBiz{repo: repository}
+func NewBiz(repository UserRepo, ps pubsub.Pubsub) *userBiz {
+	return &userBiz{
+		repo: repository,
+		ps:   ps,
+	}
 }
 
 func (b *userBiz) UpdateToRoleStreamer(ctx context.Context, id int) error {
@@ -211,5 +216,10 @@ func (b *userBiz) UpdateUserName(ctx context.Context, requester core.Requester, 
 		return core.ErrInternalServerError.WithWrap(err)
 	}
 
+	_ = b.ps.Publish(ctx, core.TopicUpdateUserName, pubsub.NewMessage(map[string]interface{}{
+		"id":          id,
+		"userName":    name.UserName,
+		"displayName": name.DisplayName,
+	}))
 	return nil
 }
