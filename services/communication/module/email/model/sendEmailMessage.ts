@@ -3,5 +3,6 @@ export interface SendEmailMessage {
     toAddresses : string[],
     ccAddress : string[],
     bccAddress : string[],
-    subject : string,
+    template? : string
+    templateData? : string
 }

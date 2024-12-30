@@ -6,7 +6,13 @@ import { SendEmailMessage } from "../model/sendEmailMessage";
 import {IEmailRepo} from "./IEmailRepo";
 import {inject, injectable} from "inversify";
 import TYPES from "../../../types";
-import {CreateTemplateCommand, GetTemplateCommand, ListTemplatesCommand, SESClient} from "@aws-sdk/client-ses";
+import {
+    CreateTemplateCommand,
+    GetTemplateCommand,
+    ListTemplatesCommand,
+    SendTemplatedEmailCommand,
+    SESClient
+} from "@aws-sdk/client-ses";
 import {createInternalError} from "../../../libs/errors";
 
 
@@ -72,8 +78,24 @@ export class SesEmailRepo implements IEmailRepo {
 
     }
     sendEmail(message: SendEmailMessage): ResultAsync<void, Error> {
-        throw new Error("asdas")
-        // const com
+        const command = new SendTemplatedEmailCommand({
+            Destination: {
+                ToAddresses : message.toAddresses,
+                CcAddresses : message.ccAddress,
+                BccAddresses :message.bccAddress,
+            },
+            Source: message.source,
+            Template: message.template,
+            TemplateData: message.templateData
+        })
+        return fromPromise(this.SESClient.send(command),
+                e => createInternalError(e)).
+        andThen( r => {
+            if (r.$metadata.httpStatusCode == 200) {
+                return okAsync(undefined)
+            }
+            return errAsync(createInternalError(new Error("Fail to send Email")))
+        })
     }
 
 }

@@ -25,6 +25,11 @@ import amqplib, {Connection} from "amqplib";
 import {IPubSub} from "./component/pubsub/IPubsub";
 import {RabbitPubSub} from "./component/pubsub/rabbitPubsub";
 import {SESClient} from "@aws-sdk/client-ses";
+import {IEmailBusiness} from "./module/email/business/IEmailBusiness";
+import {EmailBusiness} from "./module/email/business/emailBusiness";
+import {IEmailRepo} from "./module/email/repo/IEmailRepo";
+import {SesEmailRepo} from "./module/email/repo/sesEmailRepo";
+import {EmailExpress} from "./module/email/transport/emailExpress";
 
 dotenv.config();
 
@@ -40,10 +45,18 @@ const container = new Container();
 container.bind<IChatRepo>(TYPES.IChatRepository).to(ChatDynamoRepo).inRequestScope();
 container.bind<IUserRepo>(TYPES.IUserRepository).to(UserGRPCRepo).inRequestScope();
 container.bind<IStreamRepo>(TYPES.IStreamRepository).to(StreamRepo).inRequestScope();
+container.bind<IEmailRepo>(TYPES.IEmailRepository).to(SesEmailRepo).inRequestScope();
 
 // Business
 container.bind<IChatBusiness>(TYPES.IChatBusiness).to(ChatBusiness).inRequestScope();
 container.bind<IStreamBusiness>(TYPES.IStreamBusiness).to(StreamBusiness).inRequestScope();
+container.bind<IEmailBusiness>(TYPES.IEmailBusiness).to(EmailBusiness).inRequestScope();
+
+
+// Controller
+container.bind<EmailExpress>(TYPES.EmailController).to(EmailExpress).inRequestScope();
+
+
 container.bind<RedisClientType<RedisDefaultModules & RedisModules, RedisFunctions, RedisScripts>>(TYPES.RedisClient).toDynamicValue( () => {
     const client = createClient({ url: redisConnStr ,database: 0});
     client.connect(

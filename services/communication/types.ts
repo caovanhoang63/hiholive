@@ -5,6 +5,7 @@ const TYPES = {
     IChatRepository : Symbol.for("IChatRepository"),
     IUserRepository : Symbol.for("IUserRepository"),
     IStreamRepository: Symbol.for("IStreamRepository"),
+    IEmailRepository : Symbol.for("IEmailRepository"),
     // GRPC Client
     UserGRPCClient : Symbol.for("IUserGRPCClient"),
     AuthGRPCClient : Symbol.for("IAuthGRPCClient"),
@@ -13,9 +14,11 @@ const TYPES = {
     // Business
     IChatBusiness : Symbol.for("IChatBusiness"),
     IStreamBusiness: Symbol.for("IStreamBusiness"),
-
+    IEmailBusiness : Symbol.for("IEmailBusiness"),
     // Rest
 
+    // Controller
+    EmailController : Symbol.for("EmailController"),
 
     // GRPC server
 

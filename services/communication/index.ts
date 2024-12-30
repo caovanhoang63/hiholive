@@ -17,6 +17,7 @@ import {SubscriberSetup} from "./subcriber";
 import {RedisClientType, RedisDefaultModules, RedisFunctions, RedisModules, RedisScripts} from "redis";
 import {createAdapter} from "@socket.io/redis-adapter";
 import {setupCronJobs} from "./cron";
+import { v1Router } from "./expressRouter/v1";
 dotenv.config();
 const app: Express = express();
 const port = process.env.EXPRESS_PORT || 3000;
@@ -56,11 +57,15 @@ app.use(helmet());
 app.use(bodyParser.json());
 app.use(express.urlencoded({extended: false}));
 app.use(cookieParser());
+
+
 io.on("connection", (socket)  => socketSetup(io,socket));
 
 app.get("/ping",(req, res) => {
     res.status(200).json("pong")
 });
+app.use("/v1", v1Router());
+
 
 httpServer.listen(port, () => {
     console.log(`[server]: Server is running at http://localhost:${port}`);
