@@ -19,7 +19,9 @@ func SetupRoutes(router *gin.RouterGroup, serviceCtx srvctx.ServiceContext) {
 	uploadService := videocomposer.ComposeUploadAPIService(serviceCtx)
 
 	channelPrv := v1.Group("/channel")
-	channelPrv.POST("", middlewares.RequireAuth(ac), middlewares.Authorize(uc, "viewer"), channelService.CreateChannel())
+	channelPrv.Use(middlewares.RequireAuth(ac))
+	channelPrv.POST("", middlewares.Authorize(uc, "viewer"), channelService.CreateChannel())
+	channelPrv.PATCH(":id", channelService.UpdateChannelData())
 
 	channelPub := v1.Group("/channel")
 	channelPub.GET(":id", channelService.FindChannelById())
@@ -30,7 +32,8 @@ func SetupRoutes(router *gin.RouterGroup, serviceCtx srvctx.ServiceContext) {
 	userPub.GET("/:id/channel", channelService.FindChannelById())
 
 	streamPrv := v1.Group("/stream")
-	streamPrv.POST("", middlewares.RequireAuth(ac), middlewares.Authorize(uc, "streamer"), streamService.CreateStream())
+	streamPrv.Use(middlewares.RequireAuth(ac))
+	streamPrv.POST("", middlewares.Authorize(uc, "streamer"), streamService.CreateStream())
 
 	streamPub := v1.Group("/stream")
 	streamPub.GET(":id", streamService.GetStreamById())

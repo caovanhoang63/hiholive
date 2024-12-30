@@ -1,7 +1,6 @@
 package channelgin
 
 import (
-	"fmt"
 	"github.com/caovanhoang63/hiholive/services/video/module/channel/channelbiz"
 	"github.com/caovanhoang63/hiholive/services/video/module/channel/channelmodel"
 	"github.com/caovanhoang63/hiholive/shared/golang/core"
@@ -44,9 +43,33 @@ func (g *ginAPI) CreateChannel() func(c *gin.Context) {
 	}
 }
 
+func (g *ginAPI) UpdateChannelData() func(c *gin.Context) {
+	return func(c *gin.Context) {
+		uid, err := core.FromBase58(c.Param("id"))
+
+		if err != nil {
+			core.WriteErrorResponse(c, err)
+			return
+		}
+
+		var data channelmodel.ChannelUpdate
+
+		if err = c.ShouldBindJSON(&data); err != nil {
+			core.WriteErrorResponse(c, err)
+			return
+		}
+		requester := c.MustGet(core.KeyRequester).(core.Requester)
+
+		if err = g.biz.UpdateChannelData(c.Request.Context(), requester, int(uid.GetLocalID()), &data); err != nil {
+			core.WriteErrorResponse(c, err)
+			return
+		}
+		c.JSON(http.StatusOK, core.ResponseData(true))
+	}
+}
+
 func (g *ginAPI) FindUserChannel() func(c *gin.Context) {
 	return func(c *gin.Context) {
-		fmt.Println(c.Param("id"))
 		uid, err := core.FromBase58(c.Param("id"))
 
 		if err != nil {

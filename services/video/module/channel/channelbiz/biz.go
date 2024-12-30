@@ -2,11 +2,13 @@ package channelbiz
 
 import (
 	"errors"
+	"github.com/caovanhoang63/hiholive/services/user/module/user/usermodel"
 	"github.com/caovanhoang63/hiholive/services/video/common"
 	"github.com/caovanhoang63/hiholive/services/video/module/channel/channelmodel"
 	"github.com/caovanhoang63/hiholive/shared/golang/core"
 	"github.com/caovanhoang63/hiholive/shared/golang/srvctx/components/pubsub"
 	"golang.org/x/net/context"
+	"gorm.io/gorm"
 )
 
 type ChannelRepo interface {
@@ -16,6 +18,7 @@ type ChannelRepo interface {
 	FindChannelByUserName(ctx context.Context, userName string) (*channelmodel.Channel, error)
 	FindChannels(ctx context.Context, filter *channelmodel.ChannelFilter, paging *core.Paging) ([]channelmodel.Channel, error)
 	UpdateChannelName(ctx context.Context, userId int, userName, displayName string) error
+	UpdateChannelData(ctx context.Context, id int, update *channelmodel.ChannelUpdate) error
 }
 
 type ChannelBiz interface {
@@ -25,6 +28,7 @@ type ChannelBiz interface {
 	FindChannelByUserName(ctx context.Context, userName string) (*channelmodel.Channel, error)
 	FindChannels(ctx context.Context, filter *channelmodel.ChannelFilter, paging *core.Paging) ([]channelmodel.Channel, error)
 	UpdateChannelName(ctx context.Context, userId int, userName, displayName string) error
+	UpdateChannelData(ctx context.Context, requester core.Requester, id int, update *channelmodel.ChannelUpdate) error
 }
 
 type UserRepo interface {
@@ -35,6 +39,33 @@ type channelBiz struct {
 	channelRepo ChannelRepo
 	userRepo    UserRepo
 	ps          pubsub.Pubsub
+}
+
+func (c *channelBiz) UpdateChannelData(ctx context.Context, requester core.Requester, id int, update *channelmodel.ChannelUpdate) error {
+	if field, err := core.Validator.ValidateField(update); err != nil {
+		return core.ErrInvalidInput(field)
+	}
+
+	old, err := c.channelRepo.FindChannelById(ctx, id)
+
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		return core.ErrInternalServerError.WithWrap(err)
+	}
+
+	if old == nil {
+		return core.ErrNotFound
+	}
+
+	if requester != nil {
+		if old.UserId != requester.GetUserId() && requester.GetRole() != usermodel.RoleAdmin {
+			return core.ErrForbidden
+		}
+	}
+
+	if err = c.channelRepo.UpdateChannelData(ctx, id, update); err != nil {
+		return core.ErrInternalServerError.WithWrap(err)
+	}
+	return nil
 }
 
 func (c *channelBiz) UpdateChannelName(ctx context.Context, userId int, userName, displayName string) error {

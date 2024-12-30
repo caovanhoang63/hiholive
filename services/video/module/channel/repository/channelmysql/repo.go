@@ -12,6 +12,13 @@ type channelMysqlRepo struct {
 	db *gorm.DB
 }
 
+func (c *channelMysqlRepo) UpdateChannelData(ctx context.Context, id int, update *channelmodel.ChannelUpdate) error {
+	if err := c.db.WithContext(ctx).Table(channelmodel.Channel{}.TableName()).Where("id = ?", id).Updates(update).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
 func (c *channelMysqlRepo) UpdateChannelName(ctx context.Context, userId int, userName, displayName string) error {
 	if err := c.db.WithContext(ctx).Table(channelmodel.Channel{}.TableName()).Where("user_id = ?", userId).Updates(map[string]interface{}{"display_name": displayName, "user_name": userName}).Error; err != nil {
 		return err
