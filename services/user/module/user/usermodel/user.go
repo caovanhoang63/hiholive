@@ -15,9 +15,9 @@ const (
 )
 
 const (
-	Male   Gender = "male"
-	Female Gender = "female"
-	Other  Gender = "other"
+	Male   string = "male"
+	Female string = "female"
+	Other  string = "other"
 )
 
 type User struct {
@@ -29,7 +29,7 @@ type User struct {
 	UserName       string      `json:"user_name" gorm:"column:user_name"`
 	DisplayName    string      `json:"display_name" gorm:"column:display_name"`
 	DateOfBirth    string      `json:"date_of_birth" gorm:"column:date_of_birth"`
-	Gender         Gender      `json:"gender" gorm:"column:gender"`
+	Gender         string      `json:"gender" gorm:"column:gender"`
 	SystemRole     string      `json:"SystemRole" gorm:"column:system_role"`
 	Avatar         *core.Image `json:"avatar" gorm:"column:avatar"`
 	Bio            string      `json:"bio" gorm:"column:bio"`

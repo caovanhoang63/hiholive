@@ -37,6 +37,29 @@ func (g *ginAPI) GetUserById() func(c *gin.Context) {
 	}
 }
 
+func (g *ginAPI) UpdateUserData() func(c *gin.Context) {
+	return func(c *gin.Context) {
+		uid, err := core.FromBase58(c.Param("id"))
+		requester := c.MustGet(core.KeyRequester).(core.Requester)
+
+		if err != nil {
+			core.WriteErrorResponse(c, core.ErrBadRequest.WithError(err.Error()))
+			return
+		}
+		var update usermodel.UserUpdate
+		if err = c.ShouldBindJSON(&update); err != nil {
+			core.WriteErrorResponse(c, core.ErrBadRequest.WithError(err.Error()))
+			return
+		}
+
+		if err = g.biz.UpdateUser(c.Request.Context(), requester, int(uid.GetLocalID()), &update); err != nil {
+			core.WriteErrorResponse(c, err)
+			return
+		}
+		c.JSON(http.StatusOK, core.ResponseData(true))
+	}
+}
+
 func (g *ginAPI) GetUserProfile() func(c *gin.Context) {
 	return func(c *gin.Context) {
 		requester := c.MustGet(core.KeyRequester).(core.Requester)

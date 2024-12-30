@@ -2,12 +2,25 @@ package mysql
 
 import (
 	"context"
+	"errors"
 	"github.com/caovanhoang63/hiholive/services/user/module/user/usermodel"
+	"github.com/caovanhoang63/hiholive/shared/golang/core"
 	"gorm.io/gorm"
 )
 
 type mysqlRepo struct {
 	db *gorm.DB
+}
+
+func (repo *mysqlRepo) FindUserByUserName(ctx context.Context, userName string) (*usermodel.User, error) {
+	var user usermodel.User
+	if err := repo.db.WithContext(ctx).Where("user_name = ?", userName).First(&user).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, core.ErrRecordNotFound
+		}
+		return nil, err
+	}
+	return &user, nil
 }
 
 func (repo *mysqlRepo) UpdateUserRole(ctx context.Context, id int, role string) error {
@@ -32,8 +45,10 @@ func (repo *mysqlRepo) FindUserByIds(ctx context.Context, ids []int) ([]usermode
 }
 
 func (repo *mysqlRepo) UpdateUser(ctx context.Context, id int, data *usermodel.UserUpdate) error {
-	//TODO implement me
-	panic("implement me")
+	if err := repo.db.WithContext(ctx).Table(usermodel.User{}.TableName()).Where("id = ?", id).Updates(data).Error; err != nil {
+		return err
+	}
+	return nil
 }
 
 func NewMySQLRepository(db *gorm.DB) *mysqlRepo {

@@ -10,12 +10,11 @@ import (
 func SetupRoutes(router *gin.RouterGroup, serviceCtx srvctx.ServiceContext) {
 	v1 := router.Group("v1")
 	userService := usercomposer.ComposeUserAPIService(serviceCtx)
-
 	userPub := v1.Group("user")
 	userPub.GET(":id", userService.GetUserById())
 	userPub.GET("", userService.ListUser())
-
 	userPrv := v1.Group("user")
 	userPrv.Use(middlewares.RequireAuth(usercomposer.ComposeAuthRPCClient(serviceCtx)))
 	userPrv.GET("profile", userService.GetUserProfile())
+	userPrv.PATCH(":id", userService.UpdateUserData())
 }

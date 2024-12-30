@@ -21,6 +21,7 @@ type UserBiz interface {
 
 type UserRepo interface {
 	CreateNewUser(ctx context.Context, data *usermodel.UserCreate) error
+	FindUserByUserName(ctx context.Context, userName string) (*usermodel.User, error)
 	DeleteUser(ctx context.Context, id int) error
 	FindUserById(ctx context.Context, id int) (*usermodel.User, error)
 	FindUserByIds(ctx context.Context, ids []int) ([]usermodel.User, error)
@@ -142,6 +143,27 @@ func (b *userBiz) FindUserByIds(ctx context.Context, ids []int) ([]usermodel.Use
 }
 
 func (b *userBiz) UpdateUser(ctx context.Context, requester core.Requester, id int, data *usermodel.UserUpdate) error {
-	//TODO implement me
-	panic("implement me")
+	if requester != nil {
+		if id != requester.GetUserId() {
+			return core.ErrForbidden
+		}
+	}
+	if field, err := core.Validator.ValidateField(data); err != nil {
+		return core.ErrInvalidInput(field)
+	}
+	oldUser, err := b.repo.FindUserById(ctx, id)
+	if err != nil {
+		if errors.Is(err, core.ErrRecordNotFound) {
+			return core.ErrNotFound
+		}
+		return core.ErrInternalServerError.WithWrap(err)
+	}
+	if oldUser.Status != 1 {
+		return core.ErrNotFound
+	}
+
+	if err = b.repo.UpdateUser(ctx, id, data); err != nil {
+		return core.ErrInternalServerError.WithWrap(err)
+	}
+	return nil
 }
