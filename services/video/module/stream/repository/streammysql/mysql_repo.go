@@ -145,14 +145,13 @@ func (s *streamRepo) FindStreams(ctx context.Context, filter *streammodel.Stream
 		count = 0
 		for i := range result {
 			if result[i].State == streammodel.StreamStateRunning {
-				count++
-				if data[i] == nil {
+				if data[count] == nil {
 					continue
 				}
-				if v, ok := strconv.Atoi(data[i].(string)); ok == nil {
+				if v, ok := strconv.Atoi(data[count].(string)); ok == nil {
 					result[i].CurrentView = v
 				}
-
+				count++
 			}
 			if count == len(data) {
 				break
