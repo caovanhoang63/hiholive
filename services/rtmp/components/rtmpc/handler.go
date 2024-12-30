@@ -28,8 +28,6 @@ type HlsClient interface {
 	NewHlsStream(ctx context.Context, streamId, serverUrl, streamKey string, fps, resolution int) (err error)
 }
 
-var curStream = map[string]core.StreamState{}
-
 var _ rtmp.Handler = (*Handler)(nil)
 
 // Handler An RTMP connection handler
@@ -92,24 +90,28 @@ func (h *Handler) OnPublish(ctx *rtmp.StreamContext, timestamp uint32, cmd *rtmp
 		return errors.New("PublishingName is empty")
 	}
 
-	var streamInfo *core.StreamState
-
-	streamInfo, err := h.relayService.GetStream(cmd.PublishingName)
-
-	if err != nil {
-		if byteData, err := h.rdClient.Get(context.Background(), fmt.Sprintf("streamKey:%s", cmd.PublishingName)).Result(); err != nil {
-			return errors.Wrap(err, "Failed to get streamInfo")
-		} else {
-			_ = json.Unmarshal([]byte(byteData), &streamInfo)
-		}
-
-	}
 	pubsub, err := h.relayService.NewPubsub(cmd.PublishingName)
 	if err != nil {
-		if !errors.Is(err, ErrAlreadyPublished) && h.Stream.State != "error" {
-			return errors.Wrap(err, "Failed to create pubsub")
-		}
+		return err
 	}
+
+	var streamInfo *core.StreamState
+
+	byteData, err := h.rdClient.Get(context.Background(), fmt.Sprintf("streamKey:%s", cmd.PublishingName)).Result()
+
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal([]byte(byteData), &streamInfo)
+	if err != nil {
+		return errors.Wrap(err, "Failed to unmarshal streamInfo")
+	}
+
+	if streamInfo.State == "running" {
+		return errors.New("Stream is running")
+	}
+
 	streamInfo.StreamKey = cmd.PublishingName
 
 	h.Stream = streamInfo
@@ -177,7 +179,7 @@ func (h *Handler) OnSetDataFrame(timestamp uint32, data *rtmpmsg.NetStreamSetDat
 			return h.hlsClient.NewHlsStream(ctx, h.Stream.Uid, serverUrl, h.Stream.StreamKey, int(fps), int(height))
 		})
 
-		// Retry 3 time to call to hls server
+		// Retry 4 time to call to hls server
 		job.SetRetryDurations([]time.Duration{
 			time.Second * 1,
 			time.Second * 2,
@@ -188,11 +190,13 @@ func (h *Handler) OnSetDataFrame(timestamp uint32, data *rtmpmsg.NetStreamSetDat
 			h.logger.Error(err)
 		}
 	}()
+
 	if err = h.ps.Publish(context.Background(), core.TopicStreamStart, pubsub.NewMessage(id)); err != nil {
 		h.logger.Error(err)
 	}
+
 	if h.Stream.State == "error" {
-		h.relayService.CancelError(h.Stream.StreamKey)
+
 	} else {
 		_ = h.pub.Publish(&flvtag.FlvTag{
 			TagType:   flvtag.TagTypeScriptData,
@@ -262,10 +266,37 @@ func (h *Handler) OnClose() {
 		fmt.Println("Sub close ")
 		_ = h.sub.Close()
 	}
+	if h.pub != nil {
+		_ = h.pub.Close()
+		h.handleEndStream()
+	}
 }
 
 func (h *Handler) OnError(e error) {
-	h.relayService.OnError(h.Stream.StreamKey, e)
+	fmt.Println("OnError", e)
+	//if err := h.rdClient.Set(context.Background(), fmt.Sprintf("streamKey:%s", h.Stream), h.Stream.StreamKey, 0).Err(); err != nil {
+	//	h.logger.Error(err)
+	//}
+	//go func() {
+	//	defer core.AppRecover()
+	//	time.Sleep(time.Second * 30)
+	//	var streamInfo core.StreamState
+	//
+	//	byteData, err := h.rdClient.Get(context.Background(), fmt.Sprintf("streamKey:%s", h.Stream.StreamKey)).Result()
+	//	err = json.Unmarshal([]byte(byteData), &streamInfo)
+	//	if err != nil {
+	//		if errors.Is(err, redis.Nil) {
+	//			h.logger.Info("Stream not found")
+	//		} else {
+	//			h.logger.Error(err)
+	//		}
+	//		return
+	//	}
+	//	if streamInfo.State == "error" {
+	//		fmt.Println("Stream state error")
+	//		h.handleEndStream()
+	//	}
+	//}()
 }
 
 func (h *Handler) OnStop() {
