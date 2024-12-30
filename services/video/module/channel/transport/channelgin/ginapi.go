@@ -115,6 +115,6 @@ func (g *ginAPI) FindChannels() func(c *gin.Context) {
 			channels[i].Mask()
 		}
 
-		c.JSON(http.StatusOK, core.ResponseData(channels))
+		c.JSON(http.StatusOK, core.SuccessResponse(channels, paging, filter))
 	}
 }

@@ -48,6 +48,16 @@ func (c *channelMysqlRepo) FindChannels(ctx context.Context, filter *channelmode
 	var result []channelmodel.Channel
 
 	db := c.db.Table(channelmodel.Channel{}.TableName()).Where("status in (1)")
+
+	if filter != nil {
+		if filter.IsLive != nil {
+			// TODO: Implement this
+		}
+		if filter.UserName != "" {
+			db = db.Where("user_name LIKE ?", "%"+filter.UserName+"%")
+		}
+	}
+
 	if err := db.Count(&paging.Total).Error; err != nil {
 		return nil, err
 	}
