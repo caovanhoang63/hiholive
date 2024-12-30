@@ -36,8 +36,8 @@ type UserUpdate struct {
 }
 
 type UserNameAndDisplayName struct {
-	UserName    string `json:"user_name" gorm:"column:user_name"`
-	DisplayName string `json:"display_name" gorm:"column:display_name"`
+	UserName    string `json:"user_name" gorm:"column:user_name" validate:"required"`
+	DisplayName string `json:"display_name" gorm:"column:display_name" validate:"required"`
 }
 
 func (UserUpdate) TableName() string {

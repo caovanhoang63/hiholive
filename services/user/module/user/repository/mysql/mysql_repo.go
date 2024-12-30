@@ -51,6 +51,13 @@ func (repo *mysqlRepo) UpdateUser(ctx context.Context, id int, data *usermodel.U
 	return nil
 }
 
+func (repo *mysqlRepo) UpdateUserName(ctx context.Context, id int, name *usermodel.UserNameAndDisplayName) error {
+	if err := repo.db.WithContext(ctx).Table(usermodel.User{}.TableName()).Where("id = ?", id).Updates(name).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
 func NewMySQLRepository(db *gorm.DB) *mysqlRepo {
 	return &mysqlRepo{db: db}
 }

@@ -17,6 +17,7 @@ type UserBiz interface {
 	FindUsersWithCondition(ctx context.Context, filter *usermodel.UserFilter, paging *core.Paging) ([]usermodel.User, error)
 	UpdateUser(ctx context.Context, requester core.Requester, id int, data *usermodel.UserUpdate) error
 	UpdateToRoleStreamer(ctx context.Context, id int) error
+	UpdateUserName(ctx context.Context, requester core.Requester, id int, name *usermodel.UserNameAndDisplayName) error
 }
 
 type UserRepo interface {
@@ -28,6 +29,7 @@ type UserRepo interface {
 	UpdateUser(ctx context.Context, id int, data *usermodel.UserUpdate) error
 	FindUsersWithCondition(ctx context.Context, filter *usermodel.UserFilter, paging *core.Paging) ([]usermodel.User, error)
 	UpdateUserRole(ctx context.Context, id int, role string) error
+	UpdateUserName(ctx context.Context, id int, name *usermodel.UserNameAndDisplayName) error
 }
 
 type userBiz struct {
@@ -165,5 +167,49 @@ func (b *userBiz) UpdateUser(ctx context.Context, requester core.Requester, id i
 	if err = b.repo.UpdateUser(ctx, id, data); err != nil {
 		return core.ErrInternalServerError.WithWrap(err)
 	}
+	return nil
+}
+
+func (b *userBiz) UpdateUserName(ctx context.Context, requester core.Requester, id int, name *usermodel.UserNameAndDisplayName) error {
+	if requester != nil {
+		if id != requester.GetUserId() {
+			return core.ErrForbidden
+		}
+	}
+	if field, err := core.Validator.ValidateField(name); err != nil {
+		return core.ErrInvalidInput(field)
+	}
+
+	if strings.ToLower(name.UserName) != name.UserName {
+		return core.ErrInvalidInput("userName")
+	}
+
+	if strings.ToLower(name.UserName) != strings.ToLower(name.DisplayName) {
+		return core.ErrInvalidInput("displayName")
+	}
+
+	oldUser, err := b.repo.FindUserById(ctx, id)
+	if err != nil {
+		if errors.Is(err, core.ErrRecordNotFound) {
+			return core.ErrNotFound
+		}
+		return core.ErrInternalServerError.WithWrap(err)
+	}
+	if oldUser.Status != 1 {
+		return core.ErrNotFound
+	}
+
+	oldName, err := b.repo.FindUserByUserName(ctx, name.UserName)
+	if err != nil && !errors.Is(err, core.ErrRecordNotFound) {
+		return core.ErrInternalServerError.WithWrap(err)
+	}
+	if oldName != nil && err == nil && oldName.Id != oldUser.Id {
+		return core.ErrConflict
+	}
+
+	if err = b.repo.UpdateUserName(ctx, id, name); err != nil {
+		return core.ErrInternalServerError.WithWrap(err)
+	}
+
 	return nil
 }

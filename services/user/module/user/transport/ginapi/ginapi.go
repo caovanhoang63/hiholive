@@ -42,19 +42,34 @@ func (g *ginAPI) UpdateUserData() func(c *gin.Context) {
 		uid, err := core.FromBase58(c.Param("id"))
 		requester := c.MustGet(core.KeyRequester).(core.Requester)
 
+		updateType := c.Query("type")
 		if err != nil {
 			core.WriteErrorResponse(c, core.ErrBadRequest.WithError(err.Error()))
 			return
 		}
-		var update usermodel.UserUpdate
-		if err = c.ShouldBindJSON(&update); err != nil {
-			core.WriteErrorResponse(c, core.ErrBadRequest.WithError(err.Error()))
-			return
-		}
 
-		if err = g.biz.UpdateUser(c.Request.Context(), requester, int(uid.GetLocalID()), &update); err != nil {
-			core.WriteErrorResponse(c, err)
-			return
+		if updateType == "name" {
+			var update usermodel.UserNameAndDisplayName
+			if err = c.ShouldBindJSON(&update); err != nil {
+				core.WriteErrorResponse(c, core.ErrBadRequest.WithError(err.Error()))
+				return
+			}
+
+			if err = g.biz.UpdateUserName(c.Request.Context(), requester, int(uid.GetLocalID()), &update); err != nil {
+				core.WriteErrorResponse(c, err)
+				return
+			}
+		} else {
+			var update usermodel.UserUpdate
+			if err = c.ShouldBindJSON(&update); err != nil {
+				core.WriteErrorResponse(c, core.ErrBadRequest.WithError(err.Error()))
+				return
+			}
+
+			if err = g.biz.UpdateUser(c.Request.Context(), requester, int(uid.GetLocalID()), &update); err != nil {
+				core.WriteErrorResponse(c, err)
+				return
+			}
 		}
 		c.JSON(http.StatusOK, core.ResponseData(true))
 	}
