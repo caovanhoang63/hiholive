@@ -327,6 +327,9 @@ export namespace pb {
             id?: number;
             first_name?: string;
             last_name?: string;
+            user_name?: string;
+            display_name?: string;
+            system_role?: string;
             avatar?: dependency_1.pb.Image;
         }) {
             super();
@@ -340,6 +343,15 @@ export namespace pb {
                 }
                 if ("last_name" in data && data.last_name != undefined) {
                     this.last_name = data.last_name;
+                }
+                if ("user_name" in data && data.user_name != undefined) {
+                    this.user_name = data.user_name;
+                }
+                if ("display_name" in data && data.display_name != undefined) {
+                    this.display_name = data.display_name;
+                }
+                if ("system_role" in data && data.system_role != undefined) {
+                    this.system_role = data.system_role;
                 }
                 if ("avatar" in data && data.avatar != undefined) {
                     this.avatar = data.avatar;
@@ -364,19 +376,40 @@ export namespace pb {
         set last_name(value: string) {
             pb_1.Message.setField(this, 3, value);
         }
+        get user_name() {
+            return pb_1.Message.getFieldWithDefault(this, 4, "") as string;
+        }
+        set user_name(value: string) {
+            pb_1.Message.setField(this, 4, value);
+        }
+        get display_name() {
+            return pb_1.Message.getFieldWithDefault(this, 5, "") as string;
+        }
+        set display_name(value: string) {
+            pb_1.Message.setField(this, 5, value);
+        }
+        get system_role() {
+            return pb_1.Message.getFieldWithDefault(this, 6, "") as string;
+        }
+        set system_role(value: string) {
+            pb_1.Message.setField(this, 6, value);
+        }
         get avatar() {
-            return pb_1.Message.getWrapperField(this, dependency_1.pb.Image, 4) as dependency_1.pb.Image;
+            return pb_1.Message.getWrapperField(this, dependency_1.pb.Image, 7) as dependency_1.pb.Image;
         }
         set avatar(value: dependency_1.pb.Image) {
-            pb_1.Message.setWrapperField(this, 4, value);
+            pb_1.Message.setWrapperField(this, 7, value);
         }
         get has_avatar() {
-            return pb_1.Message.getField(this, 4) != null;
+            return pb_1.Message.getField(this, 7) != null;
         }
         static fromObject(data: {
             id?: number;
             first_name?: string;
             last_name?: string;
+            user_name?: string;
+            display_name?: string;
+            system_role?: string;
             avatar?: ReturnType<typeof dependency_1.pb.Image.prototype.toObject>;
         }): PublicUserInfo {
             const message = new PublicUserInfo({});
@@ -389,6 +422,15 @@ export namespace pb {
             if (data.last_name != null) {
                 message.last_name = data.last_name;
             }
+            if (data.user_name != null) {
+                message.user_name = data.user_name;
+            }
+            if (data.display_name != null) {
+                message.display_name = data.display_name;
+            }
+            if (data.system_role != null) {
+                message.system_role = data.system_role;
+            }
             if (data.avatar != null) {
                 message.avatar = dependency_1.pb.Image.fromObject(data.avatar);
             }
@@ -399,6 +441,9 @@ export namespace pb {
                 id?: number;
                 first_name?: string;
                 last_name?: string;
+                user_name?: string;
+                display_name?: string;
+                system_role?: string;
                 avatar?: ReturnType<typeof dependency_1.pb.Image.prototype.toObject>;
             } = {};
             if (this.id != null) {
@@ -409,6 +454,15 @@ export namespace pb {
             }
             if (this.last_name != null) {
                 data.last_name = this.last_name;
+            }
+            if (this.user_name != null) {
+                data.user_name = this.user_name;
+            }
+            if (this.display_name != null) {
+                data.display_name = this.display_name;
+            }
+            if (this.system_role != null) {
+                data.system_role = this.system_role;
             }
             if (this.avatar != null) {
                 data.avatar = this.avatar.toObject();
@@ -425,8 +479,14 @@ export namespace pb {
                 writer.writeString(2, this.first_name);
             if (this.last_name.length)
                 writer.writeString(3, this.last_name);
+            if (this.user_name.length)
+                writer.writeString(4, this.user_name);
+            if (this.display_name.length)
+                writer.writeString(5, this.display_name);
+            if (this.system_role.length)
+                writer.writeString(6, this.system_role);
             if (this.has_avatar)
-                writer.writeMessage(4, this.avatar, () => this.avatar.serialize(writer));
+                writer.writeMessage(7, this.avatar, () => this.avatar.serialize(writer));
             if (!w)
                 return writer.getResultBuffer();
         }
@@ -446,6 +506,15 @@ export namespace pb {
                         message.last_name = reader.readString();
                         break;
                     case 4:
+                        message.user_name = reader.readString();
+                        break;
+                    case 5:
+                        message.display_name = reader.readString();
+                        break;
+                    case 6:
+                        message.system_role = reader.readString();
+                        break;
+                    case 7:
                         reader.readMessage(message.avatar, () => message.avatar = dependency_1.pb.Image.deserialize(reader));
                         break;
                     default: reader.skipField();

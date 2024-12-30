@@ -22,6 +22,10 @@ type ChannelBiz interface {
 	FindChannels(ctx context.Context, filter *channelmodel.ChannelFilter, paging *core.Paging) ([]channelmodel.Channel, error)
 }
 
+type UserRepo interface {
+	GetUserById(ctx context.Context, id int)
+}
+
 type channelBiz struct {
 	channelRepo ChannelRepo
 	ps          pubsub.Pubsub
@@ -33,6 +37,7 @@ func NewChannelBiz(channelRepo ChannelRepo, ps pubsub.Pubsub) *channelBiz {
 
 func (c *channelBiz) Create(ctx context.Context, requester core.Requester, create *channelmodel.ChannelCreate) error {
 	channel, err := c.channelRepo.FindUserChannel(ctx, requester.GetUserId())
+
 	if err != nil && !errors.Is(err, core.ErrRecordNotFound) {
 		return core.ErrInternalServerError.WithWrap(err)
 	}
@@ -48,7 +53,6 @@ func (c *channelBiz) Create(ctx context.Context, requester core.Requester, creat
 	}
 
 	_ = c.ps.Publish(ctx, core.TopicCreateChannel, pubsub.NewMessage(create.UserId))
-
 	return nil
 }
 

@@ -38,6 +38,8 @@ func (uc *userClient) GetUserRole(ctx context.Context, userId int) (string, erro
 	return resp.Role, nil
 }
 
+func (uc *userClient) GetUserById(ctx context.Context, id int) {}
+
 func ComposeUserRPCClient(serviceCtx srvctx.ServiceContext) *userClient {
 	configComp := serviceCtx.MustGet(core.KeyCompConf).(core.Config)
 

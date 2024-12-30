@@ -30,11 +30,14 @@ type UserUpdate struct {
 	Address     string      `json:"address" gorm:"column:address"`
 	FirstName   string      `json:"first_name" gorm:"column:first_name"`
 	LastName    string      `json:"last_name" gorm:"column:last_name"`
-	DisplayName string      `json:"display_name" gorm:"column:display_name"`
 	DateOfBirth string      `json:"date_of_birth" gorm:"column:date_of_birth"`
 	Gender      Gender      `json:"gender" gorm:"column:gender"`
 	Avatar      *core.Image `json:"avatar" gorm:"column:avatar"`
-	Bio         string      `json:"bio" gorm:"column:bio"`
+}
+
+type UserNameAndDisplayName struct {
+	UserName    string `json:"user_name" gorm:"column:user_name"`
+	DisplayName string `json:"display_name" gorm:"column:display_name"`
 }
 
 func (UserUpdate) TableName() string {

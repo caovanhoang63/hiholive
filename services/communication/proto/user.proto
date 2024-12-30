@@ -24,9 +24,11 @@ message PublicUserInfo {
   int32 id = 1;
   string first_name = 2;
   string last_name = 3;
-  Image avatar = 4;
+  string user_name = 4;
+  string display_name = 5;
+  string system_role = 6;
+  Image avatar = 7;
 }
-
 message PublicUserInfoResp {
   PublicUserInfo user = 1;
 }

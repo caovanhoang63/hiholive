@@ -11,7 +11,6 @@ type Channel struct {
 	UserName       string      `json:"userName" gorm:"column:user_name"`
 	DisplayName    string      `json:"displayName" gorm:"column:display_name"`
 	Description    string      `json:"description" gorm:"column:description"`
-	Url            string      `json:"url" gorm:"column:url"`
 	Contact        string      `json:"contact" gorm:"column:contact"`
 	Status         int         `json:"status" gorm:"column:status"`
 }

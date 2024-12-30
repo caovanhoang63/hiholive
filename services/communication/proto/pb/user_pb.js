@@ -853,6 +853,9 @@ proto.pb.PublicUserInfo.toObject = function(includeInstance, msg) {
     id: jspb.Message.getFieldWithDefault(msg, 1, 0),
     firstName: jspb.Message.getFieldWithDefault(msg, 2, ""),
     lastName: jspb.Message.getFieldWithDefault(msg, 3, ""),
+    userName: jspb.Message.getFieldWithDefault(msg, 4, ""),
+    displayName: jspb.Message.getFieldWithDefault(msg, 5, ""),
+    systemRole: jspb.Message.getFieldWithDefault(msg, 6, ""),
     avatar: (f = msg.getAvatar()) && image_pb.Image.toObject(includeInstance, f)
   };
 
@@ -903,6 +906,18 @@ proto.pb.PublicUserInfo.deserializeBinaryFromReader = function(msg, reader) {
       msg.setLastName(value);
       break;
     case 4:
+      var value = /** @type {string} */ (reader.readString());
+      msg.setUserName(value);
+      break;
+    case 5:
+      var value = /** @type {string} */ (reader.readString());
+      msg.setDisplayName(value);
+      break;
+    case 6:
+      var value = /** @type {string} */ (reader.readString());
+      msg.setSystemRole(value);
+      break;
+    case 7:
       var value = new image_pb.Image;
       reader.readMessage(value,image_pb.Image.deserializeBinaryFromReader);
       msg.setAvatar(value);
@@ -957,10 +972,31 @@ proto.pb.PublicUserInfo.serializeBinaryToWriter = function(message, writer) {
       f
     );
   }
+  f = message.getUserName();
+  if (f.length > 0) {
+    writer.writeString(
+      4,
+      f
+    );
+  }
+  f = message.getDisplayName();
+  if (f.length > 0) {
+    writer.writeString(
+      5,
+      f
+    );
+  }
+  f = message.getSystemRole();
+  if (f.length > 0) {
+    writer.writeString(
+      6,
+      f
+    );
+  }
   f = message.getAvatar();
   if (f != null) {
     writer.writeMessage(
-      4,
+      7,
       f,
       image_pb.Image.serializeBinaryToWriter
     );
@@ -1023,12 +1059,66 @@ proto.pb.PublicUserInfo.prototype.setLastName = function(value) {
 
 
 /**
- * optional Image avatar = 4;
+ * optional string user_name = 4;
+ * @return {string}
+ */
+proto.pb.PublicUserInfo.prototype.getUserName = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 4, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.pb.PublicUserInfo} returns this
+ */
+proto.pb.PublicUserInfo.prototype.setUserName = function(value) {
+  return jspb.Message.setProto3StringField(this, 4, value);
+};
+
+
+/**
+ * optional string display_name = 5;
+ * @return {string}
+ */
+proto.pb.PublicUserInfo.prototype.getDisplayName = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 5, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.pb.PublicUserInfo} returns this
+ */
+proto.pb.PublicUserInfo.prototype.setDisplayName = function(value) {
+  return jspb.Message.setProto3StringField(this, 5, value);
+};
+
+
+/**
+ * optional string system_role = 6;
+ * @return {string}
+ */
+proto.pb.PublicUserInfo.prototype.getSystemRole = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 6, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.pb.PublicUserInfo} returns this
+ */
+proto.pb.PublicUserInfo.prototype.setSystemRole = function(value) {
+  return jspb.Message.setProto3StringField(this, 6, value);
+};
+
+
+/**
+ * optional Image avatar = 7;
  * @return {?proto.pb.Image}
  */
 proto.pb.PublicUserInfo.prototype.getAvatar = function() {
   return /** @type{?proto.pb.Image} */ (
-    jspb.Message.getWrapperField(this, image_pb.Image, 4));
+    jspb.Message.getWrapperField(this, image_pb.Image, 7));
 };
 
 
@@ -1037,7 +1127,7 @@ proto.pb.PublicUserInfo.prototype.getAvatar = function() {
  * @return {!proto.pb.PublicUserInfo} returns this
 */
 proto.pb.PublicUserInfo.prototype.setAvatar = function(value) {
-  return jspb.Message.setWrapperField(this, 4, value);
+  return jspb.Message.setWrapperField(this, 7, value);
 };
 
 
@@ -1055,7 +1145,7 @@ proto.pb.PublicUserInfo.prototype.clearAvatar = function() {
  * @return {boolean}
  */
 proto.pb.PublicUserInfo.prototype.hasAvatar = function() {
-  return jspb.Message.getField(this, 4) != null;
+  return jspb.Message.getField(this, 7) != null;
 };
 
 

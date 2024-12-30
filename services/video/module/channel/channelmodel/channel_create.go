@@ -11,7 +11,6 @@ type ChannelCreate struct {
 	Image          *core.Image `json:"image" gorm:"column:image"`
 	Panel          *core.Image `json:"panel" gorm:"column:panel"`
 	Description    string      `json:"description" gorm:"column:description"`
-	Url            string      `json:"url" gorm:"column:url"`
 	Contact        string      `json:"contact" gorm:"column:contact"`
 }
 
