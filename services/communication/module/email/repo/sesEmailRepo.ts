@@ -20,7 +20,6 @@ import {createInternalError} from "../../../libs/errors";
 export class SesEmailRepo implements IEmailRepo {
     constructor(@inject(TYPES.SESClient)private readonly SESClient : SESClient) {
     }
-
     createEmailTemplate(email: EmailTemplate): ResultAsync<void, Error> {
         const command = new CreateTemplateCommand({
             Template: {
@@ -53,6 +52,7 @@ export class SesEmailRepo implements IEmailRepo {
             if( !r.TemplatesMetadata ){
                 return okAsync([])
             }
+            paging.nextCursor = r.NextToken
             return fromPromise(Promise.all(
                 r.TemplatesMetadata.map( t => {
                         const getTemplateCommand = new GetTemplateCommand({

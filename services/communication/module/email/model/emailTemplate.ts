@@ -4,7 +4,3 @@ export interface EmailTemplate {
     text: string,
     templateName: string
 }
-
-
-
-
