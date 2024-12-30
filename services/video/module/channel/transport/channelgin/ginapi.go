@@ -88,6 +88,23 @@ func (g *ginAPI) FindChannelById() func(c *gin.Context) {
 	}
 }
 
+func (g *ginAPI) FindChannelByUserName() func(c *gin.Context) {
+	return func(c *gin.Context) {
+		userName := c.Param("username")
+
+		channel, err := g.biz.FindChannelByUserName(c.Request.Context(), userName)
+
+		if err != nil {
+			core.WriteErrorResponse(c, err)
+			return
+		}
+
+		channel.Mask()
+
+		c.JSON(http.StatusOK, core.ResponseData(channel))
+	}
+}
+
 func (g *ginAPI) FindChannels() func(c *gin.Context) {
 	return func(c *gin.Context) {
 		var paging core.Paging

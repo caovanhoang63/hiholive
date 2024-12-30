@@ -12,6 +12,17 @@ type channelMysqlRepo struct {
 	db *gorm.DB
 }
 
+func (c *channelMysqlRepo) FindChannelByUserName(ctx context.Context, userName string) (*channelmodel.Channel, error) {
+	var data channelmodel.Channel
+	if err := c.db.Where("user_name = ?", userName).First(&data).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, core.ErrRecordNotFound
+		}
+		return nil, err
+	}
+	return &data, nil
+}
+
 func NewChannelMysqlRepo(db *gorm.DB) *channelMysqlRepo {
 	return &channelMysqlRepo{db: db}
 }

@@ -30,6 +30,7 @@ type ChannelService interface {
 	FindUserChannel() func(c *gin.Context)
 	FindChannelById() func(c *gin.Context)
 	FindChannels() func(c *gin.Context)
+	FindChannelByUserName() func(c *gin.Context)
 }
 
 func ComposeChannelAPIService(serviceCtx srvctx.ServiceContext, repo channelbiz.UserRepo) ChannelService {

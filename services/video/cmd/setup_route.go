@@ -23,6 +23,7 @@ func SetupRoutes(router *gin.RouterGroup, serviceCtx srvctx.ServiceContext) {
 
 	channelPub := v1.Group("/channel")
 	channelPub.GET(":id", channelService.FindChannelById())
+	channelPub.GET("user/:username", channelService.FindChannelByUserName())
 	channelPub.GET("", channelService.FindChannels())
 
 	userPub := v1.Group("/user")

@@ -14,6 +14,7 @@ type ChannelRepo interface {
 	Create(ctx context.Context, create *channelmodel.ChannelCreate) error
 	FindUserChannel(ctx context.Context, userId int) (*channelmodel.Channel, error)
 	FindChannelById(ctx context.Context, channelId int) (*channelmodel.Channel, error)
+	FindChannelByUserName(ctx context.Context, userName string) (*channelmodel.Channel, error)
 	FindChannels(ctx context.Context, filter *channelmodel.ChannelFilter, paging *core.Paging) ([]channelmodel.Channel, error)
 }
 
@@ -21,6 +22,7 @@ type ChannelBiz interface {
 	Create(ctx context.Context, requester core.Requester, create *channelmodel.ChannelCreate) error
 	FindUserChannel(ctx context.Context, userId int) (*channelmodel.Channel, error)
 	FindChannelById(ctx context.Context, channelId int) (*channelmodel.Channel, error)
+	FindChannelByUserName(ctx context.Context, userName string) (*channelmodel.Channel, error)
 	FindChannels(ctx context.Context, filter *channelmodel.ChannelFilter, paging *core.Paging) ([]channelmodel.Channel, error)
 }
 
@@ -37,6 +39,17 @@ type channelBiz struct {
 func NewChannelBiz(channelRepo ChannelRepo, userRepo UserRepo, ps pubsub.Pubsub) *channelBiz {
 	return &channelBiz{channelRepo: channelRepo, ps: ps,
 		userRepo: userRepo}
+}
+
+func (c *channelBiz) FindChannelByUserName(ctx context.Context, userName string) (*channelmodel.Channel, error) {
+	channel, err := c.channelRepo.FindChannelByUserName(ctx, userName)
+	if err != nil {
+		if errors.Is(err, core.ErrRecordNotFound) {
+			return nil, core.ErrNotFound
+		}
+		return nil, core.ErrInternalServerError.WithWrap(err)
+	}
+	return channel, nil
 }
 
 func (c *channelBiz) Create(ctx context.Context, requester core.Requester, create *channelmodel.ChannelCreate) error {
