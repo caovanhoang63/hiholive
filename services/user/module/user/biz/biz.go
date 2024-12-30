@@ -97,9 +97,12 @@ func (b *userBiz) CreateNewUser(ctx context.Context, data *usermodel.UserCreate)
 
 	data.Gender = usermodel.Other
 	data.SystemRole = usermodel.RoleUser
+
+	// Default userName and DisplayName
 	displayName := strings.Split(data.Email, "@")[0]
-	displayName = displayName + "+" + core.GenSalt(5)
+	displayName = displayName + core.GenSalt(5)
 	data.DisplayName = displayName
+	data.UserName = displayName
 
 	if err := b.repo.CreateNewUser(ctx, data); err != nil {
 		return core.ErrInternalServerError.WithError(err.Error())

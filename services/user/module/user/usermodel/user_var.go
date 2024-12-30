@@ -8,6 +8,7 @@ type UserCreate struct {
 	FirstName      string `json:"first_name" gorm:"column:first_name"`
 	LastName       string `json:"last_name" gorm:"column:last_name"`
 	DisplayName    string `json:"display_name" gorm:"column:display_name"`
+	UserName       string `json:"user_name" gorm:"column:user_name"`
 	Gender         Gender `json:"gender" gorm:"column:gender"`
 	SystemRole     string `json:"system_role" gorm:"column:system_role"`
 }
