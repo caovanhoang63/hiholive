@@ -80,7 +80,7 @@ func (m *mysqlRepo) FindCategories(ctx context.Context, filter *ctgmodel.Categor
 			db = db.Where("created_at <?", filter.LtCreatedAt)
 		}
 		if filter.Name != "" {
-			db = db.Where("name LIKE ?", filter.Name+"%")
+			db = db.Where("name LIKE ?", "%"+filter.Name+"%")
 		}
 	}
 
