@@ -36,6 +36,22 @@ export class EmailExpress {
         }
     }
 
+    update() : express.Handler {
+        return async (req , res)=> {
+            const create = req.body as EmailTemplate
+
+            (await this.EmailBusiness.updateEmailTemplate(create)).match(
+                r => {
+                    res.status(200).json(AppResponse.SimpleResponse(true))
+                },
+                e => {
+                    writeErrorResponse(res,e)
+                }
+            )
+
+        }
+    }
+
     list() : express.Handler {
         return async (req,res) =>{
             const paging = ReqHelper.getPaging(req.query);

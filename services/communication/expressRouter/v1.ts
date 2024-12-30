@@ -10,6 +10,7 @@ export const v1Router = () => {
     const emailRouter = express.Router();
     emailRouter.post("", emailController.create());
     emailRouter.get("", emailController.list());
+    emailRouter.patch("", emailController.update());
 
     router.use("/email", emailRouter);
 

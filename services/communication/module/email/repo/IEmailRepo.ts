@@ -9,4 +9,5 @@ export interface IEmailRepo {
     createEmailTemplate(email:  EmailTemplate) : ResultAsync<void, Error>
     listEmailTemplate(filter : EmailFilter, paging : Paging) :  ResultAsync<EmailTemplate[], Error>
     sendEmail(message: SendEmailMessage):  ResultAsync<void, Error>
+    updateEmailTemplate(email:  EmailTemplate) : ResultAsync<void, Error>
 }

@@ -11,7 +11,7 @@ import {
     GetTemplateCommand,
     ListTemplatesCommand,
     SendTemplatedEmailCommand,
-    SESClient
+    SESClient, UpdateTemplateCommand
 } from "@aws-sdk/client-ses";
 import {createInternalError} from "../../../libs/errors";
 
@@ -19,6 +19,25 @@ import {createInternalError} from "../../../libs/errors";
 @injectable()
 export class SesEmailRepo implements IEmailRepo {
     constructor(@inject(TYPES.SESClient)private readonly SESClient : SESClient) {
+    }
+
+    updateEmailTemplate(email: EmailTemplate): ResultAsync<void, Error> {
+        const command = new UpdateTemplateCommand({
+            Template: {
+                TemplateName: email.templateName,
+                TextPart: email.text,
+                HtmlPart: email.html,
+                SubjectPart: email.subject
+            }
+        })
+        return fromPromise(this.SESClient.send(command),
+            e => createInternalError(e)).
+        andThen(r => {
+            if (r.$metadata.httpStatusCode != 200) {
+                return errAsync(createInternalError())
+            }
+            return okAsync(undefined)
+        })
     }
     createEmailTemplate(email: EmailTemplate): ResultAsync<void, Error> {
         const command = new CreateTemplateCommand({

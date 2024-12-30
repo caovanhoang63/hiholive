@@ -13,6 +13,9 @@ export class EmailBusiness implements IEmailBusiness {
     constructor(@inject(TYPES.IEmailRepository) private readonly EmailRepo: IEmailRepo) {
     }
 
+    updateEmailTemplate(email: EmailTemplate): ResultAsync<void, Error> {
+        return this.EmailRepo.updateEmailTemplate(email)
+    }
     createEmailTemplate(email: EmailTemplate): ResultAsync<void, Error> {
         return this.EmailRepo.createEmailTemplate(email)
     }

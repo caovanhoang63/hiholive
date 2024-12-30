@@ -7,6 +7,7 @@ import {SendEmailMessage} from "../model/sendEmailMessage";
 
 export interface IEmailBusiness {
     createEmailTemplate(email:  EmailTemplate) : ResultAsync<void, Error>
+    updateEmailTemplate(email:  EmailTemplate) : ResultAsync<void, Error>
     listEmailTemplate(filter : EmailFilter, paging : Paging) :  ResultAsync<EmailTemplate[], Error>
     sendEmail(message: SendEmailMessage):  ResultAsync<void, Error>
 }
