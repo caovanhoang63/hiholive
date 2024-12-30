@@ -32,11 +32,11 @@ type ChannelService interface {
 	FindChannels() func(c *gin.Context)
 }
 
-func ComposeChannelAPIService(serviceCtx srvctx.ServiceContext) ChannelService {
+func ComposeChannelAPIService(serviceCtx srvctx.ServiceContext, repo channelbiz.UserRepo) ChannelService {
 	db := serviceCtx.MustGet(core.KeyCompMySQL).(core.GormComponent)
 	ps := serviceCtx.MustGet(core.KeyCompRabbitMQ).(pubsub.Pubsub)
 	channelRepo := channelmysql.NewChannelMysqlRepo(db.GetDB())
-	biz := channelbiz.NewChannelBiz(channelRepo, ps)
+	biz := channelbiz.NewChannelBiz(channelRepo, repo, ps)
 	userService := channelgin.NewChannelGinApi(biz, serviceCtx)
 	return userService
 }

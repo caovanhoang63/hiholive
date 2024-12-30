@@ -2,10 +2,12 @@ package channelbiz
 
 import (
 	"errors"
+	"github.com/caovanhoang63/hiholive/services/video/common"
 	"github.com/caovanhoang63/hiholive/services/video/module/channel/channelmodel"
 	"github.com/caovanhoang63/hiholive/shared/golang/core"
 	"github.com/caovanhoang63/hiholive/shared/golang/srvctx/components/pubsub"
 	"golang.org/x/net/context"
+	"strings"
 )
 
 type ChannelRepo interface {
@@ -23,19 +25,25 @@ type ChannelBiz interface {
 }
 
 type UserRepo interface {
-	GetUserById(ctx context.Context, id int)
+	GetUserById(ctx context.Context, id int) (*common.User, error)
 }
 
 type channelBiz struct {
 	channelRepo ChannelRepo
+	userRepo    UserRepo
 	ps          pubsub.Pubsub
 }
 
-func NewChannelBiz(channelRepo ChannelRepo, ps pubsub.Pubsub) *channelBiz {
-	return &channelBiz{channelRepo: channelRepo, ps: ps}
+func NewChannelBiz(channelRepo ChannelRepo, userRepo UserRepo, ps pubsub.Pubsub) *channelBiz {
+	return &channelBiz{channelRepo: channelRepo, ps: ps,
+		userRepo: userRepo}
 }
 
 func (c *channelBiz) Create(ctx context.Context, requester core.Requester, create *channelmodel.ChannelCreate) error {
+	if field, err := core.Validator.ValidateField(create); err != nil {
+		return core.ErrInvalidInput(field)
+	}
+
 	channel, err := c.channelRepo.FindUserChannel(ctx, requester.GetUserId())
 
 	if err != nil && !errors.Is(err, core.ErrRecordNotFound) {
@@ -44,6 +52,23 @@ func (c *channelBiz) Create(ctx context.Context, requester core.Requester, creat
 
 	if channel != nil {
 		return core.ErrBadRequest.WithError("channel already exists")
+	}
+	user, err := c.userRepo.GetUserById(ctx, requester.GetUserId())
+
+	if err != nil || user == nil {
+		return core.ErrInternalServerError.WithWrap(err)
+	}
+
+	if strings.ToLower(create.UserName) != create.UserName {
+		return core.ErrInvalidInput("userName")
+	}
+
+	if strings.ToLower(create.UserName) != strings.ToLower(create.DisplayName) {
+		return core.ErrInvalidInput("displayName")
+	}
+
+	if user.DisplayName != create.DisplayName || user.UserName != create.UserName {
+		// TODO : UPDATE userName and DisplayName
 	}
 
 	create.UserId = requester.GetUserId()

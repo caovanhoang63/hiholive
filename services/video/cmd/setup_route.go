@@ -9,14 +9,14 @@ import (
 
 func SetupRoutes(router *gin.RouterGroup, serviceCtx srvctx.ServiceContext) {
 	v1 := router.Group("v1")
-	channelService := videocomposer.ComposeChannelAPIService(serviceCtx)
+	ac := videocomposer.ComposeAuthRPCClient(serviceCtx)
+	uc := videocomposer.ComposeUserRPCClient(serviceCtx)
+
+	channelService := videocomposer.ComposeChannelAPIService(serviceCtx, uc)
 	streamService := videocomposer.ComposeStreamAPIService(serviceCtx)
 	settingService := videocomposer.ComposeSystemSettingApiService(serviceCtx)
 	ctgService := videocomposer.ComposeCategoryApiService(serviceCtx)
 	uploadService := videocomposer.ComposeUploadAPIService(serviceCtx)
-
-	ac := videocomposer.ComposeAuthRPCClient(serviceCtx)
-	uc := videocomposer.ComposeUserRPCClient(serviceCtx)
 
 	channelPrv := v1.Group("/channel")
 	channelPrv.POST("", middlewares.RequireAuth(ac), middlewares.Authorize(uc, "viewer"), channelService.CreateChannel())
