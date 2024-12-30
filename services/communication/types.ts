@@ -14,7 +14,6 @@ const TYPES = {
     IChatBusiness : Symbol.for("IChatBusiness"),
     IStreamBusiness: Symbol.for("IStreamBusiness"),
 
-
     // Rest
 
 
@@ -25,8 +24,8 @@ const TYPES = {
     PubSub : Symbol.for("PubSub"),
     DynamoDBClient : Symbol.for("DynamoClient"),
     RabbitMQClient : Symbol.for("RabbitMQClient"),
-    RedisClient : Symbol.for("RedisClient")
-
+    RedisClient : Symbol.for("RedisClient"),
+    SESClient : Symbol.for("SESClient")
 
 }
 

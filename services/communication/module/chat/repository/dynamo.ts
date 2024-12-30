@@ -72,7 +72,9 @@ export class ChatDynamoRepo implements IChatRepo {
                                 firstName: user.firstName,
                                 lastName: user.lastName,
                                 avatar: user.avatar,
-                                systemRole: ""
+                                systemRole: user.systemRole,
+                                displayName : user.displayName,
+                                userName : user.userName,
                             };
                         }
                         return item;

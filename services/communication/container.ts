@@ -24,6 +24,7 @@ import {StreamBusiness} from "./module/stream/business/streamBusiness";
 import amqplib, {Connection} from "amqplib";
 import {IPubSub} from "./component/pubsub/IPubsub";
 import {RabbitPubSub} from "./component/pubsub/rabbitPubsub";
+import {SESClient} from "@aws-sdk/client-ses";
 
 dotenv.config();
 
@@ -71,11 +72,21 @@ container.bind<AWS.DynamoDB>(TYPES.DynamoDBClient).toDynamicValue(() => {
     return new AWS.DynamoDB({
         region: "ap-southeast-1",
         credentials : {
-            accessKeyId : accessKey!,
-            secretAccessKey : secretAccessKey!
+            accessKeyId : accessKey,
+            secretAccessKey : secretAccessKey
         },
     },);
 }).inSingletonScope();
+
+container.bind<SESClient>(TYPES.SESClient).toDynamicValue(() => {
+    return new SESClient({
+        region: "ap-southeast-1",
+        credentials: {
+            accessKeyId : accessKey,
+            secretAccessKey : secretAccessKey
+        }
+    })
+})
 
 container.bind<IPubSub>(TYPES.PubSub).to(RabbitPubSub).inSingletonScope()
 
