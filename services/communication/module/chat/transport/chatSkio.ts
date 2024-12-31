@@ -95,7 +95,10 @@ export const chatSkio = (socket : Socket<DefaultEventsMap, DefaultEventsMap, Def
                             id: v?.user?.uid.toString(),
                             firstName: v?.user?.firstName,
                             lastName:v?.user?.lastName,
-                            avatar: v?.user?.avatar
+                            avatar: v?.user?.avatar,
+                            displayName : v?.user?.displayName,
+                            userName : v?.user?.displayName,
+                            systemRole : v?.user?.systemRole,
                         },
                         message: v.message,
                         createdAt: v.createdAt,
