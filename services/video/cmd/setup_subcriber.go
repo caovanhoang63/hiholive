@@ -22,6 +22,7 @@ func StartSubscriber(serviceCtx srvctx.ServiceContext) {
 	engine.Subscribe(core.TopicUpdateStreamViewCount, streamService.UpdateStreamViewCount())
 	engine.Subscribe(core.TopicStreamEnded, streamService.EndStream())
 	engine.Subscribe(core.TopicUpdateUserName, channelService.UpdateChannelName())
+	engine.Subscribe(core.TopicUpdateChannelImage, channelService.UpdateChannelImage())
 	go func() {
 		err := engine.Start()
 		if err != nil {

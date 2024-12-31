@@ -8,4 +8,5 @@ const (
 	TopicUpdateStreamViewCount = "TopicUpdateStreamViewCount"
 	TopicUpdateUserName        = "TopicUpdateUserName"
 	TopicForgotPassword        = "TopicForgotPassword"
+	TopicUpdateChannelImage    = "TopicUpdateChannelImage"
 )

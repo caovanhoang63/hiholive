@@ -29,6 +29,7 @@ type ChannelBiz interface {
 	FindChannels(ctx context.Context, filter *channelmodel.ChannelFilter, paging *core.Paging) ([]channelmodel.Channel, error)
 	UpdateChannelName(ctx context.Context, userId int, userName, displayName string) error
 	UpdateChannelData(ctx context.Context, requester core.Requester, id int, update *channelmodel.ChannelUpdate) error
+	UpdateChannelDataByUserId(ctx context.Context, requester core.Requester, id int, data *channelmodel.ChannelUpdate) error
 }
 
 type UserRepo interface {
@@ -39,6 +40,33 @@ type channelBiz struct {
 	channelRepo ChannelRepo
 	userRepo    UserRepo
 	ps          pubsub.Pubsub
+}
+
+func (c *channelBiz) UpdateChannelDataByUserId(ctx context.Context, requester core.Requester, id int, update *channelmodel.ChannelUpdate) error {
+	if field, err := core.Validator.ValidateField(update); err != nil {
+		return core.ErrInvalidInput(field)
+	}
+
+	old, err := c.channelRepo.FindUserChannel(ctx, id)
+
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		return core.ErrInternalServerError.WithWrap(err)
+	}
+
+	if old == nil {
+		return core.ErrNotFound
+	}
+
+	if requester != nil {
+		if old.UserId != requester.GetUserId() && requester.GetRole() != usermodel.RoleAdmin {
+			return core.ErrForbidden
+		}
+	}
+
+	if err = c.channelRepo.UpdateChannelData(ctx, id, update); err != nil {
+		return core.ErrInternalServerError.WithWrap(err)
+	}
+	return nil
 }
 
 func (c *channelBiz) UpdateChannelData(ctx context.Context, requester core.Requester, id int, update *channelmodel.ChannelUpdate) error {

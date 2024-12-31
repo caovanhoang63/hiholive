@@ -172,6 +172,13 @@ func (b *userBiz) UpdateUser(ctx context.Context, requester core.Requester, id i
 	if err = b.repo.UpdateUser(ctx, id, data); err != nil {
 		return core.ErrInternalServerError.WithWrap(err)
 	}
+
+	if oldUser.SystemRole == usermodel.RoleStreamer && data.Avatar != nil {
+		_ = b.ps.Publish(ctx, core.TopicUpdateChannelImage, pubsub.NewMessage(map[string]any{
+			"image":  data.Avatar,
+			"userId": id,
+		}))
+	}
 	return nil
 }
 
