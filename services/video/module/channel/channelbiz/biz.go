@@ -63,7 +63,7 @@ func (c *channelBiz) UpdateChannelDataByUserId(ctx context.Context, requester co
 		}
 	}
 
-	if err = c.channelRepo.UpdateChannelData(ctx, id, update); err != nil {
+	if err = c.channelRepo.UpdateChannelData(ctx, old.UserId, update); err != nil {
 		return core.ErrInternalServerError.WithWrap(err)
 	}
 	return nil
