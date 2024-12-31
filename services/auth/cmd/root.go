@@ -9,6 +9,7 @@ import (
 	"github.com/caovanhoang63/hiholive/shared/golang/srvctx/components/gormc"
 	"github.com/caovanhoang63/hiholive/shared/golang/srvctx/components/jwtc"
 	"github.com/caovanhoang63/hiholive/shared/golang/srvctx/components/pubsub/rabbitmq"
+	"github.com/caovanhoang63/hiholive/shared/golang/srvctx/components/redisc"
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/cobra"
 	"net/http"
@@ -23,6 +24,7 @@ func newServiceCtx() srvctx.ServiceContext {
 		srvctx.WithComponent(jwtc.NewJWT(core.KeyCompJWT)),
 		srvctx.WithComponent(core.NewConfig()),
 		srvctx.WithComponent(rabbitpubsub.NewRabbitPubSub(core.KeyCompRabbitMQ)),
+		srvctx.WithComponent(redisc.NewRedis(core.KeyRedis)),
 	)
 }
 

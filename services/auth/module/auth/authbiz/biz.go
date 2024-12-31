@@ -5,6 +5,7 @@ import (
 	"github.com/caovanhoang63/hiholive/services/auth/module/auth/authmodel"
 	"github.com/caovanhoang63/hiholive/shared/golang/core"
 	"github.com/caovanhoang63/hiholive/shared/golang/srvctx"
+	"github.com/caovanhoang63/hiholive/shared/golang/srvctx/components/pubsub"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 	"golang.org/x/net/context"
@@ -13,11 +14,19 @@ import (
 type AuthBiz interface {
 	Register(c context.Context, register *authmodel.AuthRegister) error
 	Login(c context.Context, user *authmodel.AuthEmailPassword) (*authmodel.TokenResponse, error)
+	ForgotPassword(c context.Context, email string) error
+	ResetPasswordWithPin(c context.Context, email, pin, password string) error
+	ResetPasswordWithRequester(c context.Context, requester core.Requester, password string) error
+	CheckForgotPasswordPin(c context.Context, email, pin string) error
 }
 
 type AuthRepository interface {
 	Create(ctx context.Context, register *authmodel.Auth) error
 	FindByEmail(ctx context.Context, email string) (*authmodel.Auth, error)
+	FindByUserId(ctx context.Context, id int) (*authmodel.Auth, error)
+	ForgotPassword(c context.Context, email, pin string) error
+	CheckForgotPasswordPin(c context.Context, email, pin string) error
+	UpdatePassword(c context.Context, email, password string) error
 }
 
 type UserRepository interface {
@@ -34,15 +43,79 @@ type authBiz struct {
 	userRepo       UserRepository
 	jwtProvider    core.JWTProvider
 	hasher         Hasher
+	ps             pubsub.Pubsub
 }
 
-func NewAuthBiz(serviceContext srvctx.ServiceContext, repo AuthRepository, userRepo UserRepository, jwtProvider core.JWTProvider, hasher Hasher) *authBiz {
+func (b *authBiz) CheckForgotPasswordPin(c context.Context, email, pin string) error {
+	if err := b.repo.CheckForgotPasswordPin(c, email, pin); err != nil {
+		if errors.Is(err, authmodel.ErrInvalidPin) {
+			return core.ErrBadRequest.WithError(authmodel.ErrInvalidPin.Error())
+		}
+		return core.ErrInternalServerError.WithWrap(err)
+	}
+	return nil
+}
+
+func (b *authBiz) ForgotPassword(c context.Context, email string) error {
+	if _, err := b.repo.FindByEmail(c, email); err != nil {
+		return core.ErrNotFound
+	}
+
+	pin := core.GenSalt(6)
+	if err := b.repo.ForgotPassword(c, email, pin); err != nil {
+		if errors.Is(err, authmodel.ErrPinAlreadyExists) {
+			return core.ErrBadRequest.WithError(authmodel.ErrPinAlreadyExists.Error())
+		}
+		return core.ErrInternalServerError.WithWrap(err)
+	}
+	_ = b.ps.Publish(c, core.TopicForgotPassword, pubsub.NewMessage(map[string]interface{}{
+		"email": email,
+		"pin":   pin,
+	}))
+	return nil
+}
+
+func (b *authBiz) ResetPasswordWithPin(c context.Context, email, pin, password string) error {
+	if err := b.repo.CheckForgotPasswordPin(c, email, pin); err != nil {
+		if errors.Is(err, authmodel.ErrInvalidPin) {
+			return core.ErrBadRequest.WithError(authmodel.ErrInvalidPin.Error())
+		}
+		return core.ErrInternalServerError.WithWrap(err)
+	}
+
+	if err := b.repo.UpdatePassword(c, email, password); err != nil {
+		return core.ErrInternalServerError.WithWrap(err)
+	}
+	return nil
+}
+
+func (b *authBiz) ResetPasswordWithRequester(c context.Context, requester core.Requester, password string) error {
+	if requester == nil {
+		return core.ErrUnauthorized
+	}
+
+	auth, err := b.repo.FindByUserId(c, requester.GetUserId())
+	if err != nil {
+		if errors.Is(err, core.ErrRecordNotFound) {
+			return core.ErrBadRequest.WithError("Invalid username or password")
+		}
+		return core.ErrInternalServerError.WithDebug(err.Error())
+	}
+
+	if err = b.repo.UpdatePassword(c, auth.Email, password); err != nil {
+		return core.ErrInternalServerError.WithWrap(err)
+	}
+	return nil
+}
+
+func NewAuthBiz(serviceContext srvctx.ServiceContext, repo AuthRepository, userRepo UserRepository, jwtProvider core.JWTProvider, hasher Hasher, ps pubsub.Pubsub) *authBiz {
 	return &authBiz{
 		serviceContext: serviceContext,
 		repo:           repo,
 		userRepo:       userRepo,
 		jwtProvider:    jwtProvider,
 		hasher:         hasher,
+		ps:             ps,
 	}
 }
 

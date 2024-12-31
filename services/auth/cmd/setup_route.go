@@ -14,5 +14,8 @@ func SetupRoutes(router *gin.RouterGroup, serviceCtx srvctx.ServiceContext) {
 	{
 		auth.POST("register", authService.Register())
 		auth.POST("login", authService.Login())
+		auth.POST("forgot-password", authService.ForgotPassword())
+		auth.POST("reset-password", authService.ResetPassword())
+		auth.POST("check-reset-password-pin", authService.CheckForgotPasswordPin())
 	}
 }

@@ -7,4 +7,5 @@ const (
 	TopicStreamEnded           = "TopicStreamEnded"
 	TopicUpdateStreamViewCount = "TopicUpdateStreamViewCount"
 	TopicUpdateUserName        = "TopicUpdateUserName"
+	TopicForgotPassword        = "TopicForgotPassword"
 )

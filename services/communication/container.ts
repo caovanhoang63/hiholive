@@ -30,6 +30,8 @@ import {EmailBusiness} from "./module/email/business/emailBusiness";
 import {IEmailRepo} from "./module/email/repo/IEmailRepo";
 import {SesEmailRepo} from "./module/email/repo/sesEmailRepo";
 import {EmailExpress} from "./module/email/transport/emailExpress";
+import {EmailSub} from "./module/email/transport/emailSub";
+import {StreamSubscriber} from "./module/stream/transport/streamSubscriber";
 
 dotenv.config();
 
@@ -55,6 +57,8 @@ container.bind<IEmailBusiness>(TYPES.IEmailBusiness).to(EmailBusiness).inRequest
 
 // Controller
 container.bind<EmailExpress>(TYPES.EmailController).to(EmailExpress).inRequestScope();
+container.bind<EmailSub>(TYPES.EmailSubscriber).to(EmailSub).inRequestScope();
+container.bind<StreamSubscriber>(TYPES.StreamSubscriber).to(StreamSubscriber).inRequestScope();
 
 
 container.bind<RedisClientType<RedisDefaultModules & RedisModules, RedisFunctions, RedisScripts>>(TYPES.RedisClient).toDynamicValue( () => {

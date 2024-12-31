@@ -14,6 +14,36 @@ type ginAPI struct {
 	serviceCtx srvctx.ServiceContext
 }
 
+func (g *ginAPI) ForgotPassword() func(c *gin.Context) {
+	return func(c *gin.Context) {
+		type Email struct {
+			Email string `json:"email"`
+		}
+		var email Email
+		if err := c.ShouldBind(&email); err != nil {
+			core.WriteErrorResponse(c, core.ErrBadRequest)
+			return
+		}
+		if err := g.biz.ForgotPassword(c.Request.Context(), email.Email); err != nil {
+			core.WriteErrorResponse(c, err)
+			return
+		}
+		c.JSON(http.StatusOK, core.ResponseData(true))
+	}
+}
+
+func (g *ginAPI) ResetPassword() func(c *gin.Context) {
+	return func(c *gin.Context) {
+
+	}
+}
+
+func (g *ginAPI) CheckForgotPasswordPin() func(c *gin.Context) {
+	return func(c *gin.Context) {
+
+	}
+}
+
 func NewGinAPI(serviceCtx srvctx.ServiceContext, b authbiz.AuthBiz) *ginAPI {
 	return &ginAPI{b, serviceCtx}
 }

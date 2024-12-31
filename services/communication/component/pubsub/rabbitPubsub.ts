@@ -48,6 +48,10 @@ export class RabbitPubSub implements IPubSub {
     subscribe(topic: string,fn : ConsumerJob[] ): ResultAsync<void, Error> {
         if (this.channel == null) return errAsync(new Error("Channel wasn't created"))
         return fromPromise((async () => {
+            await this.channel!.assertExchange(topic,"fanout",{
+                durable: true,
+                autoDelete : false,
+                internal: false})
             const queue = await this.channel!.assertQueue(topic)
             await this.channel?.bindQueue(queue.queue,topic,"")
             await this.channel?.consume(queue.queue, msg => {

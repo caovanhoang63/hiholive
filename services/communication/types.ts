@@ -1,4 +1,5 @@
 import {IStreamRepo} from "./module/stream/repository/IStreamRepo";
+import {StreamSubscriber} from "./module/stream/transport/streamSubscriber";
 
 const TYPES = {
     // Repository
@@ -19,6 +20,10 @@ const TYPES = {
 
     // Controller
     EmailController : Symbol.for("EmailController"),
+
+
+    StreamSubscriber :Symbol.for("StreamSubscriber"),
+    EmailSubscriber : Symbol.for("EmailSubscriber"),
 
     // GRPC server
 

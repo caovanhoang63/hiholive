@@ -1,4 +1,4 @@
-import {id, inject} from "inversify";
+import {id, inject, injectable} from "inversify";
 import TYPES from "../../../types";
 import {RedisClientType} from "redis";
 import {errAsync, fromPromise, okAsync, ResultAsync} from "neverthrow";
@@ -8,6 +8,7 @@ import {UID} from "../../../libs/uid";
 import {io} from "../../../index";
 import {AppResponse} from "../../../libs/response";
 
+@injectable()
 export class StreamSubscriber   {
     constructor(@inject(TYPES.RedisClient) private redisClient : RedisClientType) {
     }
