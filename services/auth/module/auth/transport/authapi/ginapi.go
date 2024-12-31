@@ -40,6 +40,20 @@ func (g *ginAPI) ResetPassword() func(c *gin.Context) {
 
 func (g *ginAPI) CheckForgotPasswordPin() func(c *gin.Context) {
 	return func(c *gin.Context) {
+		type Pin struct {
+			Pin   string `json:"pin"`
+			Email string `json:"email"`
+		}
+		var pin Pin
+		if err := c.ShouldBind(&pin); err != nil {
+			core.WriteErrorResponse(c, core.ErrBadRequest)
+			return
+		}
+		if err := g.biz.CheckForgotPasswordPin(c.Request.Context(), pin.Email, pin.Pin); err != nil {
+			core.WriteErrorResponse(c, err)
+			return
+		}
+		c.JSON(http.StatusOK, core.ResponseData(true))
 
 	}
 }
