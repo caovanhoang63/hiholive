@@ -141,6 +141,7 @@ func (c *channelBiz) Create(ctx context.Context, requester core.Requester, creat
 
 	create.DisplayName = user.DisplayName
 	create.UserName = user.UserName
+	create.Image = user.Avatar
 
 	create.UserId = requester.GetUserId()
 
