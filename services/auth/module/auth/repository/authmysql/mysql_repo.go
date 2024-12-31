@@ -35,10 +35,10 @@ func (r *authRepo) CheckForgotPasswordPin(c context.Context, email, pin string) 
 	return nil
 }
 
-func (r *authRepo) UpdatePassword(c context.Context, email, password string) error {
+func (r *authRepo) UpdatePassword(c context.Context, email, password, salt string) error {
 	key := "forgot-password:" + email
 
-	err := r.db.Table(authmodel.Auth{}.TableName()).Where("email = ?", email).Update("password", password).Error
+	err := r.db.Table(authmodel.Auth{}.TableName()).Where("email = ?", email).Update("password", password).Update("salt", salt).Error
 	if err != nil {
 		return err
 	}

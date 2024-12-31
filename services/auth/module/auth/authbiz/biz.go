@@ -26,7 +26,7 @@ type AuthRepository interface {
 	FindByUserId(ctx context.Context, id int) (*authmodel.Auth, error)
 	ForgotPassword(c context.Context, email, pin string) error
 	CheckForgotPasswordPin(c context.Context, email, pin string) error
-	UpdatePassword(c context.Context, email, password string) error
+	UpdatePassword(c context.Context, email, password, salt string) error
 }
 
 type UserRepository interface {
@@ -48,7 +48,7 @@ type authBiz struct {
 
 func (b *authBiz) CheckForgotPasswordPin(c context.Context, email, pin string) error {
 	if err := b.repo.CheckForgotPasswordPin(c, email, pin); err != nil {
-		if errors.Is(err, authmodel.ErrInvalidPin) {
+		if errors.Is(err, core.ErrRecordNotFound) {
 			return core.ErrBadRequest.WithError(authmodel.ErrInvalidPin.Error())
 		}
 		return core.ErrInternalServerError.WithWrap(err)
@@ -77,13 +77,19 @@ func (b *authBiz) ForgotPassword(c context.Context, email string) error {
 
 func (b *authBiz) ResetPasswordWithPin(c context.Context, email, pin, password string) error {
 	if err := b.repo.CheckForgotPasswordPin(c, email, pin); err != nil {
-		if errors.Is(err, authmodel.ErrInvalidPin) {
+		if errors.Is(err, core.ErrRecordNotFound) {
 			return core.ErrBadRequest.WithError(authmodel.ErrInvalidPin.Error())
 		}
 		return core.ErrInternalServerError.WithWrap(err)
 	}
+	if len(password) < 8 {
+		return core.ErrBadRequest.WithError("Invalid password")
+	}
+	salt := core.GenSalt(50)
 
-	if err := b.repo.UpdatePassword(c, email, password); err != nil {
+	password = b.hasher.Hash(password + salt)
+
+	if err := b.repo.UpdatePassword(c, email, password, salt); err != nil {
 		return core.ErrInternalServerError.WithWrap(err)
 	}
 	return nil
@@ -101,8 +107,14 @@ func (b *authBiz) ResetPasswordWithRequester(c context.Context, requester core.R
 		}
 		return core.ErrInternalServerError.WithDebug(err.Error())
 	}
+	if len(password) < 8 {
+		return core.ErrBadRequest.WithError("Invalid password")
+	}
+	salt := core.GenSalt(50)
 
-	if err = b.repo.UpdatePassword(c, auth.Email, password); err != nil {
+	password = b.hasher.Hash(password + salt)
+
+	if err = b.repo.UpdatePassword(c, auth.Email, password, salt); err != nil {
 		return core.ErrInternalServerError.WithWrap(err)
 	}
 	return nil
