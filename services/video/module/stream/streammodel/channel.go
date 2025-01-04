@@ -13,5 +13,5 @@ type Channel struct {
 
 func (channel *Channel) Mask() {
 	channel.BaseModel.Mask(core.DbTypeChannel)
-	channel.UserUID = core.NewUIDP(uint32(channel.Id), core.DbTypeUser, 0)
+	channel.UserUID = core.NewUIDP(uint32(channel.UserId), core.DbTypeUser, 0)
 }

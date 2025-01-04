@@ -10,6 +10,13 @@ func (repo *mysqlRepo) FindUsersWithCondition(ctx context.Context, filter *userm
 	var result []usermodel.User
 
 	db := repo.db.Table(usermodel.User{}.TableName()).Where("status in (1)")
+
+	if filter != nil {
+		if filter.UserName != "" {
+			db = db.Where("user_name like ?", "%"+filter.UserName+"%")
+		}
+	}
+
 	if err := db.Count(&paging.Total).Error; err != nil {
 		return nil, err
 	}
