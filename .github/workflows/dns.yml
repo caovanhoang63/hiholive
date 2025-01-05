@@ -58,7 +58,10 @@ jobs:
               docker pull caovanhoang204/${APP_NAME}:latest &&
               docker run -d --name ${APP_NAME} \
               --network hiholive \
-              -v ${PWD}/.env:/app/.env \
-              -v ${PWD}/.log/:/app/.log/ \
+              -p 443:443 \
+              -v /etc/letsencrypt/live/content.hiholive.fun/fullchain.pem:/app/cert.pem
+              -v /etc/letsencrypt/live/content.hiholive.fun/privkey.pem:/app/key.pem
+              -v ${PWD}/dns/.env:/app/.env \
+              -v ${PWD}/dns/config.json:/app/config.json \
               caovanhoang204/${APP_NAME}:latest
           '

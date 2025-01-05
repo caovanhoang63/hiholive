@@ -4,7 +4,7 @@ WORKDIR /app
 
 COPY app .
 
-EXPOSE 3000
+EXPOSE 443
 
 # Run the binary
 CMD ["./app"]

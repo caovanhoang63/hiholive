@@ -107,8 +107,9 @@ func main() {
 			return
 		}
 	})
-	fmt.Println("Server is running on port 8080...")
-	if err = http.ListenAndServe(":8080", nil); err != nil {
+	fmt.Println("Server is running on port 443...")
+	if err = http.ListenAndServeTLS(":443", "./cert.pem", "./key.pem", nil); err != nil {
+		log.Fatalf("Error starting server: %v", err)
 		return
 	}
 }
