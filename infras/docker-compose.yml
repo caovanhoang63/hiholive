@@ -45,10 +45,12 @@ services:
     container_name: gateway
     image: docker.tyk.io/tyk-gateway/tyk-gateway
     ports:
-      - "80:80"
+      - "443:443"
     volumes:
       - ./gateway/tyk.standalone.conf:/opt/tyk-gateway/tyk.conf
       - ./gateway/apps:/opt/tyk-gateway/apps
+      - ${DOMAIN_SSL_CERT_PATH}:/opt/tyk-gateway/certs/cert.pem
+      - ${DOMAIN_SSL_KEY_PATH}:/opt/tyk-gateway/certs/key.pem
     networks:
       - hiholive
     depends_on:
