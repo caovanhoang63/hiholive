@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/joho/godotenv"
+	"github.com/rs/cors"
 	"io/fs"
 	"io/ioutil"
 	"log"
@@ -107,8 +108,18 @@ func main() {
 			return
 		}
 	})
+
+	// Enable CORS
+	corsHandler := cors.New(cors.Options{
+		AllowedOrigins:   []string{"*"}, // Allow all origins, adjust as needed
+		AllowedMethods:   []string{"GET", "POST"},
+		AllowedHeaders:   []string{"*"},
+		AllowCredentials: true,
+	})
+	handler := corsHandler.Handler(http.DefaultServeMux)
+
 	fmt.Println("Server is running on port 443...")
-	if err = http.ListenAndServeTLS(":443", "./cert.pem", "./key.pem", nil); err != nil {
+	if err = http.ListenAndServeTLS(":443", "./cert.pem", "./key.pem", handler); err != nil {
 		log.Fatalf("Error starting server: %v", err)
 		return
 	}
