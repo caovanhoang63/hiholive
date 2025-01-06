@@ -1,0 +1,33 @@
+services:
+  rtmp:
+    image: caovanhoang204/hiholive-rtmp
+    deploy:
+      replicas: 3
+      resources:
+        limits:
+          memory: 128M
+    volumes:
+      - ${PWD}/.env:/app/.env
+      - ${PWD}/.log/:/app/.log/
+    networks:
+      - hiholive
+
+  load-balancer:
+    container_name: load-balancer
+    image: haproxy:2.6
+    ports:
+      - "1935:1935"
+    privileged: true
+    deploy:
+      replicas: 1
+      resources:
+        limits:
+          memory: 512M
+    networks:
+      - hiholive
+    volumes:
+      - ${PWD}/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg
+
+networks:
+  hiholive:
+    external: true
