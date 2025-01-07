@@ -14,5 +14,6 @@ func StartSubscriberServices(ffmpeg *ffmpegc.Ffmpeg, serviceCtx srvctx.ServiceCo
 	service := hlssub.NewHLSSub(ffmpeg)
 	engine := subengine.NewEngine(serviceCtx, pb)
 	engine.Subscribe(core.TopicStreamEnded, service.OnStopStream())
+	engine.Subscribe(core.TopicStreamError, service.OnStreamError())
 	_ = engine.Start()
 }

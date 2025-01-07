@@ -14,6 +14,7 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/rabbitmq/amqp091-go v1.10.0
 	github.com/redis/go-redis/v9 v9.7.0
+	github.com/rs/cors v1.11.1
 	github.com/sirupsen/logrus v1.7.0
 	github.com/spf13/cobra v1.8.1
 	github.com/yutopp/go-flv v0.3.1
@@ -69,7 +70,6 @@ require (
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/pelletier/go-toml/v2 v2.2.3 // indirect
 	github.com/rogpeppe/go-internal v1.13.1 // indirect
-	github.com/rs/cors v1.11.1 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	github.com/ugorji/go/codec v1.2.12 // indirect
@@ -84,4 +84,4 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-replace github.com/yutopp/go-rtmp v0.0.7 => github.com/caovanhoang63/go-rtmp v0.0.2
+replace github.com/yutopp/go-rtmp v0.0.7 => github.com/caovanhoang63/go-rtmp v0.0.4

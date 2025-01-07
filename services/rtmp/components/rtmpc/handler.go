@@ -104,6 +104,8 @@ func (h *Handler) OnPublish(ctx *rtmp.StreamContext, timestamp uint32, cmd *rtmp
 	}
 
 	err = json.Unmarshal([]byte(byteData), &streamInfo)
+	fmt.Println(11111111, streamInfo.State)
+
 	if err != nil {
 		return errors.Wrap(err, "Failed to unmarshal streamInfo")
 	}
@@ -173,8 +175,12 @@ func (h *Handler) OnSetDataFrame(timestamp uint32, data *rtmpmsg.NetStreamSetDat
 		return core.ErrInternalServerError.WithWrap(err)
 	}
 
+	if err = h.ps.Publish(context.Background(), core.TopicStreamStart, pubsub.NewMessage(id)); err != nil {
+		h.logger.Error(err)
+	}
 	go func() {
 		defer core.AppRecover()
+
 		job := asyncjob.NewJob(func(ctx context.Context) error {
 			return h.hlsClient.NewHlsStream(ctx, h.Stream.Uid, serverUrl, h.Stream.StreamKey, int(fps), int(height))
 		})
@@ -189,23 +195,23 @@ func (h *Handler) OnSetDataFrame(timestamp uint32, data *rtmpmsg.NetStreamSetDat
 		if err = job.RunWithRetry(context.Background()); err != nil {
 			h.logger.Error(err)
 		}
+
 	}()
 
-	if err = h.ps.Publish(context.Background(), core.TopicStreamStart, pubsub.NewMessage(id)); err != nil {
-		h.logger.Error(err)
-	}
-
 	if h.Stream.State == "error" {
-
 	} else {
+
 		_ = h.pub.Publish(&flvtag.FlvTag{
 			TagType:   flvtag.TagTypeScriptData,
 			Timestamp: timestamp,
 			Data:      &script,
 		})
 	}
-
 	h.Stream.State = "running"
+	byteDate, _ := json.Marshal(h.Stream)
+	if err = h.rdClient.Set(context.Background(), fmt.Sprintf("streamKey:%s", h.Stream.StreamKey), byteDate, 0).Err(); err != nil {
+		h.logger.Error(err)
+	}
 
 	return nil
 }
@@ -268,35 +274,49 @@ func (h *Handler) OnClose() {
 	}
 	if h.pub != nil {
 		_ = h.pub.Close()
-		h.handleEndStream()
 	}
 }
 
 func (h *Handler) OnError(e error) {
 	fmt.Println("OnError", e)
-	//if err := h.rdClient.Set(context.Background(), fmt.Sprintf("streamKey:%s", h.Stream), h.Stream.StreamKey, 0).Err(); err != nil {
-	//	h.logger.Error(err)
-	//}
-	//go func() {
-	//	defer core.AppRecover()
-	//	time.Sleep(time.Second * 30)
-	//	var streamInfo core.StreamState
-	//
-	//	byteData, err := h.rdClient.Get(context.Background(), fmt.Sprintf("streamKey:%s", h.Stream.StreamKey)).Result()
-	//	err = json.Unmarshal([]byte(byteData), &streamInfo)
-	//	if err != nil {
-	//		if errors.Is(err, redis.Nil) {
-	//			h.logger.Info("Stream not found")
-	//		} else {
-	//			h.logger.Error(err)
-	//		}
-	//		return
-	//	}
-	//	if streamInfo.State == "error" {
-	//		fmt.Println("Stream state error")
-	//		h.handleEndStream()
-	//	}
-	//}()
+	if h.Stream == nil {
+		fmt.Println("Stream is nil")
+		return
+	}
+	h.Stream.State = "error"
+	fmt.Println(h.Stream.StreamKey)
+	byteDate, _ := json.Marshal(h.Stream)
+	if err := h.rdClient.Set(context.Background(), fmt.Sprintf("streamKey:%s", h.Stream.StreamKey), byteDate, 0).Err(); err != nil {
+		h.logger.Error(err)
+	}
+	id, _ := core.FromBase58(h.Stream.Uid)
+
+	_ = h.ps.Publish(context.Background(), core.TopicStreamError, pubsub.NewMessage(map[string]interface{}{
+		"stream_id": id,
+		"timestamp": time.Now(),
+	}))
+	go func() {
+		defer core.AppRecover()
+		time.Sleep(time.Second * 30)
+		var streamInfo core.StreamState
+
+		byteData, err := h.rdClient.Get(context.Background(), fmt.Sprintf("streamKey:%s", h.Stream.StreamKey)).Result()
+		err = json.Unmarshal([]byte(byteData), &streamInfo)
+		if err != nil {
+			if errors.Is(err, redis.Nil) {
+				h.logger.Info("Stream not found")
+			} else {
+				h.logger.Error(err)
+			}
+			return
+		}
+		if streamInfo.State == "error" {
+			fmt.Println("Stream state error")
+			h.handleEndStream()
+			return
+		}
+		fmt.Println("Stream recovery")
+	}()
 }
 
 func (h *Handler) OnStop() {

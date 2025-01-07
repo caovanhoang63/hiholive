@@ -5,6 +5,7 @@ const (
 	TopicStreamCreate          = "TopicStreamCreate"
 	TopicStreamStart           = "TopicStreamStart"
 	TopicStreamEnded           = "TopicStreamEnded"
+	TopicStreamError           = "TopicStreamError"
 	TopicUpdateStreamViewCount = "TopicUpdateStreamViewCount"
 	TopicUpdateUserName        = "TopicUpdateUserName"
 	TopicForgotPassword        = "TopicForgotPassword"

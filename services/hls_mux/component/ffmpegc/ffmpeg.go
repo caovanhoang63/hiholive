@@ -11,6 +11,7 @@ import (
 	"os"
 	"os/exec"
 	"os/signal"
+	"path/filepath"
 	"syscall"
 )
 
@@ -113,6 +114,7 @@ func (f *Ffmpeg) NewStream(streamId, serverUrl, streamKey string, fps, resolutio
 	if err != nil {
 		return
 	}
+
 	args := []string{
 		"-i", url,
 
@@ -146,11 +148,28 @@ func (f *Ffmpeg) NewStream(streamId, serverUrl, streamKey string, fps, resolutio
 	}
 
 	args = append(args, param...)
+	started, err := isStreamStarted(outputDir)
+	if err != nil {
+		return nil
+	}
+
+	if started {
+		fmt.Println("Continuing existing stream...")
+		// Stream đã tồn tại, thêm flag để tiếp tục
+		args = append(args,
+			"-hls_flags", "append_list+independent_segments",
+		)
+	} else {
+		fmt.Println("Starting a new stream...")
+		// Stream mới, tạo playlist từ đầu
+		args = append(args,
+			"-hls_flags", "independent_segments",
+		)
+	}
 	args = append(args,
 		"-threads", "0", // Set the number of threads for encoding/decoding (2 threads in this case)
 		"-hls_time", "1", // Set the duration (in seconds) of each HLS segment (2 seconds per segment)
 		"-hls_list_size", "0", // Set the number of playlist entries (0 means unlimited, keeps all segments in the playlist)
-		"-hls_flags", "independent_segments", // Use independent segments, allowing segments to be played individually without depending on previous ones
 		"-http_persistent", "0", // Disable HTTP persistent connections (each segment is requested in a new connection)
 		"-f", "hls", // Set the output format to HLS (HTTP Live Streaming)
 		"-hls_segment_type", "fmp4", // Use fragmented MP4 (fMP4) instead of MPEG-TS for HLS segments
@@ -185,6 +204,15 @@ func (f *Ffmpeg) NewStream(streamId, serverUrl, streamKey string, fps, resolutio
 	}
 	f.closeFuncs[streamId] = fn
 	return fn
+}
+
+func isStreamStarted(outputDir string) (bool, error) {
+	masterPlaylist := filepath.Join(outputDir, "master.m3u8")
+	_, err := os.Stat(masterPlaylist)
+	if os.IsNotExist(err) {
+		return false, nil // File không tồn tại
+	}
+	return err == nil, err // File tồn tại hoặc có lỗi khác
 }
 
 func (f *Ffmpeg) Start() {}

@@ -34,3 +34,21 @@ func (h *HLSSub) OnStopStream() subengine.ConsumerJob {
 		},
 	}
 }
+func (h *HLSSub) OnStreamError() subengine.ConsumerJob {
+	return subengine.ConsumerJob{
+		Title: "Stop FFMPEG for Error",
+		Handler: func(ctx context.Context, message *pubsub.Message) error {
+			data, ok := message.Data.(map[string]interface{})
+			if !ok {
+				return errors.New("invalid data")
+			}
+
+			id, ok := data["stream_id"].(string)
+
+			if !ok {
+				return errors.New("invalid id")
+			}
+			return h.f.StopStream(id)
+		},
+	}
+}

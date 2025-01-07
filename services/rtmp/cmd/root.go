@@ -11,11 +11,11 @@ import (
 	"github.com/caovanhoang63/hiholive/shared/golang/srvctx/components/pubsub"
 	rabbitpubsub "github.com/caovanhoang63/hiholive/shared/golang/srvctx/components/pubsub/rabbitmq"
 	"github.com/caovanhoang63/hiholive/shared/golang/srvctx/components/redisc"
-	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/yutopp/go-rtmp"
 	"io"
 	"net"
+	"time"
 
 	"os"
 )
@@ -60,10 +60,11 @@ var rootCmd = &cobra.Command{
 			OnConnect: func(conn net.Conn) (io.ReadWriteCloser, *rtmp.ConnConfig) {
 				return conn, &rtmp.ConnConfig{
 					Handler: rtmpc.NewHandler(relayService, rd.GetClient(), composer.ComposeHlsRPCClient(serviceCtx), ps),
+					Timeout: time.Second * 5,
 					ControlState: rtmp.StreamControlStateConfig{
 						DefaultBandwidthWindowSize: 6 * 1024 * 1024 / 8,
 					},
-					Logger: log.StandardLogger(),
+					Logger: nil,
 				}
 			},
 		})
